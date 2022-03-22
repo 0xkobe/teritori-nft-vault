@@ -18,16 +18,13 @@ module.exports = {
     hardhat: {
       allowUnlimitedContractSize: true,
     },
-    fantom: {
-      url: "https://rpc.ftm.tools/",
-      // url: "https://ftmrpc.ultimatenodes.io/",
+    mainnet: {
+      url: `https://polygon-mainnet.g.alchemy.com/v2/${process.env.RPC_NODE_KEY}`,
       accounts: [process.env.PRIVATE_KEY],
-      chainId: 250,
     },
-    "fantom-testnet": {
-      url: "https://rpc.testnet.fantom.network",
+    testnet: {
+      url: `https://polygon-mumbai.g.alchemy.com/v2/${process.env.RPC_NODE_KEY}`,
       accounts: [process.env.PRIVATE_KEY],
-      chainId: 4002,
     },
   },
   solidity: {

@@ -61,7 +61,7 @@ contract NFTVault is Ownable, ReentrancyGuard {
         internal
     {
         require(
-            _feeNumerator <= _feeDenominator && _feeDenominator == 0,
+            _feeNumerator <= _feeDenominator && _feeDenominator != 0,
             "invalid fee setting"
         );
 
