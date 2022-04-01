@@ -28,6 +28,7 @@ interface NFTVaultInterface extends ethers.utils.Interface {
     "feeNumerator()": FunctionFragment;
     "listNFT(address,uint256,(address,uint256))": FunctionFragment;
     "nftSales(address,uint256)": FunctionFragment;
+    "onERC721Received(address,address,uint256,bytes)": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "setFeeNumerator(uint256,uint256)": FunctionFragment;
@@ -35,6 +36,7 @@ interface NFTVaultInterface extends ethers.utils.Interface {
     "updateSaleOption(address,uint256,(address,uint256))": FunctionFragment;
     "withdraw(address)": FunctionFragment;
     "withdrawAll(address[])": FunctionFragment;
+    "withdrawNFT(address,uint256)": FunctionFragment;
   };
 
   encodeFunctionData(functionFragment: "FTM", values?: undefined): string;
@@ -58,6 +60,10 @@ interface NFTVaultInterface extends ethers.utils.Interface {
     functionFragment: "nftSales",
     values: [string, BigNumberish]
   ): string;
+  encodeFunctionData(
+    functionFragment: "onERC721Received",
+    values: [string, string, BigNumberish, BytesLike]
+  ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
@@ -80,6 +86,10 @@ interface NFTVaultInterface extends ethers.utils.Interface {
     functionFragment: "withdrawAll",
     values: [string[]]
   ): string;
+  encodeFunctionData(
+    functionFragment: "withdrawNFT",
+    values: [string, BigNumberish]
+  ): string;
 
   decodeFunctionResult(functionFragment: "FTM", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "buyNFT", data: BytesLike): Result;
@@ -93,6 +103,10 @@ interface NFTVaultInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "listNFT", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "nftSales", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "onERC721Received",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
@@ -115,25 +129,37 @@ interface NFTVaultInterface extends ethers.utils.Interface {
     functionFragment: "withdrawAll",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "withdrawNFT",
+    data: BytesLike
+  ): Result;
 
   events: {
-    "BuyNFT(address,address,uint256)": EventFragment;
+    "BuyNFT(address,address,uint256,tuple)": EventFragment;
     "ListNFT(address,address,uint256,tuple)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
     "UpdateSaleOption(address,address,uint256,tuple)": EventFragment;
+    "WithdrawNFT(address,address,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "BuyNFT"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ListNFT"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "UpdateSaleOption"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "WithdrawNFT"): EventFragment;
 }
 
 export type BuyNFTEvent = TypedEvent<
-  [string, string, BigNumber] & {
+  [
+    string,
+    string,
+    BigNumber,
+    [string, BigNumber] & { token: string; amount: BigNumber }
+  ] & {
     buyer: string;
     nft: string;
     tokenId: BigNumber;
+    saleOption: [string, BigNumber] & { token: string; amount: BigNumber };
   }
 >;
 
@@ -166,6 +192,14 @@ export type UpdateSaleOptionEvent = TypedEvent<
     nft: string;
     tokenId: BigNumber;
     saleOption: [string, BigNumber] & { token: string; amount: BigNumber };
+  }
+>;
+
+export type WithdrawNFTEvent = TypedEvent<
+  [string, string, BigNumber] & {
+    owner: string;
+    nft: string;
+    tokenId: BigNumber;
   }
 >;
 
@@ -243,6 +277,14 @@ export class NFTVault extends BaseContract {
       }
     >;
 
+    onERC721Received(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      arg3: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     owner(overrides?: CallOverrides): Promise<[string]>;
 
     renounceOwnership(
@@ -276,6 +318,12 @@ export class NFTVault extends BaseContract {
       tokens: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    withdrawNFT(
+      nft: string,
+      tokenId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
   };
 
   FTM(overrides?: CallOverrides): Promise<string>;
@@ -307,6 +355,14 @@ export class NFTVault extends BaseContract {
       saleOption: [string, BigNumber] & { token: string; amount: BigNumber };
     }
   >;
+
+  onERC721Received(
+    arg0: string,
+    arg1: string,
+    arg2: BigNumberish,
+    arg3: BytesLike,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
@@ -342,6 +398,12 @@ export class NFTVault extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  withdrawNFT(
+    nft: string,
+    tokenId: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   callStatic: {
     FTM(overrides?: CallOverrides): Promise<string>;
 
@@ -373,6 +435,14 @@ export class NFTVault extends BaseContract {
       }
     >;
 
+    onERC721Received(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      arg3: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
     owner(overrides?: CallOverrides): Promise<string>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
@@ -398,25 +468,53 @@ export class NFTVault extends BaseContract {
     withdraw(token: string, overrides?: CallOverrides): Promise<void>;
 
     withdrawAll(tokens: string[], overrides?: CallOverrides): Promise<void>;
+
+    withdrawNFT(
+      nft: string,
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
   };
 
   filters: {
-    "BuyNFT(address,address,uint256)"(
+    "BuyNFT(address,address,uint256,tuple)"(
       buyer?: string | null,
       nft?: string | null,
-      tokenId?: BigNumberish | null
+      tokenId?: BigNumberish | null,
+      saleOption?: null
     ): TypedEventFilter<
-      [string, string, BigNumber],
-      { buyer: string; nft: string; tokenId: BigNumber }
+      [
+        string,
+        string,
+        BigNumber,
+        [string, BigNumber] & { token: string; amount: BigNumber }
+      ],
+      {
+        buyer: string;
+        nft: string;
+        tokenId: BigNumber;
+        saleOption: [string, BigNumber] & { token: string; amount: BigNumber };
+      }
     >;
 
     BuyNFT(
       buyer?: string | null,
       nft?: string | null,
-      tokenId?: BigNumberish | null
+      tokenId?: BigNumberish | null,
+      saleOption?: null
     ): TypedEventFilter<
-      [string, string, BigNumber],
-      { buyer: string; nft: string; tokenId: BigNumber }
+      [
+        string,
+        string,
+        BigNumber,
+        [string, BigNumber] & { token: string; amount: BigNumber }
+      ],
+      {
+        buyer: string;
+        nft: string;
+        tokenId: BigNumber;
+        saleOption: [string, BigNumber] & { token: string; amount: BigNumber };
+      }
     >;
 
     "ListNFT(address,address,uint256,tuple)"(
@@ -514,6 +612,24 @@ export class NFTVault extends BaseContract {
         saleOption: [string, BigNumber] & { token: string; amount: BigNumber };
       }
     >;
+
+    "WithdrawNFT(address,address,uint256)"(
+      owner?: string | null,
+      nft?: string | null,
+      tokenId?: BigNumberish | null
+    ): TypedEventFilter<
+      [string, string, BigNumber],
+      { owner: string; nft: string; tokenId: BigNumber }
+    >;
+
+    WithdrawNFT(
+      owner?: string | null,
+      nft?: string | null,
+      tokenId?: BigNumberish | null
+    ): TypedEventFilter<
+      [string, string, BigNumber],
+      { owner: string; nft: string; tokenId: BigNumber }
+    >;
   };
 
   estimateGas: {
@@ -540,6 +656,14 @@ export class NFTVault extends BaseContract {
       arg0: string,
       arg1: BigNumberish,
       overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    onERC721Received(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      arg3: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
@@ -575,6 +699,12 @@ export class NFTVault extends BaseContract {
       tokens: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
+
+    withdrawNFT(
+      nft: string,
+      tokenId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -601,6 +731,14 @@ export class NFTVault extends BaseContract {
       arg0: string,
       arg1: BigNumberish,
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    onERC721Received(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      arg3: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -634,6 +772,12 @@ export class NFTVault extends BaseContract {
 
     withdrawAll(
       tokens: string[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    withdrawNFT(
+      nft: string,
+      tokenId: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
   };

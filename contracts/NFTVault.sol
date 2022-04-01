@@ -4,11 +4,12 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 import "./lib/UniSafeERC20.sol";
 
-contract NFTVault is Ownable, ReentrancyGuard {
+contract NFTVault is Ownable, ReentrancyGuard, ERC721Holder {
     using UniSafeERC20 for IERC20;
 
     struct SaleOption {
@@ -26,6 +27,11 @@ contract NFTVault is Ownable, ReentrancyGuard {
         uint256 indexed tokenId,
         SaleOption saleOption
     );
+    event WithdrawNFT(
+        address indexed owner,
+        address indexed nft,
+        uint256 indexed tokenId
+    );
     event UpdateSaleOption(
         address indexed owner,
         address indexed nft,
@@ -35,7 +41,8 @@ contract NFTVault is Ownable, ReentrancyGuard {
     event BuyNFT(
         address indexed buyer,
         address indexed nft,
-        uint256 indexed tokenId
+        uint256 indexed tokenId,
+        SaleOption saleOption
     );
 
     address public constant FTM = address(0);
@@ -98,6 +105,16 @@ contract NFTVault is Ownable, ReentrancyGuard {
         emit ListNFT(msg.sender, nft, tokenId, saleOption);
     }
 
+    function withdrawNFT(address nft, uint256 tokenId) external nonReentrant {
+        require(nftSales[nft][tokenId].owner == msg.sender, "Unauthorized");
+
+        IERC721(nft).transferFrom(address(this), msg.sender, tokenId);
+
+        emit WithdrawNFT(msg.sender, nft, tokenId);
+
+        delete nftSales[nft][tokenId];
+    }
+
     function buyNFT(address nft, uint256 tokenId)
         external
         payable
@@ -110,19 +127,18 @@ contract NFTVault is Ownable, ReentrancyGuard {
 
         IERC20(nftSale.saleOption.token).uniSafeTransferFrom(
             msg.sender,
-            nftSale.owner,
+            address(this),
             nftSale.saleOption.amount
         );
 
-        IERC20(nftSale.saleOption.token).uniSafeTransferFrom(
-            msg.sender,
-            address(this),
-            feeAmount
+        IERC20(nftSale.saleOption.token).uniSafeTransfer(
+            nftSale.owner,
+            nftSale.saleOption.amount - feeAmount
         );
 
         IERC721(nft).transferFrom(address(this), msg.sender, tokenId);
 
-        emit BuyNFT(msg.sender, nft, tokenId);
+        emit BuyNFT(msg.sender, nft, tokenId, nftSale.saleOption);
 
         delete nftSales[nft][tokenId];
     }
