@@ -97,6 +97,14 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.NFTVault__factory>;
     getContractFactory(
+      name: "NFTStakingPool",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.NFTStakingPool__factory>;
+    getContractFactory(
+      name: "NFTStakingPoolManager",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.NFTStakingPoolManager__factory>;
+    getContractFactory(
       name: "TestERC721",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TestERC721__factory>;
@@ -206,6 +214,16 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.NFTVault>;
+    getContractAt(
+      name: "NFTStakingPool",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.NFTStakingPool>;
+    getContractAt(
+      name: "NFTStakingPoolManager",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.NFTStakingPoolManager>;
     getContractAt(
       name: "TestERC721",
       address: string,

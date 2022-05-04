@@ -22,6 +22,8 @@ export type { ERC165 } from "./ERC165";
 export type { IERC165 } from "./IERC165";
 export type { UniSafeERC20 } from "./UniSafeERC20";
 export type { NFTVault } from "./NFTVault";
+export type { NFTStakingPool } from "./NFTStakingPool";
+export type { NFTStakingPoolManager } from "./NFTStakingPoolManager";
 export type { TestERC721 } from "./TestERC721";
 
 export { AccessControl__factory } from "./factories/AccessControl__factory";
@@ -45,4 +47,6 @@ export { ERC165__factory } from "./factories/ERC165__factory";
 export { IERC165__factory } from "./factories/IERC165__factory";
 export { UniSafeERC20__factory } from "./factories/UniSafeERC20__factory";
 export { NFTVault__factory } from "./factories/NFTVault__factory";
+export { NFTStakingPool__factory } from "./factories/NFTStakingPool__factory";
+export { NFTStakingPoolManager__factory } from "./factories/NFTStakingPoolManager__factory";
 export { TestERC721__factory } from "./factories/TestERC721__factory";
