@@ -71,4 +71,21 @@ contract NFTStakingPool is Ownable {
     function withdraw(address _owner, address _to) external {}
 
     function claim(address _owner) external {}
+
+    function _updatePool() internal {
+        uint256 _rewardPoolsCount = rewardPoolCount;
+        for (uint256 i = 0; i < _rewardPoolsCount; ++i) {
+            RewardPool storage pool = rewardPools[i];
+
+            if (totalSupply == 0) {
+                pool.accRewardPerShare = block.timestamp;
+            } else {
+                uint256 newRewards = (block.timestamp - lastRewardTimestamp) *
+                    pool.rewardPerSec;
+                pool.accRewardPerShare += (newRewards * (1e36)) / totalSupply;
+            }
+        }
+
+        lastRewardTimestamp = block.number;
+    }
 }
