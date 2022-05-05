@@ -46,6 +46,8 @@ contract NFTStakingPool is Ownable {
         external
         onlyOwner
     {
+        _updatePool();
+
         rewardPools[rewardPoolCount].rewardToken = _rewardToken;
         rewardPools[rewardPoolCount].rewardPerSec = _rewardPerSec;
         rewardPoolCount++;
@@ -57,16 +59,37 @@ contract NFTStakingPool is Ownable {
     {
         require(_index < rewardPoolCount, "invalid index");
 
+        _updatePool();
+
         rewardPools[_index].rewardPerSec = _rewardPerSec;
     }
 
-    function deposit(address _owner, uint256 _tokenId) external {}
+    function deposit(address _owner, uint256 _tokenId) external {
+        _updatePool();
+        _withdrawReward(_owner);
+
+        IERC721(collection).safeTransferFrom(
+            msg.sender,
+            address(this),
+            _tokenId
+        );
+
+        totalSupply += 1;
+        userNftSet[_owner].add(_tokenId);
+
+        _updateUserRewardDebt(_owner);
+    }
 
     function withdraw(
         address _owner,
         uint256 _tokenId,
         address _to
-    ) external {}
+    ) external {
+        require(
+            msg.sender == _owner || msg.sender == poolManager,
+            "Unauthorized"
+        );
+    }
 
     function withdraw(address _owner, address _to) external {}
 
