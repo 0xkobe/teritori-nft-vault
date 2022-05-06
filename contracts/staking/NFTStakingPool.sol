@@ -4,8 +4,11 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract NFTStakingPool is Ownable {
+    using SafeERC20 for IERC20;
     using EnumerableSet for EnumerableSet.UintSet;
 
     address public immutable poolManager;
@@ -89,11 +92,39 @@ contract NFTStakingPool is Ownable {
             msg.sender == _owner || msg.sender == poolManager,
             "Unauthorized"
         );
+
+        _updatePool();
+        _withdrawReward(_owner);
+
+        IERC721(collection).safeTransferFrom(address(this), _to, _tokenId);
+
+        totalSupply -= 1;
+        userNftSet[_owner].remove(_tokenId);
+
+        _updateUserRewardDebt(_owner);
     }
 
-    function withdraw(address _owner, address _to) external {}
+    function withdrawAll(address _owner, address _to) external {
+        require(
+            msg.sender == _owner || msg.sender == poolManager,
+            "Unauthorized"
+        );
 
-    function claim(address _owner) external {}
+        _updatePool();
+        _withdrawReward(_owner);
+
+        EnumerableSet.UintSet storage nftSet = userNftSet[_owner];
+        uint256 length = nftSet.length();
+        for (uint256 i = 0; i < length; i++) {
+            uint256 tokenId = nftSet.at(i);
+
+            IERC721(collection).safeTransferFrom(address(this), _to, tokenId);
+            userNftSet[_owner].remove(tokenId);
+        }
+        totalSupply -= length;
+
+        _updateUserRewardDebt(_owner);
+    }
 
     function _updatePool() internal {
         uint256 _rewardPoolsCount = rewardPoolCount;
