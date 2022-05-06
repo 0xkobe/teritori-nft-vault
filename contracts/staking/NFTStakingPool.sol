@@ -126,6 +126,25 @@ contract NFTStakingPool is Ownable {
         _updateUserRewardDebt(_owner);
     }
 
+    function claim(address _owner) external {
+        _updatePool();
+        _withdrawReward(_owner);
+
+        uint256 _rewardPoolsCount = rewardPoolCount;
+        for (uint256 i = 0; i < _rewardPoolsCount; ++i) {
+            uint256 claimAmount = userPendingRewards[i][_owner];
+            if (claimAmount > 0) {
+                IERC20(rewardPools[i].rewardToken).safeTransfer(
+                    _owner,
+                    claimAmount
+                );
+                userPendingRewards[i][_owner] = 0;
+            }
+        }
+
+        _updateUserRewardDebt(_owner);
+    }
+
     function _updatePool() internal {
         uint256 _rewardPoolsCount = rewardPoolCount;
         for (uint256 i = 0; i < _rewardPoolsCount; ++i) {
