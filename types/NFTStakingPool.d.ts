@@ -21,17 +21,30 @@ import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
 interface NFTStakingPoolInterface extends ethers.utils.Interface {
   functions: {
+    "addRewardToken(address,uint256)": FunctionFragment;
+    "balanceOf(address)": FunctionFragment;
     "claim(address)": FunctionFragment;
     "collection()": FunctionFragment;
-    "deposit(address,address,uint256)": FunctionFragment;
+    "deposit(address,uint256)": FunctionFragment;
+    "lastRewardTimestamp()": FunctionFragment;
     "name()": FunctionFragment;
     "owner()": FunctionFragment;
     "poolManager()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
+    "rewardPoolCount()": FunctionFragment;
+    "rewardPools(uint256)": FunctionFragment;
+    "setRewardPerSec(uint256,uint256)": FunctionFragment;
+    "totalSupply()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "withdraw(address,uint256,address)": FunctionFragment;
+    "withdrawAll(address,address)": FunctionFragment;
   };
 
+  encodeFunctionData(
+    functionFragment: "addRewardToken",
+    values: [string, BigNumberish]
+  ): string;
+  encodeFunctionData(functionFragment: "balanceOf", values: [string]): string;
   encodeFunctionData(functionFragment: "claim", values: [string]): string;
   encodeFunctionData(
     functionFragment: "collection",
@@ -39,7 +52,11 @@ interface NFTStakingPoolInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "deposit",
-    values: [string, string, BigNumberish]
+    values: [string, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "lastRewardTimestamp",
+    values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
@@ -52,6 +69,22 @@ interface NFTStakingPoolInterface extends ethers.utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "rewardPoolCount",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "rewardPools",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setRewardPerSec",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "totalSupply",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [string]
   ): string;
@@ -59,10 +92,23 @@ interface NFTStakingPoolInterface extends ethers.utils.Interface {
     functionFragment: "withdraw",
     values: [string, BigNumberish, string]
   ): string;
+  encodeFunctionData(
+    functionFragment: "withdrawAll",
+    values: [string, string]
+  ): string;
 
+  decodeFunctionResult(
+    functionFragment: "addRewardToken",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "claim", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "collection", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "lastRewardTimestamp",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
@@ -74,10 +120,30 @@ interface NFTStakingPoolInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "rewardPoolCount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "rewardPools",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setRewardPerSec",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "totalSupply",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "withdrawAll",
+    data: BytesLike
+  ): Result;
 
   events: {
     "OwnershipTransferred(address,address)": EventFragment;
@@ -134,6 +200,14 @@ export class NFTStakingPool extends BaseContract {
   interface: NFTStakingPoolInterface;
 
   functions: {
+    addRewardToken(
+      _rewardToken: string,
+      _rewardPerSec: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    balanceOf(_user: string, overrides?: CallOverrides): Promise<[BigNumber]>;
+
     claim(
       _owner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -143,10 +217,11 @@ export class NFTStakingPool extends BaseContract {
 
     deposit(
       _owner: string,
-      _collection: string,
       _tokenId: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    lastRewardTimestamp(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     name(overrides?: CallOverrides): Promise<[string]>;
 
@@ -158,24 +233,53 @@ export class NFTStakingPool extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    rewardPoolCount(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    rewardPools(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<
+      [string, BigNumber, BigNumber] & {
+        rewardToken: string;
+        rewardPerSec: BigNumber;
+        accRewardPerShare: BigNumber;
+      }
+    >;
+
+    setRewardPerSec(
+      _index: BigNumberish,
+      _rewardPerSec: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    totalSupply(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    "withdraw(address,uint256,address)"(
+    withdraw(
       _owner: string,
       _tokenId: BigNumberish,
       _to: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    "withdraw(address,address)"(
+    withdrawAll(
       _owner: string,
       _to: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
   };
+
+  addRewardToken(
+    _rewardToken: string,
+    _rewardPerSec: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  balanceOf(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
   claim(
     _owner: string,
@@ -186,10 +290,11 @@ export class NFTStakingPool extends BaseContract {
 
   deposit(
     _owner: string,
-    _collection: string,
     _tokenId: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
+
+  lastRewardTimestamp(overrides?: CallOverrides): Promise<BigNumber>;
 
   name(overrides?: CallOverrides): Promise<string>;
 
@@ -201,35 +306,65 @@ export class NFTStakingPool extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  rewardPoolCount(overrides?: CallOverrides): Promise<BigNumber>;
+
+  rewardPools(
+    arg0: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<
+    [string, BigNumber, BigNumber] & {
+      rewardToken: string;
+      rewardPerSec: BigNumber;
+      accRewardPerShare: BigNumber;
+    }
+  >;
+
+  setRewardPerSec(
+    _index: BigNumberish,
+    _rewardPerSec: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
+
   transferOwnership(
     newOwner: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  "withdraw(address,uint256,address)"(
+  withdraw(
     _owner: string,
     _tokenId: BigNumberish,
     _to: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  "withdraw(address,address)"(
+  withdrawAll(
     _owner: string,
     _to: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   callStatic: {
+    addRewardToken(
+      _rewardToken: string,
+      _rewardPerSec: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    balanceOf(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
+
     claim(_owner: string, overrides?: CallOverrides): Promise<void>;
 
     collection(overrides?: CallOverrides): Promise<string>;
 
     deposit(
       _owner: string,
-      _collection: string,
       _tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    lastRewardTimestamp(overrides?: CallOverrides): Promise<BigNumber>;
 
     name(overrides?: CallOverrides): Promise<string>;
 
@@ -239,19 +374,40 @@ export class NFTStakingPool extends BaseContract {
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
+    rewardPoolCount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    rewardPools(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<
+      [string, BigNumber, BigNumber] & {
+        rewardToken: string;
+        rewardPerSec: BigNumber;
+        accRewardPerShare: BigNumber;
+      }
+    >;
+
+    setRewardPerSec(
+      _index: BigNumberish,
+      _rewardPerSec: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
+
     transferOwnership(
       newOwner: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "withdraw(address,uint256,address)"(
+    withdraw(
       _owner: string,
       _tokenId: BigNumberish,
       _to: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "withdraw(address,address)"(
+    withdrawAll(
       _owner: string,
       _to: string,
       overrides?: CallOverrides
@@ -277,6 +433,14 @@ export class NFTStakingPool extends BaseContract {
   };
 
   estimateGas: {
+    addRewardToken(
+      _rewardToken: string,
+      _rewardPerSec: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    balanceOf(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
+
     claim(
       _owner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -286,10 +450,11 @@ export class NFTStakingPool extends BaseContract {
 
     deposit(
       _owner: string,
-      _collection: string,
       _tokenId: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
+
+    lastRewardTimestamp(overrides?: CallOverrides): Promise<BigNumber>;
 
     name(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -301,19 +466,34 @@ export class NFTStakingPool extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    rewardPoolCount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    rewardPools(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    setRewardPerSec(
+      _index: BigNumberish,
+      _rewardPerSec: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
+
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    "withdraw(address,uint256,address)"(
+    withdraw(
       _owner: string,
       _tokenId: BigNumberish,
       _to: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    "withdraw(address,address)"(
+    withdrawAll(
       _owner: string,
       _to: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -321,6 +501,17 @@ export class NFTStakingPool extends BaseContract {
   };
 
   populateTransaction: {
+    addRewardToken(
+      _rewardToken: string,
+      _rewardPerSec: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    balanceOf(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     claim(
       _owner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -330,9 +521,12 @@ export class NFTStakingPool extends BaseContract {
 
     deposit(
       _owner: string,
-      _collection: string,
       _tokenId: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    lastRewardTimestamp(
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     name(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -345,19 +539,34 @@ export class NFTStakingPool extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    rewardPoolCount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    rewardPools(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    setRewardPerSec(
+      _index: BigNumberish,
+      _rewardPerSec: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    totalSupply(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    "withdraw(address,uint256,address)"(
+    withdraw(
       _owner: string,
       _tokenId: BigNumberish,
       _to: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    "withdraw(address,address)"(
+    withdrawAll(
       _owner: string,
       _to: string,
       overrides?: Overrides & { from?: string | Promise<string> }
