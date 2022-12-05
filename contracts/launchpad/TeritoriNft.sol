@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Royalty.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721RoyaltyUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 
-contract TeritoriNft is ERC721Royalty, ERC721URIStorage {
+contract TeritoriNft is ERC721RoyaltyUpgradeable, ERC721URIStorageUpgradeable {
     struct Attribute {
         string trate_type;
         string value;
@@ -19,28 +19,22 @@ contract TeritoriNft is ERC721Royalty, ERC721URIStorage {
     }
 
     address public minter;
-    mapping(uint256 => Metadata) internal extensions;
+    mapping(uint256 => Metadata) internal _extensions;
 
-    constructor(string memory _name, string memory _symbol)
-        ERC721(_name, _symbol)
+    function initialize(string memory _name, string memory _symbol)
+        external
+        initializer
     {
+        __ERC721_init(_name, _symbol);
         minter = msg.sender;
     }
 
-    function mintWithMetadata(
-        address receiver,
-        uint256 tokenId,
-        address royaltyReceiver,
-        uint96 royaltyPercentage,
-        string memory tokenUri,
-        Metadata memory extension
-    ) external {
-        require(msg.sender == minter, "unauthorized");
-
-        _safeMint(receiver, tokenId);
-        _setTokenRoyalty(tokenId, royaltyReceiver, royaltyPercentage);
-        _setTokenURI(tokenId, tokenUri);
-        extensions[tokenId] = extension;
+    function extensions(uint256 tokenId)
+        external
+        view
+        returns (Metadata memory)
+    {
+        return _extensions[tokenId];
     }
 
     function mint(
@@ -57,6 +51,29 @@ contract TeritoriNft is ERC721Royalty, ERC721URIStorage {
         _setTokenURI(tokenId, tokenUri);
     }
 
+    function mintWithMetadata(
+        address receiver,
+        uint256 tokenId,
+        address royaltyReceiver,
+        uint96 royaltyPercentage,
+        string memory tokenUri,
+        Metadata memory extension
+    ) external {
+        require(msg.sender == minter, "unauthorized");
+
+        _safeMint(receiver, tokenId);
+        _setTokenRoyalty(tokenId, royaltyReceiver, royaltyPercentage);
+        _setTokenURI(tokenId, tokenUri);
+
+        _extensions[tokenId].name = extension.name;
+        _extensions[tokenId].description = extension.description;
+        _extensions[tokenId].image = extension.image;
+        _extensions[tokenId].external_url = extension.external_url;
+        for (uint256 i = 0; i < extension.attributes.length; i++) {
+            _extensions[tokenId].attributes.push(extension.attributes[i]);
+        }
+    }
+
     /**
      * @dev See {IERC165-supportsInterface}.
      */
@@ -64,7 +81,7 @@ contract TeritoriNft is ERC721Royalty, ERC721URIStorage {
         public
         view
         virtual
-        override(ERC721, ERC721Royalty)
+        override(ERC721Upgradeable, ERC721RoyaltyUpgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
@@ -77,7 +94,7 @@ contract TeritoriNft is ERC721Royalty, ERC721URIStorage {
         public
         view
         virtual
-        override(ERC721, ERC721URIStorage)
+        override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
         returns (string memory)
     {
         return super.tokenURI(tokenId);
@@ -88,7 +105,7 @@ contract TeritoriNft is ERC721Royalty, ERC721URIStorage {
      */
     function _burn(uint256 tokenId)
         internal
-        override(ERC721Royalty, ERC721URIStorage)
+        override(ERC721RoyaltyUpgradeable, ERC721URIStorageUpgradeable)
     {
         super._burn(tokenId);
     }
