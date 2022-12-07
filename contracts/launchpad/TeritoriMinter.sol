@@ -6,11 +6,12 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 import "./TeritoriNft.sol";
 import "../lib/UniSafeERC20.sol";
 
-contract TeritoriMinter is Ownable, Pausable {
+contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
     // using SafeERC20 for IERC20;
     using UniSafeERC20 for IERC20;
 
@@ -49,7 +50,7 @@ contract TeritoriMinter is Ownable, Pausable {
         string memory _symbol,
         address _nft_impl,
         address _minter
-    ) Ownable() Pausable() {
+    ) Ownable() Pausable() ReentrancyGuard() {
         nft = Clones.clone(_nft_impl);
         TeritoriNft(nft).initialize(_name, _symbol);
         minter = _minter;
@@ -105,7 +106,12 @@ contract TeritoriMinter is Ownable, Pausable {
         }
     }
 
-    function requestMint(address user) external payable whenNotPaused {
+    function requestMint(address user)
+        external
+        payable
+        whenNotPaused
+        nonReentrant
+    {
         require(
             config.mintStartTime != 0 &&
                 config.mintStartTime <= block.timestamp,
@@ -152,7 +158,7 @@ contract TeritoriMinter is Ownable, Pausable {
         string tokenUri;
     }
 
-    function mint(MintData[] memory mintData) external {
+    function mint(MintData[] memory mintData) external nonReentrant {
         require(msg.sender == minter, "UNAUTHORIZED");
         require(
             currentSupply + mintData.length <= tokenRequestsCount,
@@ -181,7 +187,10 @@ contract TeritoriMinter is Ownable, Pausable {
         TeritoriNft.Metadata extension;
     }
 
-    function mintWithMetadata(MintDataWithMetadata[] memory mintData) external {
+    function mintWithMetadata(MintDataWithMetadata[] memory mintData)
+        external
+        nonReentrant
+    {
         require(msg.sender == minter, "UNAUTHORIZED");
         require(
             currentSupply + mintData.length <= tokenRequestsCount,

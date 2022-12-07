@@ -6,11 +6,14 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/interfaces/IERC2981.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-import "./lib/UniSafeERC20.sol";
+import "../lib/UniSafeERC20.sol";
 
 contract NFTVault is Ownable, ReentrancyGuard, ERC721Holder {
     using UniSafeERC20 for IERC20;
+    using EnumerableSet for EnumerableSet.AddressSet;
 
     struct SaleOption {
         address token;
@@ -21,6 +24,8 @@ contract NFTVault is Ownable, ReentrancyGuard, ERC721Holder {
         SaleOption saleOption;
     }
 
+    event SetSupportedNft(address indexed nft, bool supported);
+    event SetSupportedToken(address indexed token, bool supported);
     event ListNFT(
         address indexed owner,
         address indexed nft,
@@ -45,7 +50,8 @@ contract NFTVault is Ownable, ReentrancyGuard, ERC721Holder {
         SaleOption saleOption
     );
 
-    address public constant FTM = address(0);
+    EnumerableSet.AddressSet internal _supportedNfts;
+    EnumerableSet.AddressSet internal _supportedTokens;
     mapping(address => mapping(uint256 => NFTSale)) public nftSales; // nft => tokenId => NFTSale
     uint256 public feeNumerator;
     uint256 public feeDenominator;
@@ -55,6 +61,29 @@ contract NFTVault is Ownable, ReentrancyGuard, ERC721Holder {
         ReentrancyGuard()
     {
         _setFeeNumerator(_feeNumerator, _feeDenominator);
+    }
+
+    function setSupportedNft(address nft, bool supported) external onlyOwner {
+        if (supported) {
+            _supportedNfts.add(nft);
+        } else {
+            _supportedNfts.remove(nft);
+        }
+
+        emit SetSupportedNft(nft, supported);
+    }
+
+    function setSupportedToken(address token, bool supported)
+        external
+        onlyOwner
+    {
+        if (supported) {
+            _supportedTokens.add(token);
+        } else {
+            _supportedTokens.remove(token);
+        }
+
+        emit SetSupportedToken(token, supported);
     }
 
     function setFeeNumerator(uint256 _feeNumerator, uint256 _feeDenominator)
@@ -80,7 +109,9 @@ contract NFTVault is Ownable, ReentrancyGuard, ERC721Holder {
         address nft,
         uint256 tokenId,
         SaleOption memory saleOption
-    ) external {
+    ) external nonReentrant {
+        require(_supportedNfts.contains(nft), "invalid nft");
+        require(_supportedNfts.contains(saleOption.token), "invalid token");
         require(saleOption.amount != 0, "invalid amount");
 
         IERC721(nft).safeTransferFrom(msg.sender, address(this), tokenId);
@@ -97,8 +128,10 @@ contract NFTVault is Ownable, ReentrancyGuard, ERC721Holder {
         address nft,
         uint256 tokenId,
         SaleOption memory saleOption
-    ) external {
+    ) external nonReentrant {
         require(nftSales[nft][tokenId].owner == msg.sender, "Unauthorized");
+        require(_supportedNfts.contains(saleOption.token), "invalid token");
+        require(saleOption.amount != 0, "invalid amount");
 
         nftSales[nft][tokenId].saleOption = saleOption;
 
@@ -120,6 +153,7 @@ contract NFTVault is Ownable, ReentrancyGuard, ERC721Holder {
         payable
         nonReentrant
     {
+        require(_supportedNfts.contains(nft), "invalid nft");
         NFTSale memory nftSale = nftSales[nft][tokenId];
 
         uint256 feeAmount = (nftSale.saleOption.amount * feeNumerator) /
@@ -131,9 +165,20 @@ contract NFTVault is Ownable, ReentrancyGuard, ERC721Holder {
             nftSale.saleOption.amount
         );
 
+        (address royaltyReceiver, uint256 royaltyAmount) = royaltyInfo(
+            nft,
+            tokenId,
+            nftSale.saleOption.amount
+        );
+
+        IERC20(nftSale.saleOption.token).uniSafeTransfer(
+            royaltyReceiver,
+            royaltyAmount
+        );
+
         IERC20(nftSale.saleOption.token).uniSafeTransfer(
             nftSale.owner,
-            nftSale.saleOption.amount - feeAmount
+            nftSale.saleOption.amount - feeAmount - royaltyAmount
         );
 
         IERC721(nft).transferFrom(address(this), msg.sender, tokenId);
@@ -146,7 +191,7 @@ contract NFTVault is Ownable, ReentrancyGuard, ERC721Holder {
     function withdraw(address token) public onlyOwner {
         IERC20(token).uniSafeTransfer(
             msg.sender,
-            token == FTM
+            token == UniSafeERC20.NATIVE_TOKEN
                 ? address(this).balance
                 : IERC20(token).balanceOf(address(this))
         );
@@ -156,5 +201,21 @@ contract NFTVault is Ownable, ReentrancyGuard, ERC721Holder {
         for (uint256 i = 0; i < tokens.length; i++) {
             withdraw(tokens[i]);
         }
+    }
+
+    function royaltyInfo(
+        address nft,
+        uint256 tokenId,
+        uint256 amount
+    ) public view returns (address, uint256) {
+        return IERC2981(nft).royaltyInfo(tokenId, amount);
+    }
+
+    function isSupportedNft(address nft) external view returns (bool) {
+        return _supportedNfts.contains(nft);
+    }
+
+    function isSupportedToken(address token) external view returns (bool) {
+        return _supportedTokens.contains(token);
     }
 }
