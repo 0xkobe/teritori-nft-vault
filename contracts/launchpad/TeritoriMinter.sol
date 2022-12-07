@@ -8,22 +8,25 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import "./TeritoriNft.sol";
+import "../lib/UniSafeERC20.sol";
 
 contract TeritoriMinter is Ownable, Pausable {
-    using SafeERC20 for IERC20;
+    // using SafeERC20 for IERC20;
+    using UniSafeERC20 for IERC20;
 
-    event TokenRequest(address user);
+    event MintRequest(address user);
+    event WithdrawFund(address token, uint256 amount);
 
-    struct WhitelistMintConfig {
+    struct WhitelistConfig {
         uint256 mintMax;
         uint256 mintPeriod;
         uint256 mintPrice;
     }
-    struct MintConfig {
+    struct Config {
         uint256 maxSupply;
         address mintToken; // address(0) for ETH payment
         uint256 mintStartTime;
-        WhitelistMintConfig[] whitelistMints;
+        uint256 whitelistCount;
         uint256 publicMintPrice;
         uint256 publicMintMax;
         string baseUrl;
@@ -31,11 +34,13 @@ contract TeritoriMinter is Ownable, Pausable {
 
     address public minter;
     address public nft;
-    MintConfig internal _config;
-    mapping(address => mapping(uint256 => bool)) public userWhitelisted;
-    mapping(address => uint256) public userMinted;
+    Config public config;
+    mapping(uint256 => WhitelistConfig) public whitelists; // whitelist phase => config
+    mapping(uint256 => mapping(address => bool)) public userWhitelisted; // whitelist phase => user address => whitelisted
+    mapping(uint256 => uint256) public whitelistSize; // whitelist phase => whitelisted addresses count
+    mapping(address => uint256) public userMinted; // user address => minted count
 
-    mapping(uint256 => address) public tokenRequests;
+    mapping(uint256 => address) public tokenRequests; // mint request index => user address
     uint256 public tokenRequestsCount;
     uint256 public currentSupply;
 
@@ -50,29 +55,6 @@ contract TeritoriMinter is Ownable, Pausable {
         minter = _minter;
     }
 
-    function config() external view returns (MintConfig memory) {
-        return _config;
-    }
-
-    function setConfig(MintConfig memory newConfig) external onlyOwner {
-        _config.maxSupply = newConfig.maxSupply;
-        _config.mintToken = newConfig.mintToken;
-        _config.mintStartTime = newConfig.mintStartTime;
-        _config.publicMintPrice = newConfig.publicMintPrice;
-        _config.publicMintMax = newConfig.publicMintMax;
-        _config.baseUrl = newConfig.baseUrl;
-
-        // delete previous whitelist mint period
-        uint256 previousLength = _config.whitelistMints.length;
-        for (uint256 i = 0; i < previousLength; i++) {
-            _config.whitelistMints.pop();
-        }
-        // add new whitelist mint period
-        for (uint256 i = 0; i < newConfig.whitelistMints.length; i++) {
-            _config.whitelistMints.push(newConfig.whitelistMints[i]);
-        }
-    }
-
     function pause() external onlyOwner whenNotPaused {
         _pause();
     }
@@ -81,45 +63,76 @@ contract TeritoriMinter is Ownable, Pausable {
         _unpause();
     }
 
-    function whitelist(
-        address[] memory users,
+    function setConfig(Config memory newConfig) external onlyOwner {
+        config = newConfig;
+    }
+
+    function startMint() external onlyOwner {
+        config.mintStartTime = block.timestamp;
+    }
+
+    function setWhitelistConfig(
+        uint256[] memory whitelistPhases,
+        WhitelistConfig[] memory newWhitelistMintConfigs
+    ) external onlyOwner {
+        require(
+            whitelistPhases.length == newWhitelistMintConfigs.length,
+            "INVALID_LENGTH"
+        );
+        uint256 length = whitelistPhases.length;
+        for (uint256 i = 0; i < length; i++) {
+            whitelists[whitelistPhases[i]] = newWhitelistMintConfigs[i];
+        }
+    }
+
+    function setWhitelist(
         uint256 whitelistPhase,
+        address[] memory users,
         bool whitelisted
     ) external onlyOwner {
+        uint256 changes = 0;
         for (uint256 i = 0; i < users.length; i++) {
-            userWhitelisted[users[i]][whitelistPhase] = whitelisted;
+            if (userWhitelisted[whitelistPhase][users[i]] != whitelisted) {
+                userWhitelisted[whitelistPhase][users[i]] = whitelisted;
+                changes++;
+            }
+        }
+
+        if (whitelisted) {
+            whitelistSize[whitelistPhase] += changes;
+        } else {
+            whitelistSize[whitelistPhase] -= changes;
         }
     }
 
     function requestMint(address user) external payable whenNotPaused {
-        require(_config.mintStartTime <= block.timestamp, "MINT_NOT_STARTED");
+        require(
+            config.mintStartTime != 0 &&
+                config.mintStartTime <= block.timestamp,
+            "MINT_NOT_STARTED"
+        );
 
         uint256 mintCount = userMinted[user];
-        uint256 currentPhase = _config.mintStartTime;
-        uint256 mintPrice = _config.publicMintPrice;
-        for (uint256 i = 0; i < _config.whitelistMints.length; i++) {
-            WhitelistMintConfig memory whitelistMintConfig = _config
-                .whitelistMints[i];
-            if (
-                currentPhase + whitelistMintConfig.mintPeriod >= block.timestamp
-            ) {
-                mintPrice = whitelistMintConfig.mintPrice;
-                require(userWhitelisted[user][i], "NOT_WHITELISTED");
+        uint256 currentPhaseStart = config.mintStartTime;
+        uint256 mintPrice = config.publicMintPrice;
+        for (uint256 i = 0; i < config.whitelistCount; i++) {
+            WhitelistConfig memory whitelist = whitelists[i];
+            if (currentPhaseStart + whitelist.mintPeriod >= block.timestamp) {
+                mintPrice = whitelist.mintPrice;
+                require(userWhitelisted[i][user], "NOT_WHITELISTED");
                 require(
-                    mintCount < whitelistMintConfig.mintMax,
+                    mintCount < whitelist.mintMax,
                     "EXCEED_WHITELIST_MINT_MAX"
                 );
                 break;
             }
-            currentPhase += whitelistMintConfig.mintPeriod;
+            currentPhaseStart += whitelist.mintPeriod;
         }
 
-        require(mintCount < _config.publicMintMax, "EXCEED_MINT_MAX");
+        require(mintCount < config.publicMintMax, "EXCEED_MINT_MAX");
 
-        if (_config.mintToken == address(0)) {
-            require(msg.value == mintPrice, "INVALID_AMOUNT");
-        } else {
-            IERC20(_config.mintToken).safeTransferFrom(
+        if (mintPrice > 0) {
+            IERC20(config.mintToken).uniSafeTransferFrom(
                 msg.sender,
                 address(this),
                 mintPrice
@@ -129,59 +142,111 @@ contract TeritoriMinter is Ownable, Pausable {
         tokenRequests[tokenRequestsCount] = user;
         tokenRequestsCount++;
 
-        emit TokenRequest(user);
+        emit MintRequest(user);
     }
 
-    function mint(
-        uint256 tokenId,
-        address royaltyReceiver,
-        uint96 royaltyPercentage,
-        string memory tokenUri
-    ) external {
-        require(msg.sender == minter, "UNAUTHORIZED");
-        require(currentSupply > tokenRequestsCount, "NO_TOKEN_REQUEST");
-
-        address user = tokenRequests[currentSupply];
-        currentSupply++;
-        TeritoriNft(nft).mint(
-            user,
-            tokenId,
-            royaltyReceiver,
-            royaltyPercentage,
-            tokenUri
-        );
+    struct MintData {
+        uint256 tokenId;
+        address royaltyReceiver;
+        uint96 royaltyPercentage;
+        string tokenUri;
     }
 
-    function mintWithMetadata(
-        uint256 tokenId,
-        address royaltyReceiver,
-        uint96 royaltyPercentage,
-        string memory tokenUri,
-        TeritoriNft.Metadata memory extension
-    ) external {
+    function mint(MintData[] memory mintData) external {
         require(msg.sender == minter, "UNAUTHORIZED");
-        require(currentSupply > tokenRequestsCount, "NO_TOKEN_REQUEST");
-
-        address user = tokenRequests[currentSupply];
-        currentSupply++;
-        TeritoriNft(nft).mintWithMetadata(
-            user,
-            tokenId,
-            royaltyReceiver,
-            royaltyPercentage,
-            tokenUri,
-            extension
+        require(
+            currentSupply + mintData.length <= tokenRequestsCount,
+            "NO_TOKEN_REQUEST"
         );
+
+        for (uint256 i = 0; i < mintData.length; i++) {
+            address user = tokenRequests[currentSupply];
+            currentSupply++;
+
+            TeritoriNft(nft).mint(
+                user,
+                mintData[i].tokenId,
+                mintData[i].royaltyReceiver,
+                mintData[i].royaltyPercentage,
+                mintData[i].tokenUri
+            );
+        }
+    }
+
+    struct MintDataWithMetadata {
+        uint256 tokenId;
+        address royaltyReceiver;
+        uint96 royaltyPercentage;
+        string tokenUri;
+        TeritoriNft.Metadata extension;
+    }
+
+    function mintWithMetadata(MintDataWithMetadata[] memory mintData) external {
+        require(msg.sender == minter, "UNAUTHORIZED");
+        require(
+            currentSupply + mintData.length <= tokenRequestsCount,
+            "NO_TOKEN_REQUEST"
+        );
+
+        for (uint256 i = 0; i < mintData.length; i++) {
+            address user = tokenRequests[currentSupply];
+            currentSupply++;
+
+            TeritoriNft(nft).mintWithMetadata(
+                user,
+                mintData[i].tokenId,
+                mintData[i].royaltyReceiver,
+                mintData[i].royaltyPercentage,
+                mintData[i].tokenUri,
+                mintData[i].extension
+            );
+        }
     }
 
     function withdrawFund() external onlyOwner {
-        if (_config.mintToken == address(0)) {
-            payable(msg.sender).call{value: address(this).balance}("");
+        uint256 withdrawBalance = 0;
+        if (config.mintToken == UniSafeERC20.NATIVE_TOKEN) {
+            withdrawBalance = address(this).balance;
         } else {
-            IERC20(_config.mintToken).safeTransfer(
-                msg.sender,
-                IERC20(_config.mintToken).balanceOf(address(this))
-            );
+            withdrawBalance = IERC20(config.mintToken).balanceOf(address(this));
         }
+
+        require(withdrawBalance > 0, "NO_AVAILABLE_FUND");
+        IERC20(config.mintToken).uniSafeTransfer(msg.sender, withdrawBalance);
+
+        emit WithdrawFund(config.mintToken, withdrawBalance);
+    }
+
+    function userState(address user)
+        external
+        view
+        returns (
+            uint256 currentPhase,
+            uint256 mintPrice,
+            bool userCanMint
+        )
+    {
+        require(
+            config.mintStartTime != 0 &&
+                config.mintStartTime <= block.timestamp,
+            "MINT_NOT_STARTED"
+        );
+
+        uint256 mintCount = userMinted[user];
+        uint256 currentPhaseStart = config.mintStartTime;
+        currentPhase = config.whitelistCount;
+        mintPrice = config.publicMintPrice;
+        for (uint256 i = 0; i < config.whitelistCount; i++) {
+            WhitelistConfig memory whitelist = whitelists[i];
+            if (currentPhaseStart + whitelist.mintPeriod >= block.timestamp) {
+                currentPhase = i;
+                userCanMint =
+                    userWhitelisted[i][user] &&
+                    mintCount < whitelist.mintMax;
+                break;
+            }
+            currentPhaseStart += whitelist.mintPeriod;
+        }
+        userCanMint = userCanMint && mintCount < config.publicMintMax;
     }
 }

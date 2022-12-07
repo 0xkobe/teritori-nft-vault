@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URISto
 
 contract TeritoriNft is ERC721RoyaltyUpgradeable, ERC721URIStorageUpgradeable {
     struct Attribute {
-        string trate_type;
+        string trait_type;
         string value;
     }
     struct Metadata {
@@ -29,7 +29,7 @@ contract TeritoriNft is ERC721RoyaltyUpgradeable, ERC721URIStorageUpgradeable {
         minter = msg.sender;
     }
 
-    function extensions(uint256 tokenId)
+    function nftInfo(uint256 tokenId)
         external
         view
         returns (Metadata memory)

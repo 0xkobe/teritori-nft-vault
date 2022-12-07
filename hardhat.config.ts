@@ -1,14 +1,14 @@
 require("dotenv").config();
-require("@nomiclabs/hardhat-ethers");
-require("@nomiclabs/hardhat-web3"); //For openzeppelin
-require("@nomiclabs/hardhat-waffle");
-require("@nomiclabs/hardhat-etherscan");
-require("hardhat-gas-reporter");
-require("hardhat-abi-exporter");
-require("solidity-coverage");
-require("@typechain/hardhat");
+import "@nomiclabs/hardhat-ethers";
+import "@nomiclabs/hardhat-web3";
+import "@nomiclabs/hardhat-waffle";
+import "@nomiclabs/hardhat-etherscan";
+import "hardhat-gas-reporter";
+import "hardhat-abi-exporter";
+import "solidity-coverage";
+import "@typechain/hardhat";
 
-module.exports = {
+export default {
   defaultNetwork: "hardhat",
   gasReporter: {
     showTimeSpent: true,
