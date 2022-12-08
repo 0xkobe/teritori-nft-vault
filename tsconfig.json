@@ -1,20 +1,19 @@
 {
-    "compilerOptions": {
-      "target": "es2015",
-      "module": "commonjs",
-      "moduleResolution": "node",
-      "rootDir": "scripts",
-      "outDir": "build",
-      "lib": ["esnext"],
-      "strict": true,
-      "esModuleInterop": true,
-      "allowJs": true,
-      "checkJs": false,
-      "resolveJsonModule": true,
-      "skipLibCheck": true,
-      "forceConsistentCasingInFileNames": true
-    },
-    "include": ["scripts", "hardhat.config.ts"],
-    "exclude": ["node_modules"]
-  }
-  
+  "compilerOptions": {
+    "target": "es2015",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "rootDir": "scripts",
+    "outDir": "build",
+    "lib": ["esnext"],
+    "strict": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "checkJs": false,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["script/", "hardhat.config.ts"],
+  "exclude": ["node_modules"]
+}
