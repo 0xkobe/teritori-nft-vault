@@ -145,6 +145,7 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
             );
         }
 
+        userMinted[user]++;
         tokenRequests[tokenRequestsCount] = user;
         tokenRequestsCount++;
 
