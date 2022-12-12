@@ -111,7 +111,7 @@ contract NFTVault is Ownable, ReentrancyGuard, ERC721Holder {
         SaleOption memory saleOption
     ) external nonReentrant {
         require(_supportedNfts.contains(nft), "invalid nft");
-        require(_supportedNfts.contains(saleOption.token), "invalid token");
+        require(_supportedTokens.contains(saleOption.token), "invalid token");
         require(saleOption.amount != 0, "invalid amount");
 
         IERC721(nft).safeTransferFrom(msg.sender, address(this), tokenId);
@@ -130,7 +130,7 @@ contract NFTVault is Ownable, ReentrancyGuard, ERC721Holder {
         SaleOption memory saleOption
     ) external nonReentrant {
         require(nftSales[nft][tokenId].owner == msg.sender, "Unauthorized");
-        require(_supportedNfts.contains(saleOption.token), "invalid token");
+        require(_supportedTokens.contains(saleOption.token), "invalid token");
         require(saleOption.amount != 0, "invalid amount");
 
         nftSales[nft][tokenId].saleOption = saleOption;
