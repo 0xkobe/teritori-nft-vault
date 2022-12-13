@@ -15,6 +15,7 @@ contract TeritoriNft is ERC721RoyaltyUpgradeable, ERC721URIStorageUpgradeable {
         string description;
         string image;
         string external_url;
+        string animation_url;
         Attribute[] attributes;
     }
 
@@ -69,6 +70,7 @@ contract TeritoriNft is ERC721RoyaltyUpgradeable, ERC721URIStorageUpgradeable {
         _extensions[tokenId].description = extension.description;
         _extensions[tokenId].image = extension.image;
         _extensions[tokenId].external_url = extension.external_url;
+        _extensions[tokenId].animation_url = extension.animation_url;
         for (uint256 i = 0; i < extension.attributes.length; i++) {
             _extensions[tokenId].attributes.push(extension.attributes[i]);
         }

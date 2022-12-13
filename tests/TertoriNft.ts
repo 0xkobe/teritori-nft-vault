@@ -230,6 +230,7 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
                 description: "description",
                 image: "image",
                 external_url: "external_url",
+                animation_url: "animation_url",
                 attributes: [
                     {
                         trait_type: "trait_type",
@@ -249,6 +250,7 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
                 description: "description",
                 image: "image",
                 external_url: "external_url",
+                animation_url: "animation_url",
                 attributes: [
                     {
                         trait_type: "trait_type",
@@ -265,6 +267,7 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
         expect((await teritoriNft.nftInfo("1")).description).to.equal("description");
         expect((await teritoriNft.nftInfo("1")).image).to.equal("image");
         expect((await teritoriNft.nftInfo("1")).external_url).to.equal("external_url");
+        expect((await teritoriNft.nftInfo("1")).animation_url).to.equal("animation_url");
         expect((await teritoriNft.nftInfo("1")).attributes.length).to.equal(1);
         expect((await teritoriNft.nftInfo("1")).attributes[0].trait_type).to.equal("trait_type");
         expect((await teritoriNft.nftInfo("1")).attributes[0].value).to.equal("value");
