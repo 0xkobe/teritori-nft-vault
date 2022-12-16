@@ -26,19 +26,25 @@ async function Instantiate() {
 
   const nftstorage = new NFTStorage({ token: nftStorageAPIKey })
 
-  const imageFile = path.join(dataDir, collectionInfo.image)
-  const imageContent = fs.readFileSync(imageFile)
-  const imageType = mime.getType(imageFile)
-  const imageFileName = path.basename(imageFile)
-  const imageDirCid = await nftstorage.storeDirectory([new File([imageContent], imageFileName, { type: imageType })])
-  const imageURL = `ipfs://${imageDirCid}/${imageFileName}`
+  let imageURL = collectionInfo.image;
+  if (!collectionInfo.image.includes("ipfs")) {
+    const imageFile = path.join(dataDir, collectionInfo.image)
+    const imageContent = fs.readFileSync(imageFile)
+    const imageType = mime.getType(imageFile)
+    const imageFileName = path.basename(imageFile)
+    const imageDirCid = await nftstorage.storeDirectory([new File([imageContent], imageFileName, { type: imageType })])
+    imageURL = `ipfs://${imageDirCid}/${imageFileName}`
+  }
 
-  const bannerFile = path.join(dataDir, collectionInfo.banner)
-  const bannerContent = fs.readFileSync(bannerFile)
-  const bannerType = mime.getType(bannerFile)
-  const bannerFileName = path.basename(bannerFile)
-  const bannerDirCid = await nftstorage.storeDirectory([new File([bannerContent], bannerFileName, { type: bannerType })])
-  const bannerURL = `ipfs://${bannerDirCid}/${bannerFileName}`
+  let bannerURL = collectionInfo.banner;
+  if (!collectionInfo.banner.includes("ipfs")) {
+    const bannerFile = path.join(dataDir, collectionInfo.banner)
+    const bannerContent = fs.readFileSync(bannerFile)
+    const bannerType = mime.getType(bannerFile)
+    const bannerFileName = path.basename(bannerFile)
+    const bannerDirCid = await nftstorage.storeDirectory([new File([bannerContent], bannerFileName, { type: bannerType })])
+    bannerURL = `ipfs://${bannerDirCid}/${bannerFileName}`
+  }
 
   const collectionMetadata = {
     name: collectionInfo.name,

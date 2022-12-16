@@ -21,7 +21,7 @@ async function start() {
     })).wait();
   } else {
     const token = <IERC20>await ethers.getContractAt("IERC20", config.mintToken);
-    await token.approve(minter.address, state.mintPrice);
+    await (await token.approve(minter.address, state.mintPrice)).wait();
     await (await minter.requestMint(deployer.address)).wait();
   }
   console.log("Mint requested");

@@ -249,6 +249,7 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
         for (uint256 i = 0; i < config.whitelistCount; i++) {
             WhitelistConfig memory whitelist = whitelists[i];
             if (currentPhaseStart + whitelist.mintPeriod >= block.timestamp) {
+                mintPrice = whitelist.mintPrice;
                 currentPhase = i;
                 userCanMint =
                     userWhitelisted[i][user] &&
