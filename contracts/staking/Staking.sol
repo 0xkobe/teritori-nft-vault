@@ -48,7 +48,7 @@ contract Staking is Ownable, Pausable {
         _unpause();
     }
 
-    function updateCooldownInDays(uint256 _cooldownInDays) external onlyOwner {
+    function setCooldownInDays(uint256 _cooldownInDays) external onlyOwner {
         cooldownInDays = _cooldownInDays;
     }
 
@@ -77,6 +77,18 @@ contract Staking is Ownable, Pausable {
         returns (address)
     {
         return _supportedCollections.at(index);
+    }
+
+    function supportedCollections(uint256 index)
+        external
+        view
+        returns (address[] memory collections)
+    {
+        uint256 length = _supportedCollections.length();
+        collections = new address[](length);
+        for (uint256 i = 0; i < length; i++) {
+            collections[i] = _supportedCollections.at(index);
+        }
     }
 
     function nftStakeInfo(address collection, uint256 tokenId)
@@ -146,6 +158,7 @@ contract Staking is Ownable, Pausable {
         );
 
         stakeList[index].withdrawn = true;
+        delete nftStakeIndex[collection][tokenId];
 
         IERC721(collection).safeTransferFrom(
             address(this),

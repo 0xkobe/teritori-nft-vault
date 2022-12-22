@@ -56,8 +56,26 @@ contract SquadStaking is Ownable, Pausable {
         _unpause();
     }
 
-    function updateCooldownInDays(uint256 _cooldownInDays) external onlyOwner {
+    function setSquadSize(uint256 _minSquadSize, uint256 _maxSquadSize)
+        external
+        onlyOwner
+    {
+        minSquadSize = _minSquadSize;
+        maxSquadSize = _maxSquadSize;
+    }
+
+    function setCooldownInDays(uint256 _cooldownInDays) external onlyOwner {
         cooldownInDays = _cooldownInDays;
+    }
+
+    function setBonusMultiplier(
+        uint256[] memory _size,
+        uint256[] memory _bonusMultipliers
+    ) external onlyOwner {
+        require(_size.length == _bonusMultipliers.length, "length mismatch");
+        for (uint256 i = 0; i < _bonusMultipliers.length; i++) {
+            bonusMultipliers[_size[i]] = _bonusMultipliers[i];
+        }
     }
 
     function setSupportedCollection(address collection, bool supported)
@@ -85,6 +103,18 @@ contract SquadStaking is Ownable, Pausable {
         returns (address)
     {
         return _supportedCollections.at(index);
+    }
+
+    function supportedCollections(uint256 index)
+        external
+        view
+        returns (address[] memory collections)
+    {
+        uint256 length = _supportedCollections.length();
+        collections = new address[](length);
+        for (uint256 i = 0; i < length; i++) {
+            collections[i] = _supportedCollections.at(index);
+        }
     }
 
     function userSquadInfo(address user)
@@ -118,7 +148,7 @@ contract SquadStaking is Ownable, Pausable {
         uint256 duration = stakeDuration(
             nfts[0].collection,
             nfts[0].tokenId,
-            bonusMultipliers[nfts.length]
+            nfts.length
         );
         uint256 startTime = block.timestamp;
         uint256 endTime = startTime + duration;
@@ -158,8 +188,9 @@ contract SquadStaking is Ownable, Pausable {
     function stakeDuration(
         address collection,
         uint256 tokenId,
-        uint256 bonusMultiplier
+        uint256 size
     ) public view returns (uint256) {
+        uint256 bonusMultiplier = bonusMultipliers[size];
         require(bonusMultiplier != 0, "invalid bonus multiplier");
 
         uint256 stamina = 0;
