@@ -64,6 +64,10 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
         _unpause();
     }
 
+    function setMinter(address newMinter) external onlyOwner {
+        minter = newMinter;
+    }
+
     function setConfig(Config memory newConfig) external onlyOwner {
         config = newConfig;
     }
