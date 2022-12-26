@@ -20,7 +20,7 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
 
         const TeritoriMinter = await ethers.getContractFactory("TeritoriMinter");
         teritoriMinter = <TeritoriMinter>await TeritoriMinter.deploy(
-            name, symbol, teritoriNftImpl.address, minter.address
+            name, symbol, teritoriNftImpl.address, minter.address, ethers.utils.parseEther("0.005")
         );
         await teritoriMinter.deployed();
 
@@ -112,6 +112,9 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
         await teritoriMinter.setWhitelist(1, [user.address], true);
         await teritoriMinter.startMint();
 
+        expect((await teritoriMinter.userState(user.address)).mintPrice).to.equal(
+            ethers.utils.parseEther("0.01")
+        );
         await expect(teritoriMinter.connect(user).requestMint(user.address, {
             value: ethers.utils.parseEther("0.05")
         })).to.reverted;
@@ -125,6 +128,9 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
         await network.provider.send("evm_increaseTime", [100]);
         await network.provider.send("evm_mine");
 
+        expect((await teritoriMinter.userState(user.address)).mintPrice).to.equal(
+            ethers.utils.parseEther("0.05")
+        );
         await expect(teritoriMinter.connect(user).requestMint(user.address, {
             value: ethers.utils.parseEther("0.1")
         })).to.reverted;
@@ -166,6 +172,9 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
         await teritoriMinter.setWhitelist(1, [user.address], true);
         await teritoriMinter.startMint();
 
+        expect((await teritoriMinter.userState(user.address)).mintPrice).to.equal(
+            ethers.utils.parseEther("0.01")
+        );
         await expect(teritoriMinter.connect(user).requestMint(user.address, {
             value: ethers.utils.parseEther("0.1")
         })).to.reverted;
@@ -173,6 +182,9 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
         await network.provider.send("evm_increaseTime", [100]);
         await network.provider.send("evm_mine");
 
+        expect((await teritoriMinter.userState(user.address)).mintPrice).to.equal(
+            ethers.utils.parseEther("0.05")
+        );
         await expect(teritoriMinter.connect(user).requestMint(user.address, {
             value: ethers.utils.parseEther("0.1")
         })).to.reverted;
@@ -180,6 +192,9 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
         await network.provider.send("evm_increaseTime", [100]);
         await network.provider.send("evm_mine");
 
+        expect((await teritoriMinter.userState(user.address)).mintPrice).to.equal(
+            ethers.utils.parseEther("0.1")
+        );
         await teritoriMinter.connect(user).requestMint(user.address, {
             value: ethers.utils.parseEther("0.1")
         });

@@ -25,7 +25,7 @@ describe("NFTVault Test", () => {
 
         const TeritoriMinter = await ethers.getContractFactory("TeritoriMinter");
         teritoriMinter = <TeritoriMinter>await TeritoriMinter.deploy(
-            name, symbol, teritoriNftImpl.address, owner.address
+            name, symbol, teritoriNftImpl.address, owner.address, ethers.utils.parseEther("0.05")
         );
         await teritoriMinter.deployed();
 

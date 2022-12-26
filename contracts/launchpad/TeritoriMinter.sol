@@ -45,15 +45,19 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
     uint256 public tokenRequestsCount;
     uint256 public currentSupply;
 
+    uint256 public minterFee;
+
     constructor(
         string memory _name,
         string memory _symbol,
         address _nft_impl,
-        address _minter
+        address _minter,
+        uint256 _minterFee
     ) Ownable() Pausable() ReentrancyGuard() {
         nft = Clones.clone(_nft_impl);
         TeritoriNft(nft).initialize(_name, _symbol);
         minter = _minter;
+        minterFee = _minterFee;
     }
 
     function pause() external onlyOwner whenNotPaused {
@@ -66,6 +70,10 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
 
     function setMinter(address newMinter) external onlyOwner {
         minter = newMinter;
+    }
+
+    function setMinterFee(uint256 newMinterFee) external onlyOwner {
+        minterFee = newMinterFee;
     }
 
     function setConfig(Config memory newConfig) external onlyOwner {
@@ -142,11 +150,8 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
         require(mintCount < config.publicMintMax, "EXCEED_MINT_MAX");
 
         if (mintPrice > 0) {
-            IERC20(config.mintToken).uniSafeTransferFrom(
-                msg.sender,
-                address(this),
-                mintPrice
-            );
+            IERC20(config.mintToken).uniSafeTransferFrom(msg.sender, mintPrice);
+            IERC20(config.mintToken).uniSafeTransfer(minter, minterFee);
         }
 
         userMinted[user]++;

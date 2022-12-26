@@ -12,13 +12,12 @@ library UniSafeERC20 {
     function uniSafeTransferFrom(
         IERC20 asset,
         address from,
-        address to,
         uint256 value
     ) internal {
         if (address(asset) == NATIVE_TOKEN) {
             require(value == msg.value, "INVALID_MSG_VALUE");
         } else {
-            asset.safeTransferFrom(from, to, value);
+            asset.safeTransferFrom(from, address(this), value);
         }
     }
 

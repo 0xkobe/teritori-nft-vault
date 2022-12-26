@@ -72,7 +72,8 @@ async function Instantiate() {
     collectionInfo.name,
     collectionInfo.symbol,
     nftImplementationAddress,
-    deployer.address
+    deployer.address,
+    collectionInfo.minterFee,
   );
   await minter.deployed();
 

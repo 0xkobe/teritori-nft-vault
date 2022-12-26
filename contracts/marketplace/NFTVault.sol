@@ -161,7 +161,6 @@ contract NFTVault is Ownable, ReentrancyGuard, ERC721Holder {
 
         IERC20(nftSale.saleOption.token).uniSafeTransferFrom(
             msg.sender,
-            address(this),
             nftSale.saleOption.amount
         );
 
