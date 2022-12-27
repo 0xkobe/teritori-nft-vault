@@ -51,6 +51,9 @@ async function Instantiate() {
     image: imageURL,
     banner: bannerURL,
     description: collectionInfo.description,
+    external_link: collectionInfo.website,
+    seller_fee_basis_points: collectionInfo.royaltyPercentage,
+    fee_recipient: collectionInfo.royaltyPaymentAddress,
     discord: collectionInfo.discord,
     twitter: collectionInfo.twitter,
     website: collectionInfo.website,
@@ -71,6 +74,7 @@ async function Instantiate() {
   const minter = await TeritoriMinter.deploy(
     collectionInfo.name,
     collectionInfo.symbol,
+    metadataURL,
     nftImplementationAddress,
     deployer.address,
     collectionInfo.minterFee,
@@ -92,7 +96,6 @@ async function Instantiate() {
       whitelistCount: collectionInfo.whitelists.length,
       publicMintPrice: collectionInfo.publicMintPrice,
       publicMintMax: collectionInfo.publicMintMax || maxSupply,
-      baseUrl: metadataURL
     }
   )).wait();
   console.log("Minter configuration set");

@@ -20,7 +20,7 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
 
         const TeritoriMinter = await ethers.getContractFactory("TeritoriMinter");
         teritoriMinter = <TeritoriMinter>await TeritoriMinter.deploy(
-            name, symbol, teritoriNftImpl.address, minter.address, ethers.utils.parseEther("0.005")
+            name, symbol, "contract-uri", teritoriNftImpl.address, minter.address, ethers.utils.parseEther("0.005")
         );
         await teritoriMinter.deployed();
 
@@ -33,7 +33,6 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
             whitelistCount: 1,
             publicMintPrice: ethers.utils.parseEther("0.1"),
             publicMintMax: 2,
-            baseUrl: "",
         };
         await teritoriMinter.setConfig(config);
     })
@@ -41,6 +40,7 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
     it("initialize", async () => {
         expect(await teritoriNft.name()).to.equal(name);
         expect(await teritoriNft.symbol()).to.equal(symbol);
+        expect(await teritoriNft.contractURI()).to.equal("contract-uri");
         expect(await teritoriNft.minter()).to.equal(teritoriMinter.address);
     })
 

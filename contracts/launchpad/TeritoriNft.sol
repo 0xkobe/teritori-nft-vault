@@ -20,21 +20,20 @@ contract TeritoriNft is ERC721RoyaltyUpgradeable, ERC721URIStorageUpgradeable {
     }
 
     address public minter;
+    string public contractURI;
     mapping(uint256 => Metadata) internal _extensions;
 
-    function initialize(string memory _name, string memory _symbol)
-        external
-        initializer
-    {
+    function initialize(
+        string memory _name,
+        string memory _symbol,
+        string memory _contractURI
+    ) external initializer {
         __ERC721_init(_name, _symbol);
         minter = msg.sender;
+        contractURI = _contractURI;
     }
 
-    function nftInfo(uint256 tokenId)
-        external
-        view
-        returns (Metadata memory)
-    {
+    function nftInfo(uint256 tokenId) external view returns (Metadata memory) {
         return _extensions[tokenId];
     }
 

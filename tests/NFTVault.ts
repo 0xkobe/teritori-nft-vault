@@ -25,7 +25,7 @@ describe("NFTVault Test", () => {
 
         const TeritoriMinter = await ethers.getContractFactory("TeritoriMinter");
         teritoriMinter = <TeritoriMinter>await TeritoriMinter.deploy(
-            name, symbol, teritoriNftImpl.address, owner.address, ethers.utils.parseEther("0.05")
+            name, symbol, "", teritoriNftImpl.address, owner.address, ethers.utils.parseEther("0.05")
         );
         await teritoriMinter.deployed();
 
@@ -39,7 +39,6 @@ describe("NFTVault Test", () => {
             whitelistCount: 0,
             publicMintPrice: ethers.utils.parseEther("0.1"),
             publicMintMax: 2,
-            baseUrl: "",
         };
         await teritoriMinter.setConfig(config);
         await teritoriMinter.connect(user).requestMint(user.address, {

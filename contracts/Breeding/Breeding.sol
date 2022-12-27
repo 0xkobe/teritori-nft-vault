@@ -48,13 +48,14 @@ contract Breeding is Ownable, Pausable, ReentrancyGuard {
         address _parentCollection,
         string memory _child_name,
         string memory _child_symbol,
+        string memory _child_URI,
         address _nft_impl,
         BreedConfig memory _breedConfig,
         ChildCollectionConfig memory _childCollectionConfig
     ) Ownable() Pausable() ReentrancyGuard() {
         parentCollection = _parentCollection;
         childCollection = Clones.clone(_nft_impl);
-        TeritoriNft(childCollection).initialize(_child_name, _child_symbol);
+        TeritoriNft(childCollection).initialize(_child_name, _child_symbol, _child_URI);
 
         breedConfig = _breedConfig;
         childCollectionConfig = _childCollectionConfig;
