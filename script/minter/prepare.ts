@@ -4,16 +4,15 @@ import path from "path"
 import { File, NFTStorage } from "nft.storage"
 import { nftStorageAPIKey } from "./data/secrets";
 import mime from 'mime'
-import { getMaxSupply, metadataDir, tokensFile } from "./lib";
+import { getMaxSupply, getURL, metadataDir, tokensFile } from "./lib";
 
 // TODO: parallelize
 
 const internalImageFileName = "nft.png"
 
 async function prepareToken(i: number, nftstorage: NFTStorage, maxSupply: number) {
-  const metadata = JSON.parse(fs.readFileSync(path.join(metadataDir, `${i}.json`)).toString())
+  let metadata = JSON.parse(fs.readFileSync(path.join(metadataDir, `${i}.json`)).toString())
   if (!metadata.image.toString().includes('ipfs')) {
-
     const imagePath = path.join(metadataDir, metadata.image)
     const imageContent = fs.readFileSync(imagePath)
     const imageType = mime.getType(imagePath)
@@ -22,11 +21,31 @@ async function prepareToken(i: number, nftstorage: NFTStorage, maxSupply: number
 
     console.log(`${i}/${maxSupply} ${imageURL}`)
 
-    fs.writeFileSync(path.join(metadataDir, `${i}.json`), JSON.stringify({
-      ...metadata,
-      image: imageURL,
-    }, undefined, 2))
+    metadata = {
+      name: metadata.name,
+      description: metadata.description,
+      external_url: metadata.external_url,
+      animation_url: metadata.animation_url,
+      attributes: metadata.attributes,
+      image: getURL(imageURL),
+    };
   }
+
+  if (!metadata.tokenURI) {
+    const content = JSON.stringify(metadata, null, 2)
+    const type = "application/json"
+    const dirCid = await nftstorage.storeBlob(new File([content], { type }))
+    const tokenURI = `ipfs://${dirCid}`
+
+    console.log(`${i}/${maxSupply} ${tokenURI}`)
+
+    metadata = {
+      ...metadata,
+      tokenURI: getURL(tokenURI),
+    };
+  }
+
+  fs.writeFileSync(path.join(metadataDir, `${i}.json`), JSON.stringify(metadata, undefined, 2))
 }
 
 async function prepare() {
@@ -47,6 +66,7 @@ async function prepare() {
 
       tokens.push(...new Array(batch_count).fill(0).map((_, index) => i + index))
       fs.writeFileSync(tokensFile, JSON.stringify(tokens, undefined, 2))
+
     } catch (err) {
       console.error(i, err)
       break;

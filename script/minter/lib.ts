@@ -16,7 +16,7 @@ export const loadState = (): State => {
   if (!fs.existsSync(stateFile)) {
     return {}
   }
-  return JSON.parse(fs.readFileSync(stateFile, {encoding: "utf-8"}))
+  return JSON.parse(fs.readFileSync(stateFile, { encoding: "utf-8" }))
 }
 
 export const saveState = (state: State) => {
@@ -26,4 +26,12 @@ export const saveState = (state: State) => {
 export const getMaxSupply = () => {
   const files = fs.readdirSync(metadataDir).filter(f => f.endsWith(".json"))
   return files.length
+}
+
+export const getURL = (url: string) => {
+  const res = 'https://' + url.replace('ipfs://', '').replace('/', '.ipfs.nftstorage.link/');
+  if (!res.includes('ipfs.nftstorage.link')) {
+    return res + '.ipfs.nftstorage.link'
+  }
+  return res;
 }

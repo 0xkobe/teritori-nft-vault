@@ -6,7 +6,7 @@ import path from "path"
 import { NFTStorage, File } from 'nft.storage'
 import mime from "mime"
 import { ethers } from "hardhat"
-import { dataDir, getMaxSupply, loadState, saveState } from "./lib";
+import { dataDir, getMaxSupply, getURL, loadState, saveState } from "./lib";
 import { TeritoriMinter__factory } from '../../types'
 
 async function Instantiate() {
@@ -33,7 +33,7 @@ async function Instantiate() {
     const imageType = mime.getType(imageFile)
     const imageFileName = path.basename(imageFile)
     const imageDirCid = await nftstorage.storeDirectory([new File([imageContent], imageFileName, { type: imageType })])
-    imageURL = `ipfs://${imageDirCid}/${imageFileName}`
+    imageURL = getURL(`ipfs://${imageDirCid}/${imageFileName}`)
   }
 
   let bannerURL = collectionInfo.banner;
@@ -43,7 +43,7 @@ async function Instantiate() {
     const bannerType = mime.getType(bannerFile)
     const bannerFileName = path.basename(bannerFile)
     const bannerDirCid = await nftstorage.storeDirectory([new File([bannerContent], bannerFileName, { type: bannerType })])
-    bannerURL = `ipfs://${bannerDirCid}/${bannerFileName}`
+    bannerURL = getURL(`ipfs://${bannerDirCid}/${bannerFileName}`)
   }
 
   const collectionMetadata = {
@@ -66,7 +66,7 @@ async function Instantiate() {
   const type = "application/json"
   const fileName = "collection.json"
   const dirCid = await nftstorage.storeDirectory([new File([content], fileName, { type })])
-  const metadataURL = `ipfs://${dirCid}/${fileName}`
+  const metadataURL = getURL(`ipfs://${dirCid}/${fileName}`)
 
   console.log("Metadata URL:", metadataURL)
 
