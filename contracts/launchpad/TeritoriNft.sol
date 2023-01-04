@@ -3,9 +3,14 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721RoyaltyUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 
-contract TeritoriNft is ERC721RoyaltyUpgradeable, ERC721URIStorageUpgradeable {
+contract TeritoriNft is
+    ERC721EnumerableUpgradeable,
+    ERC721RoyaltyUpgradeable,
+    ERC721URIStorageUpgradeable
+{
     struct Attribute {
         string trait_type;
         string value;
@@ -82,10 +87,17 @@ contract TeritoriNft is ERC721RoyaltyUpgradeable, ERC721URIStorageUpgradeable {
         public
         view
         virtual
-        override(ERC721Upgradeable, ERC721RoyaltyUpgradeable)
+        override(
+            ERC721Upgradeable,
+            ERC721RoyaltyUpgradeable,
+            ERC721EnumerableUpgradeable
+        )
         returns (bool)
     {
-        return super.supportsInterface(interfaceId);
+        return
+            ERC721Upgradeable.supportsInterface(interfaceId) ||
+            ERC721RoyaltyUpgradeable.supportsInterface(interfaceId) ||
+            ERC721EnumerableUpgradeable.supportsInterface(interfaceId);
     }
 
     /**
@@ -98,7 +110,7 @@ contract TeritoriNft is ERC721RoyaltyUpgradeable, ERC721URIStorageUpgradeable {
         override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
         returns (string memory)
     {
-        return super.tokenURI(tokenId);
+        return ERC721URIStorageUpgradeable.tokenURI(tokenId);
     }
 
     /**
@@ -106,8 +118,24 @@ contract TeritoriNft is ERC721RoyaltyUpgradeable, ERC721URIStorageUpgradeable {
      */
     function _burn(uint256 tokenId)
         internal
-        override(ERC721RoyaltyUpgradeable, ERC721URIStorageUpgradeable)
+        override(
+            ERC721Upgradeable,
+            ERC721RoyaltyUpgradeable,
+            ERC721URIStorageUpgradeable
+        )
     {
         super._burn(tokenId);
+    }
+
+    /**
+     * @dev See {ERC721-_burn}. This override additionally clears the royalty information for the token.
+     */
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 firstTokenId,
+        uint256 batchSize
+    ) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable) {
+        super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
     }
 }

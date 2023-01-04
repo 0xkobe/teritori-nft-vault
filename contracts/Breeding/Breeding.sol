@@ -44,6 +44,9 @@ contract Breeding is Ownable, Pausable, ReentrancyGuard {
     BreedConfig public breedConfig;
     ChildCollectionConfig public childCollectionConfig;
 
+    BreedInfo[] public breedList;
+    mapping(address => uint256[]) public userBreedList;
+
     constructor(
         address _parentCollection,
         string memory _child_name,
