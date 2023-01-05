@@ -22,16 +22,20 @@ import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
 interface NFTVaultInterface extends ethers.utils.Interface {
   functions: {
-    "FTM()": FunctionFragment;
     "buyNFT(address,uint256)": FunctionFragment;
     "feeDenominator()": FunctionFragment;
     "feeNumerator()": FunctionFragment;
+    "isSupportedNft(address)": FunctionFragment;
+    "isSupportedToken(address)": FunctionFragment;
     "listNFT(address,uint256,(address,uint256))": FunctionFragment;
     "nftSales(address,uint256)": FunctionFragment;
     "onERC721Received(address,address,uint256,bytes)": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
+    "royaltyInfo(address,uint256,uint256)": FunctionFragment;
     "setFeeNumerator(uint256,uint256)": FunctionFragment;
+    "setSupportedNft(address,bool)": FunctionFragment;
+    "setSupportedToken(address,bool)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "updateSaleOption(address,uint256,(address,uint256))": FunctionFragment;
     "withdraw(address)": FunctionFragment;
@@ -39,7 +43,6 @@ interface NFTVaultInterface extends ethers.utils.Interface {
     "withdrawNFT(address,uint256)": FunctionFragment;
   };
 
-  encodeFunctionData(functionFragment: "FTM", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "buyNFT",
     values: [string, BigNumberish]
@@ -51,6 +54,14 @@ interface NFTVaultInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "feeNumerator",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isSupportedNft",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isSupportedToken",
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "listNFT",
@@ -70,8 +81,20 @@ interface NFTVaultInterface extends ethers.utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "royaltyInfo",
+    values: [string, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setFeeNumerator",
     values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setSupportedNft",
+    values: [string, boolean]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setSupportedToken",
+    values: [string, boolean]
   ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
@@ -91,7 +114,6 @@ interface NFTVaultInterface extends ethers.utils.Interface {
     values: [string, BigNumberish]
   ): string;
 
-  decodeFunctionResult(functionFragment: "FTM", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "buyNFT", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "feeDenominator",
@@ -99,6 +121,14 @@ interface NFTVaultInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "feeNumerator",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isSupportedNft",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isSupportedToken",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "listNFT", data: BytesLike): Result;
@@ -113,7 +143,19 @@ interface NFTVaultInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "royaltyInfo",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "setFeeNumerator",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setSupportedNft",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setSupportedToken",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -138,6 +180,8 @@ interface NFTVaultInterface extends ethers.utils.Interface {
     "BuyNFT(address,address,uint256,tuple)": EventFragment;
     "ListNFT(address,address,uint256,tuple)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
+    "SetSupportedNft(address,bool)": EventFragment;
+    "SetSupportedToken(address,bool)": EventFragment;
     "UpdateSaleOption(address,address,uint256,tuple)": EventFragment;
     "WithdrawNFT(address,address,uint256)": EventFragment;
   };
@@ -145,6 +189,8 @@ interface NFTVaultInterface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: "BuyNFT"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ListNFT"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SetSupportedNft"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SetSupportedToken"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "UpdateSaleOption"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WithdrawNFT"): EventFragment;
 }
@@ -179,6 +225,14 @@ export type ListNFTEvent = TypedEvent<
 
 export type OwnershipTransferredEvent = TypedEvent<
   [string, string] & { previousOwner: string; newOwner: string }
+>;
+
+export type SetSupportedNftEvent = TypedEvent<
+  [string, boolean] & { nft: string; supported: boolean }
+>;
+
+export type SetSupportedTokenEvent = TypedEvent<
+  [string, boolean] & { token: string; supported: boolean }
 >;
 
 export type UpdateSaleOptionEvent = TypedEvent<
@@ -247,8 +301,6 @@ export class NFTVault extends BaseContract {
   interface: NFTVaultInterface;
 
   functions: {
-    FTM(overrides?: CallOverrides): Promise<[string]>;
-
     buyNFT(
       nft: string,
       tokenId: BigNumberish,
@@ -258,6 +310,13 @@ export class NFTVault extends BaseContract {
     feeDenominator(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     feeNumerator(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    isSupportedNft(nft: string, overrides?: CallOverrides): Promise<[boolean]>;
+
+    isSupportedToken(
+      token: string,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
 
     listNFT(
       nft: string,
@@ -291,9 +350,28 @@ export class NFTVault extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    royaltyInfo(
+      nft: string,
+      tokenId: BigNumberish,
+      amount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string, BigNumber]>;
+
     setFeeNumerator(
       _feeNumerator: BigNumberish,
       _feeDenominator: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setSupportedNft(
+      nft: string,
+      supported: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setSupportedToken(
+      token: string,
+      supported: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -326,8 +404,6 @@ export class NFTVault extends BaseContract {
     ): Promise<ContractTransaction>;
   };
 
-  FTM(overrides?: CallOverrides): Promise<string>;
-
   buyNFT(
     nft: string,
     tokenId: BigNumberish,
@@ -337,6 +413,10 @@ export class NFTVault extends BaseContract {
   feeDenominator(overrides?: CallOverrides): Promise<BigNumber>;
 
   feeNumerator(overrides?: CallOverrides): Promise<BigNumber>;
+
+  isSupportedNft(nft: string, overrides?: CallOverrides): Promise<boolean>;
+
+  isSupportedToken(token: string, overrides?: CallOverrides): Promise<boolean>;
 
   listNFT(
     nft: string,
@@ -370,9 +450,28 @@ export class NFTVault extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  royaltyInfo(
+    nft: string,
+    tokenId: BigNumberish,
+    amount: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<[string, BigNumber]>;
+
   setFeeNumerator(
     _feeNumerator: BigNumberish,
     _feeDenominator: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setSupportedNft(
+    nft: string,
+    supported: boolean,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setSupportedToken(
+    token: string,
+    supported: boolean,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -405,8 +504,6 @@ export class NFTVault extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    FTM(overrides?: CallOverrides): Promise<string>;
-
     buyNFT(
       nft: string,
       tokenId: BigNumberish,
@@ -416,6 +513,13 @@ export class NFTVault extends BaseContract {
     feeDenominator(overrides?: CallOverrides): Promise<BigNumber>;
 
     feeNumerator(overrides?: CallOverrides): Promise<BigNumber>;
+
+    isSupportedNft(nft: string, overrides?: CallOverrides): Promise<boolean>;
+
+    isSupportedToken(
+      token: string,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
 
     listNFT(
       nft: string,
@@ -447,9 +551,28 @@ export class NFTVault extends BaseContract {
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
+    royaltyInfo(
+      nft: string,
+      tokenId: BigNumberish,
+      amount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string, BigNumber]>;
+
     setFeeNumerator(
       _feeNumerator: BigNumberish,
       _feeDenominator: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setSupportedNft(
+      nft: string,
+      supported: boolean,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setSupportedToken(
+      token: string,
+      supported: boolean,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -573,6 +696,32 @@ export class NFTVault extends BaseContract {
       { previousOwner: string; newOwner: string }
     >;
 
+    "SetSupportedNft(address,bool)"(
+      nft?: string | null,
+      supported?: null
+    ): TypedEventFilter<[string, boolean], { nft: string; supported: boolean }>;
+
+    SetSupportedNft(
+      nft?: string | null,
+      supported?: null
+    ): TypedEventFilter<[string, boolean], { nft: string; supported: boolean }>;
+
+    "SetSupportedToken(address,bool)"(
+      token?: string | null,
+      supported?: null
+    ): TypedEventFilter<
+      [string, boolean],
+      { token: string; supported: boolean }
+    >;
+
+    SetSupportedToken(
+      token?: string | null,
+      supported?: null
+    ): TypedEventFilter<
+      [string, boolean],
+      { token: string; supported: boolean }
+    >;
+
     "UpdateSaleOption(address,address,uint256,tuple)"(
       owner?: string | null,
       nft?: string | null,
@@ -633,8 +782,6 @@ export class NFTVault extends BaseContract {
   };
 
   estimateGas: {
-    FTM(overrides?: CallOverrides): Promise<BigNumber>;
-
     buyNFT(
       nft: string,
       tokenId: BigNumberish,
@@ -644,6 +791,13 @@ export class NFTVault extends BaseContract {
     feeDenominator(overrides?: CallOverrides): Promise<BigNumber>;
 
     feeNumerator(overrides?: CallOverrides): Promise<BigNumber>;
+
+    isSupportedNft(nft: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    isSupportedToken(
+      token: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     listNFT(
       nft: string,
@@ -672,9 +826,28 @@ export class NFTVault extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    royaltyInfo(
+      nft: string,
+      tokenId: BigNumberish,
+      amount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     setFeeNumerator(
       _feeNumerator: BigNumberish,
       _feeDenominator: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setSupportedNft(
+      nft: string,
+      supported: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setSupportedToken(
+      token: string,
+      supported: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -708,8 +881,6 @@ export class NFTVault extends BaseContract {
   };
 
   populateTransaction: {
-    FTM(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     buyNFT(
       nft: string,
       tokenId: BigNumberish,
@@ -719,6 +890,16 @@ export class NFTVault extends BaseContract {
     feeDenominator(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     feeNumerator(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    isSupportedNft(
+      nft: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    isSupportedToken(
+      token: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     listNFT(
       nft: string,
@@ -747,9 +928,28 @@ export class NFTVault extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    royaltyInfo(
+      nft: string,
+      tokenId: BigNumberish,
+      amount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     setFeeNumerator(
       _feeNumerator: BigNumberish,
       _feeDenominator: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setSupportedNft(
+      nft: string,
+      supported: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setSupportedToken(
+      token: string,
+      supported: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

@@ -16,13 +16,13 @@ async function start() {
   const config = await minter.config();
   const state = await minter.userState(deployer.address);
   if (config.mintToken == "0x0000000000000000000000000000000000000000") {
-    await (await minter.requestMint(deployer.address, {
+    await (await minter.requestMint(deployer.address, 1, {
       value: state.mintPrice
     })).wait();
   } else {
     const token = <IERC20>await ethers.getContractAt("IERC20", config.mintToken);
     await (await token.approve(minter.address, state.mintPrice)).wait();
-    await (await minter.requestMint(deployer.address)).wait();
+    await (await minter.requestMint(deployer.address, 1)).wait();
   }
   console.log("Mint requested");
 }

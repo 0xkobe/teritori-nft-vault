@@ -41,10 +41,10 @@ describe("NFTVault Test", () => {
             publicMintMax: 2,
         };
         await teritoriMinter.setConfig(config);
-        await teritoriMinter.connect(user).requestMint(user.address, {
+        await teritoriMinter.connect(user).requestMint(user.address, 1, {
             value: ethers.utils.parseEther("0.1")
         });
-        await teritoriMinter.connect(user).requestMint(user.address, {
+        await teritoriMinter.connect(user).requestMint(user.address, 1, {
             value: ethers.utils.parseEther("0.1")
         });
 

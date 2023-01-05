@@ -11,32 +11,25 @@ import {
   PopulatedTransaction,
   BaseContract,
   ContractTransaction,
-  CallOverrides,
 } from "ethers";
 import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
-interface UniSafeERC20Interface extends ethers.utils.Interface {
-  functions: {
-    "NATIVE_TOKEN()": FunctionFragment;
+interface ContextUpgradeableInterface extends ethers.utils.Interface {
+  functions: {};
+
+  events: {
+    "Initialized(uint8)": EventFragment;
   };
 
-  encodeFunctionData(
-    functionFragment: "NATIVE_TOKEN",
-    values?: undefined
-  ): string;
-
-  decodeFunctionResult(
-    functionFragment: "NATIVE_TOKEN",
-    data: BytesLike
-  ): Result;
-
-  events: {};
+  getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
 }
 
-export class UniSafeERC20 extends BaseContract {
+export type InitializedEvent = TypedEvent<[number] & { version: number }>;
+
+export class ContextUpgradeable extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -77,25 +70,23 @@ export class UniSafeERC20 extends BaseContract {
     toBlock?: string | number | undefined
   ): Promise<Array<TypedEvent<EventArgsArray & EventArgsObject>>>;
 
-  interface: UniSafeERC20Interface;
+  interface: ContextUpgradeableInterface;
 
-  functions: {
-    NATIVE_TOKEN(overrides?: CallOverrides): Promise<[string]>;
+  functions: {};
+
+  callStatic: {};
+
+  filters: {
+    "Initialized(uint8)"(
+      version?: null
+    ): TypedEventFilter<[number], { version: number }>;
+
+    Initialized(
+      version?: null
+    ): TypedEventFilter<[number], { version: number }>;
   };
 
-  NATIVE_TOKEN(overrides?: CallOverrides): Promise<string>;
+  estimateGas: {};
 
-  callStatic: {
-    NATIVE_TOKEN(overrides?: CallOverrides): Promise<string>;
-  };
-
-  filters: {};
-
-  estimateGas: {
-    NATIVE_TOKEN(overrides?: CallOverrides): Promise<BigNumber>;
-  };
-
-  populateTransaction: {
-    NATIVE_TOKEN(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-  };
+  populateTransaction: {};
 }

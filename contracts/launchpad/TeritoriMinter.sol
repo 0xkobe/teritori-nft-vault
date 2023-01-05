@@ -116,7 +116,7 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
         }
     }
 
-    function requestMint(address user)
+    function requestMint(address user, uint256 count)
         external
         payable
         whenNotPaused
@@ -137,7 +137,7 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
                 mintPrice = whitelist.mintPrice;
                 require(userWhitelisted[i][user], "NOT_WHITELISTED");
                 require(
-                    mintCount < whitelist.mintMax,
+                    mintCount + count <= whitelist.mintMax,
                     "EXCEED_WHITELIST_MINT_MAX"
                 );
                 break;
@@ -145,16 +145,21 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
             currentPhaseStart += whitelist.mintPeriod;
         }
 
-        require(mintCount < config.publicMintMax, "EXCEED_MINT_MAX");
+        require(mintCount + count <= config.publicMintMax, "EXCEED_MINT_MAX");
 
         if (mintPrice > 0) {
-            IERC20(config.mintToken).uniSafeTransferFrom(msg.sender, mintPrice);
-            IERC20(config.mintToken).uniSafeTransfer(minter, minterFee);
+            IERC20(config.mintToken).uniSafeTransferFrom(
+                msg.sender,
+                mintPrice * count
+            );
+            IERC20(config.mintToken).uniSafeTransfer(minter, minterFee * count);
         }
 
-        userMinted[user]++;
-        tokenRequests[tokenRequestsCount] = user;
-        tokenRequestsCount++;
+        userMinted[user] += count;
+        for (uint256 i = 0; i < count; i++) {
+            tokenRequests[tokenRequestsCount + i] = user;
+        }
+        tokenRequestsCount += count;
 
         emit MintRequest(user);
     }

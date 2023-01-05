@@ -4,6 +4,7 @@
   "license": "MIT",
   "scripts": {
     "compile": "hardhat compile",
+    "test": "hardhat test",
     "minter-prepare-collection": "ts-node script/minter/prepare.ts",
     "minter-deploy-collection": "hardhat run script/minter/instantiate.ts",
     "minter-start-collection": "hardhat run script/minter/start.ts",

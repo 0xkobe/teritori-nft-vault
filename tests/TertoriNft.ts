@@ -115,13 +115,13 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
         expect((await teritoriMinter.userState(user.address)).mintPrice).to.equal(
             ethers.utils.parseEther("0.01")
         );
-        await expect(teritoriMinter.connect(user).requestMint(user.address, {
+        await expect(teritoriMinter.connect(user).requestMint(user.address, 1, {
             value: ethers.utils.parseEther("0.05")
         })).to.reverted;
-        await teritoriMinter.connect(user).requestMint(user.address, {
+        await teritoriMinter.connect(user).requestMint(user.address, 1, {
             value: ethers.utils.parseEther("0.01")
         });
-        await expect(teritoriMinter.connect(user).requestMint(user.address, {
+        await expect(teritoriMinter.connect(user).requestMint(user.address, 1, {
             value: ethers.utils.parseEther("0.01")
         })).to.reverted;
 
@@ -131,13 +131,13 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
         expect((await teritoriMinter.userState(user.address)).mintPrice).to.equal(
             ethers.utils.parseEther("0.05")
         );
-        await expect(teritoriMinter.connect(user).requestMint(user.address, {
+        await expect(teritoriMinter.connect(user).requestMint(user.address, 1, {
             value: ethers.utils.parseEther("0.1")
         })).to.reverted;
-        await teritoriMinter.connect(user).requestMint(user.address, {
+        await teritoriMinter.connect(user).requestMint(user.address, 1, {
             value: ethers.utils.parseEther("0.05")
         });
-        await expect(teritoriMinter.connect(user).requestMint(user.address, {
+        await expect(teritoriMinter.connect(user).requestMint(user.address, 1, {
             value: ethers.utils.parseEther("0.05")
         })).to.reverted;
     })
@@ -175,7 +175,7 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
         expect((await teritoriMinter.userState(user.address)).mintPrice).to.equal(
             ethers.utils.parseEther("0.01")
         );
-        await expect(teritoriMinter.connect(user).requestMint(user.address, {
+        await expect(teritoriMinter.connect(user).requestMint(user.address, 1, {
             value: ethers.utils.parseEther("0.1")
         })).to.reverted;
 
@@ -185,7 +185,7 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
         expect((await teritoriMinter.userState(user.address)).mintPrice).to.equal(
             ethers.utils.parseEther("0.05")
         );
-        await expect(teritoriMinter.connect(user).requestMint(user.address, {
+        await expect(teritoriMinter.connect(user).requestMint(user.address, 1, {
             value: ethers.utils.parseEther("0.1")
         })).to.reverted;
 
@@ -195,19 +195,19 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
         expect((await teritoriMinter.userState(user.address)).mintPrice).to.equal(
             ethers.utils.parseEther("0.1")
         );
-        await teritoriMinter.connect(user).requestMint(user.address, {
+        await teritoriMinter.connect(user).requestMint(user.address, 1, {
             value: ethers.utils.parseEther("0.1")
         });
-        await teritoriMinter.connect(user).requestMint(user.address, {
+        await teritoriMinter.connect(user).requestMint(user.address, 1, {
             value: ethers.utils.parseEther("0.1")
         });
-        await expect(teritoriMinter.connect(user).requestMint(user.address, {
+        await expect(teritoriMinter.connect(user).requestMint(user.address, 1, {
             value: ethers.utils.parseEther("0.1")
         })).to.reverted;
     })
 
     it("mint", async () => {
-        await teritoriMinter.connect(user).requestMint(user.address, {
+        await teritoriMinter.connect(user).requestMint(user.address, 1, {
             value: ethers.utils.parseEther("0.1")
         });
 
@@ -231,7 +231,7 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
     })
 
     it("mintWithMetadata", async () => {
-        await teritoriMinter.connect(user).requestMint(user.address, {
+        await teritoriMinter.connect(user).requestMint(user.address, 1, {
             value: ethers.utils.parseEther("0.1")
         });
 
