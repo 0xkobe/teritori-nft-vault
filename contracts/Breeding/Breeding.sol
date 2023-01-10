@@ -16,6 +16,7 @@ contract Breeding is Ownable, Pausable, ReentrancyGuard {
     event WithdrawFund(address token, uint256 amount);
 
     struct ChildCollectionConfig {
+        uint256 currentSupply;
         uint256 maxSupply;
         string baseUrl;
     }
@@ -45,7 +46,8 @@ contract Breeding is Ownable, Pausable, ReentrancyGuard {
     ChildCollectionConfig public childCollectionConfig;
 
     BreedInfo[] public breedList;
-    mapping(address => uint256[]) public userBreedList;
+    mapping(uint256 => uint256) public nftBreededCount;
+    mapping(address => uint256[]) private _userBreedList;
 
     constructor(
         address _parentCollection,
@@ -58,7 +60,11 @@ contract Breeding is Ownable, Pausable, ReentrancyGuard {
     ) Ownable() Pausable() ReentrancyGuard() {
         parentCollection = _parentCollection;
         childCollection = Clones.clone(_nft_impl);
-        TeritoriNft(childCollection).initialize(_child_name, _child_symbol, _child_URI);
+        TeritoriNft(childCollection).initialize(
+            _child_name,
+            _child_symbol,
+            _child_URI
+        );
 
         breedConfig = _breedConfig;
         childCollectionConfig = _childCollectionConfig;
@@ -116,7 +122,70 @@ contract Breeding is Ownable, Pausable, ReentrancyGuard {
         payable
         whenNotPaused
         nonReentrant
-    {}
+    {
+        require(
+            breedConfig.startTime != 0 &&
+                breedConfig.startTime <= block.timestamp,
+            "BREED_NOT_STARTED"
+        );
+        require(
+            breedList.length < childCollectionConfig.maxSupply,
+            "BREED_ENDED"
+        );
+
+        // pay breeding fee
+        IERC20(breedConfig.currency).uniSafeTransferFrom(
+            msg.sender,
+            breedConfig.priceAmount
+        );
+
+        // check count limit
+        require(
+            nftBreededCount[tokenId1] < breedConfig.countLimit &&
+                nftBreededCount[tokenId2] < breedConfig.countLimit,
+            "BREED_COUNT_LIMIT"
+        );
+        nftBreededCount[tokenId1]++;
+        nftBreededCount[tokenId2]++;
+
+        BreedInfo memory info = BreedInfo({
+            owner: msg.sender,
+            parentTokenId1: tokenId1,
+            parentTokenId2: tokenId2,
+            childTokenId: 0,
+            startTime: block.timestamp,
+            endTime: block.timestamp + breedConfig.duration,
+            withdrawn: false
+        });
+
+        // check duration
+        if (breedConfig.duration == 0) {
+            // check nft ownership
+            require(
+                TeritoriNft(parentCollection).ownerOf(tokenId1) == msg.sender &&
+                    TeritoriNft(parentCollection).ownerOf(tokenId2) ==
+                    msg.sender,
+                "NOT_OWNER"
+            );
+            info.withdrawn = true;
+        } else {
+            // lock nfts
+            TeritoriNft(parentCollection).safeTransferFrom(
+                msg.sender,
+                address(this),
+                tokenId1
+            );
+            TeritoriNft(parentCollection).safeTransferFrom(
+                msg.sender,
+                address(this),
+                tokenId2
+            );
+        }
+
+        // save breed info
+        breedList.push(info);
+        userBreedList[msg.sender].push(breedList.length - 1);
+    }
 
     struct MintData {
         uint256 tokenId;
@@ -142,5 +211,13 @@ contract Breeding is Ownable, Pausable, ReentrancyGuard {
         nonReentrant
     {
         require(msg.sender == minter, "UNAUTHORIZED");
+    }
+
+    function userBreedList(address user)
+        external
+        view
+        returns (uint256[] memory)
+    {
+        return _userBreedList[user];
     }
 }
