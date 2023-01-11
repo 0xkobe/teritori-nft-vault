@@ -14,6 +14,8 @@ contract Breeding is Ownable, Pausable, ReentrancyGuard {
     using UniSafeERC20 for IERC20;
 
     event WithdrawFund(address token, uint256 amount);
+    event Breed(address user, uint256 nft_token_id1, uint256 nft_token_id2);
+    event Mint(address user, uint256 child_token_id);
 
     struct ChildCollectionConfig {
         uint256 currentSupply;
@@ -184,7 +186,9 @@ contract Breeding is Ownable, Pausable, ReentrancyGuard {
 
         // save breed info
         breedList.push(info);
-        userBreedList[msg.sender].push(breedList.length - 1);
+        _userBreedList[msg.sender].push(breedList.length - 1);
+
+        emit Breed(msg.sender, tokenId1, tokenId2);
     }
 
     struct MintData {
@@ -196,6 +200,28 @@ contract Breeding is Ownable, Pausable, ReentrancyGuard {
 
     function mint(MintData[] memory mintData) external nonReentrant {
         require(msg.sender == minter, "UNAUTHORIZED");
+
+        uint256 currentSupply = childCollectionConfig.currentSupply;
+        require(
+            currentSupply + mintData.length <= breedList.length,
+            "ALL_BREED_PROCESSED"
+        );
+
+        for (uint256 i = 0; i < mintData.length; i++) {
+            breedList[currentSupply].childTokenId = mintData[i].tokenId;
+            TeritoriNft(childCollection).mint(
+                breedList[currentSupply].owner,
+                mintData[i].tokenId,
+                mintData[i].royaltyReceiver,
+                mintData[i].royaltyPercentage,
+                mintData[i].tokenUri
+            );
+            emit Mint(breedList[currentSupply].owner, mintData[i].tokenId);
+
+            currentSupply++;
+        }
+
+        childCollectionConfig.currentSupply = currentSupply;
     }
 
     struct MintDataWithMetadata {
@@ -211,6 +237,29 @@ contract Breeding is Ownable, Pausable, ReentrancyGuard {
         nonReentrant
     {
         require(msg.sender == minter, "UNAUTHORIZED");
+
+        uint256 currentSupply = childCollectionConfig.currentSupply;
+        require(
+            currentSupply + mintData.length <= breedList.length,
+            "ALL_BREED_PROCESSED"
+        );
+
+        for (uint256 i = 0; i < mintData.length; i++) {
+            breedList[currentSupply].childTokenId = mintData[i].tokenId;
+            TeritoriNft(childCollection).mintWithMetadata(
+                breedList[currentSupply].owner,
+                mintData[i].tokenId,
+                mintData[i].royaltyReceiver,
+                mintData[i].royaltyPercentage,
+                mintData[i].tokenUri,
+                mintData[i].extension
+            );
+            emit Mint(breedList[currentSupply].owner, mintData[i].tokenId);
+
+            currentSupply++;
+        }
+
+        childCollectionConfig.currentSupply = currentSupply;
     }
 
     function userBreedList(address user)
