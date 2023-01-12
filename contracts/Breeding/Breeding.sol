@@ -14,8 +14,14 @@ contract Breeding is Ownable, Pausable, ReentrancyGuard {
     using UniSafeERC20 for IERC20;
 
     event WithdrawFund(address token, uint256 amount);
-    event Breed(address user, uint256 nft_token_id1, uint256 nft_token_id2);
-    event Mint(address user, uint256 child_token_id);
+    event Breed(address user, uint256 parentTokenId1, uint256 parentTokenId2);
+    event Withdraw(
+        address user,
+        uint256 breedId,
+        uint256 parentTokenId1,
+        uint256 parentTokenId2
+    );
+    event Mint(address user, uint256 childTokenId);
 
     struct ChildCollectionConfig {
         uint256 currentSupply;
@@ -53,23 +59,24 @@ contract Breeding is Ownable, Pausable, ReentrancyGuard {
 
     constructor(
         address _parentCollection,
-        string memory _child_name,
-        string memory _child_symbol,
-        string memory _child_URI,
-        address _nft_impl,
+        string memory _childName,
+        string memory _childSymbol,
+        string memory _childURI,
+        address _nftImpl,
         BreedConfig memory _breedConfig,
         ChildCollectionConfig memory _childCollectionConfig
     ) Ownable() Pausable() ReentrancyGuard() {
         parentCollection = _parentCollection;
-        childCollection = Clones.clone(_nft_impl);
+        childCollection = Clones.clone(_nftImpl);
         TeritoriNft(childCollection).initialize(
-            _child_name,
-            _child_symbol,
-            _child_URI
+            _childName,
+            _childSymbol,
+            _childURI
         );
 
         breedConfig = _breedConfig;
         childCollectionConfig = _childCollectionConfig;
+        minter = msg.sender;
     }
 
     function pause() external onlyOwner whenNotPaused {
@@ -189,6 +196,32 @@ contract Breeding is Ownable, Pausable, ReentrancyGuard {
         _userBreedList[msg.sender].push(breedList.length - 1);
 
         emit Breed(msg.sender, tokenId1, tokenId2);
+    }
+
+    function withdraw(uint256 breedId) external nonReentrant {
+        BreedInfo storage breedInfo = breedList[breedId];
+        require(breedInfo.owner == msg.sender, "UNAUTHORIZED");
+        require(!breedInfo.withdrawn, "ALREADY_WITHDRAWN");
+        require(breedInfo.endTime <= block.timestamp, "COOLDOWN_NOT_PASSED");
+
+        breedInfo.withdrawn = true;
+        TeritoriNft(parentCollection).safeTransferFrom(
+            address(this),
+            msg.sender,
+            breedInfo.parentTokenId1
+        );
+        TeritoriNft(parentCollection).safeTransferFrom(
+            address(this),
+            msg.sender,
+            breedInfo.parentTokenId2
+        );
+
+        emit Withdraw(
+            msg.sender,
+            breedId,
+            breedInfo.parentTokenId1,
+            breedInfo.parentTokenId2
+        );
     }
 
     struct MintData {

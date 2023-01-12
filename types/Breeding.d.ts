@@ -30,18 +30,20 @@ interface BreedingInterface extends ethers.utils.Interface {
     "mint(tuple[])": FunctionFragment;
     "mintWithMetadata(tuple[])": FunctionFragment;
     "minter()": FunctionFragment;
+    "nftBreededCount(uint256)": FunctionFragment;
     "owner()": FunctionFragment;
     "parentCollection()": FunctionFragment;
     "pause()": FunctionFragment;
     "paused()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "setBreedConfig((uint256,uint256,uint256,uint256,address))": FunctionFragment;
-    "setChildCollectionConfig((uint256,string))": FunctionFragment;
+    "setChildCollectionConfig((uint256,uint256,string))": FunctionFragment;
     "setMinter(address)": FunctionFragment;
     "startBreed()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "unpause()": FunctionFragment;
-    "userBreedList(address,uint256)": FunctionFragment;
+    "userBreedList(address)": FunctionFragment;
+    "withdraw(uint256)": FunctionFragment;
     "withdrawFund()": FunctionFragment;
   };
 
@@ -96,6 +98,10 @@ interface BreedingInterface extends ethers.utils.Interface {
     ]
   ): string;
   encodeFunctionData(functionFragment: "minter", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "nftBreededCount",
+    values: [BigNumberish]
+  ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "parentCollection",
@@ -121,7 +127,9 @@ interface BreedingInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "setChildCollectionConfig",
-    values: [{ maxSupply: BigNumberish; baseUrl: string }]
+    values: [
+      { currentSupply: BigNumberish; maxSupply: BigNumberish; baseUrl: string }
+    ]
   ): string;
   encodeFunctionData(functionFragment: "setMinter", values: [string]): string;
   encodeFunctionData(
@@ -135,7 +143,11 @@ interface BreedingInterface extends ethers.utils.Interface {
   encodeFunctionData(functionFragment: "unpause", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "userBreedList",
-    values: [string, BigNumberish]
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "withdraw",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "withdrawFund",
@@ -162,6 +174,10 @@ interface BreedingInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "minter", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "nftBreededCount",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "parentCollection",
@@ -192,23 +208,42 @@ interface BreedingInterface extends ethers.utils.Interface {
     functionFragment: "userBreedList",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "withdrawFund",
     data: BytesLike
   ): Result;
 
   events: {
+    "Breed(address,uint256,uint256)": EventFragment;
+    "Mint(address,uint256)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
     "Paused(address)": EventFragment;
     "Unpaused(address)": EventFragment;
+    "Withdraw(address,uint256,uint256,uint256)": EventFragment;
     "WithdrawFund(address,uint256)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "Breed"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Mint"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Paused"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Unpaused"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Withdraw"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WithdrawFund"): EventFragment;
 }
+
+export type BreedEvent = TypedEvent<
+  [string, BigNumber, BigNumber] & {
+    user: string;
+    parentTokenId1: BigNumber;
+    parentTokenId2: BigNumber;
+  }
+>;
+
+export type MintEvent = TypedEvent<
+  [string, BigNumber] & { user: string; childTokenId: BigNumber }
+>;
 
 export type OwnershipTransferredEvent = TypedEvent<
   [string, string] & { previousOwner: string; newOwner: string }
@@ -217,6 +252,15 @@ export type OwnershipTransferredEvent = TypedEvent<
 export type PausedEvent = TypedEvent<[string] & { account: string }>;
 
 export type UnpausedEvent = TypedEvent<[string] & { account: string }>;
+
+export type WithdrawEvent = TypedEvent<
+  [string, BigNumber, BigNumber, BigNumber] & {
+    user: string;
+    breedId: BigNumber;
+    parentTokenId1: BigNumber;
+    parentTokenId2: BigNumber;
+  }
+>;
 
 export type WithdrawFundEvent = TypedEvent<
   [string, BigNumber] & { token: string; amount: BigNumber }
@@ -311,7 +355,13 @@ export class Breeding extends BaseContract {
 
     childCollectionConfig(
       overrides?: CallOverrides
-    ): Promise<[BigNumber, string] & { maxSupply: BigNumber; baseUrl: string }>;
+    ): Promise<
+      [BigNumber, BigNumber, string] & {
+        currentSupply: BigNumber;
+        maxSupply: BigNumber;
+        baseUrl: string;
+      }
+    >;
 
     mint(
       mintData: {
@@ -343,6 +393,11 @@ export class Breeding extends BaseContract {
 
     minter(overrides?: CallOverrides): Promise<[string]>;
 
+    nftBreededCount(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
     owner(overrides?: CallOverrides): Promise<[string]>;
 
     parentCollection(overrides?: CallOverrides): Promise<[string]>;
@@ -369,7 +424,11 @@ export class Breeding extends BaseContract {
     ): Promise<ContractTransaction>;
 
     setChildCollectionConfig(
-      newChildCollectionConfig: { maxSupply: BigNumberish; baseUrl: string },
+      newChildCollectionConfig: {
+        currentSupply: BigNumberish;
+        maxSupply: BigNumberish;
+        baseUrl: string;
+      },
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -392,10 +451,14 @@ export class Breeding extends BaseContract {
     ): Promise<ContractTransaction>;
 
     userBreedList(
-      arg0: string,
-      arg1: BigNumberish,
+      user: string,
       overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
+    ): Promise<[BigNumber[]]>;
+
+    withdraw(
+      breedId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     withdrawFund(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -439,7 +502,13 @@ export class Breeding extends BaseContract {
 
   childCollectionConfig(
     overrides?: CallOverrides
-  ): Promise<[BigNumber, string] & { maxSupply: BigNumber; baseUrl: string }>;
+  ): Promise<
+    [BigNumber, BigNumber, string] & {
+      currentSupply: BigNumber;
+      maxSupply: BigNumber;
+      baseUrl: string;
+    }
+  >;
 
   mint(
     mintData: {
@@ -471,6 +540,11 @@ export class Breeding extends BaseContract {
 
   minter(overrides?: CallOverrides): Promise<string>;
 
+  nftBreededCount(
+    arg0: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
   owner(overrides?: CallOverrides): Promise<string>;
 
   parentCollection(overrides?: CallOverrides): Promise<string>;
@@ -497,7 +571,11 @@ export class Breeding extends BaseContract {
   ): Promise<ContractTransaction>;
 
   setChildCollectionConfig(
-    newChildCollectionConfig: { maxSupply: BigNumberish; baseUrl: string },
+    newChildCollectionConfig: {
+      currentSupply: BigNumberish;
+      maxSupply: BigNumberish;
+      baseUrl: string;
+    },
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -519,11 +597,12 @@ export class Breeding extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  userBreedList(
-    arg0: string,
-    arg1: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
+  userBreedList(user: string, overrides?: CallOverrides): Promise<BigNumber[]>;
+
+  withdraw(
+    breedId: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   withdrawFund(
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -575,7 +654,13 @@ export class Breeding extends BaseContract {
 
     childCollectionConfig(
       overrides?: CallOverrides
-    ): Promise<[BigNumber, string] & { maxSupply: BigNumber; baseUrl: string }>;
+    ): Promise<
+      [BigNumber, BigNumber, string] & {
+        currentSupply: BigNumber;
+        maxSupply: BigNumber;
+        baseUrl: string;
+      }
+    >;
 
     mint(
       mintData: {
@@ -607,6 +692,11 @@ export class Breeding extends BaseContract {
 
     minter(overrides?: CallOverrides): Promise<string>;
 
+    nftBreededCount(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     owner(overrides?: CallOverrides): Promise<string>;
 
     parentCollection(overrides?: CallOverrides): Promise<string>;
@@ -629,7 +719,11 @@ export class Breeding extends BaseContract {
     ): Promise<void>;
 
     setChildCollectionConfig(
-      newChildCollectionConfig: { maxSupply: BigNumberish; baseUrl: string },
+      newChildCollectionConfig: {
+        currentSupply: BigNumberish;
+        maxSupply: BigNumberish;
+        baseUrl: string;
+      },
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -645,15 +739,50 @@ export class Breeding extends BaseContract {
     unpause(overrides?: CallOverrides): Promise<void>;
 
     userBreedList(
-      arg0: string,
-      arg1: BigNumberish,
+      user: string,
       overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    ): Promise<BigNumber[]>;
+
+    withdraw(breedId: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
     withdrawFund(overrides?: CallOverrides): Promise<void>;
   };
 
   filters: {
+    "Breed(address,uint256,uint256)"(
+      user?: null,
+      parentTokenId1?: null,
+      parentTokenId2?: null
+    ): TypedEventFilter<
+      [string, BigNumber, BigNumber],
+      { user: string; parentTokenId1: BigNumber; parentTokenId2: BigNumber }
+    >;
+
+    Breed(
+      user?: null,
+      parentTokenId1?: null,
+      parentTokenId2?: null
+    ): TypedEventFilter<
+      [string, BigNumber, BigNumber],
+      { user: string; parentTokenId1: BigNumber; parentTokenId2: BigNumber }
+    >;
+
+    "Mint(address,uint256)"(
+      user?: null,
+      childTokenId?: null
+    ): TypedEventFilter<
+      [string, BigNumber],
+      { user: string; childTokenId: BigNumber }
+    >;
+
+    Mint(
+      user?: null,
+      childTokenId?: null
+    ): TypedEventFilter<
+      [string, BigNumber],
+      { user: string; childTokenId: BigNumber }
+    >;
+
     "OwnershipTransferred(address,address)"(
       previousOwner?: string | null,
       newOwner?: string | null
@@ -681,6 +810,36 @@ export class Breeding extends BaseContract {
     ): TypedEventFilter<[string], { account: string }>;
 
     Unpaused(account?: null): TypedEventFilter<[string], { account: string }>;
+
+    "Withdraw(address,uint256,uint256,uint256)"(
+      user?: null,
+      breedId?: null,
+      parentTokenId1?: null,
+      parentTokenId2?: null
+    ): TypedEventFilter<
+      [string, BigNumber, BigNumber, BigNumber],
+      {
+        user: string;
+        breedId: BigNumber;
+        parentTokenId1: BigNumber;
+        parentTokenId2: BigNumber;
+      }
+    >;
+
+    Withdraw(
+      user?: null,
+      breedId?: null,
+      parentTokenId1?: null,
+      parentTokenId2?: null
+    ): TypedEventFilter<
+      [string, BigNumber, BigNumber, BigNumber],
+      {
+        user: string;
+        breedId: BigNumber;
+        parentTokenId1: BigNumber;
+        parentTokenId2: BigNumber;
+      }
+    >;
 
     "WithdrawFund(address,uint256)"(
       token?: null,
@@ -747,6 +906,11 @@ export class Breeding extends BaseContract {
 
     minter(overrides?: CallOverrides): Promise<BigNumber>;
 
+    nftBreededCount(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     parentCollection(overrides?: CallOverrides): Promise<BigNumber>;
@@ -773,7 +937,11 @@ export class Breeding extends BaseContract {
     ): Promise<BigNumber>;
 
     setChildCollectionConfig(
-      newChildCollectionConfig: { maxSupply: BigNumberish; baseUrl: string },
+      newChildCollectionConfig: {
+        currentSupply: BigNumberish;
+        maxSupply: BigNumberish;
+        baseUrl: string;
+      },
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -795,10 +963,11 @@ export class Breeding extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    userBreedList(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
+    userBreedList(user: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    withdraw(
+      breedId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     withdrawFund(
@@ -856,6 +1025,11 @@ export class Breeding extends BaseContract {
 
     minter(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    nftBreededCount(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     parentCollection(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -882,7 +1056,11 @@ export class Breeding extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     setChildCollectionConfig(
-      newChildCollectionConfig: { maxSupply: BigNumberish; baseUrl: string },
+      newChildCollectionConfig: {
+        currentSupply: BigNumberish;
+        maxSupply: BigNumberish;
+        baseUrl: string;
+      },
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -905,9 +1083,13 @@ export class Breeding extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     userBreedList(
-      arg0: string,
-      arg1: BigNumberish,
+      user: string,
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    withdraw(
+      breedId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     withdrawFund(
