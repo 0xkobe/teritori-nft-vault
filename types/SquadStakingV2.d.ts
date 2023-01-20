@@ -19,7 +19,7 @@ import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
-interface SquadStakingInterface extends ethers.utils.Interface {
+interface SquadStakingV2Interface extends ethers.utils.Interface {
   functions: {
     "BONUS_MULTIPLIER_BASE_POINT()": FunctionFragment;
     "_userSquadInfo(address)": FunctionFragment;
@@ -28,6 +28,7 @@ interface SquadStakingInterface extends ethers.utils.Interface {
     "isSupportedCollection(address)": FunctionFragment;
     "maxSquadSize()": FunctionFragment;
     "minSquadSize()": FunctionFragment;
+    "nftMetadataRegistry()": FunctionFragment;
     "onERC721Received(address,address,uint256,bytes)": FunctionFragment;
     "owner()": FunctionFragment;
     "pause()": FunctionFragment;
@@ -39,7 +40,6 @@ interface SquadStakingInterface extends ethers.utils.Interface {
     "setSupportedCollection(address,bool)": FunctionFragment;
     "stake(tuple[])": FunctionFragment;
     "stakeDuration(address,uint256,uint256)": FunctionFragment;
-    "stringToUint(string)": FunctionFragment;
     "supportedCollectionAt(uint256)": FunctionFragment;
     "supportedCollectionLength()": FunctionFragment;
     "supportedCollections(uint256)": FunctionFragment;
@@ -78,6 +78,10 @@ interface SquadStakingInterface extends ethers.utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "nftMetadataRegistry",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "onERC721Received",
     values: [string, string, BigNumberish, BytesLike]
   ): string;
@@ -111,10 +115,6 @@ interface SquadStakingInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "stakeDuration",
     values: [string, BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "stringToUint",
-    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "supportedCollectionAt",
@@ -168,6 +168,10 @@ interface SquadStakingInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "nftMetadataRegistry",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "onERC721Received",
     data: BytesLike
   ): Result;
@@ -197,10 +201,6 @@ interface SquadStakingInterface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "stake", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "stakeDuration",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "stringToUint",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -259,7 +259,7 @@ export type UnpausedEvent = TypedEvent<[string] & { account: string }>;
 
 export type UnstakeEvent = TypedEvent<[string] & { user: string }>;
 
-export class SquadStaking extends BaseContract {
+export class SquadStakingV2 extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -300,7 +300,7 @@ export class SquadStaking extends BaseContract {
     toBlock?: string | number | undefined
   ): Promise<Array<TypedEvent<EventArgsArray & EventArgsObject>>>;
 
-  interface: SquadStakingInterface;
+  interface: SquadStakingV2Interface;
 
   functions: {
     BONUS_MULTIPLIER_BASE_POINT(
@@ -329,6 +329,8 @@ export class SquadStaking extends BaseContract {
     maxSquadSize(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     minSquadSize(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    nftMetadataRegistry(overrides?: CallOverrides): Promise<[string]>;
 
     onERC721Received(
       arg0: string,
@@ -384,11 +386,6 @@ export class SquadStaking extends BaseContract {
       size: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
-
-    stringToUint(
-      s: string,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber, boolean] & { result: BigNumber; hasError: boolean }>;
 
     supportedCollectionAt(
       index: BigNumberish,
@@ -461,6 +458,8 @@ export class SquadStaking extends BaseContract {
 
   minSquadSize(overrides?: CallOverrides): Promise<BigNumber>;
 
+  nftMetadataRegistry(overrides?: CallOverrides): Promise<string>;
+
   onERC721Received(
     arg0: string,
     arg1: string,
@@ -515,11 +514,6 @@ export class SquadStaking extends BaseContract {
     size: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
-
-  stringToUint(
-    s: string,
-    overrides?: CallOverrides
-  ): Promise<[BigNumber, boolean] & { result: BigNumber; hasError: boolean }>;
 
   supportedCollectionAt(
     index: BigNumberish,
@@ -590,6 +584,8 @@ export class SquadStaking extends BaseContract {
 
     minSquadSize(overrides?: CallOverrides): Promise<BigNumber>;
 
+    nftMetadataRegistry(overrides?: CallOverrides): Promise<string>;
+
     onERC721Received(
       arg0: string,
       arg1: string,
@@ -640,11 +636,6 @@ export class SquadStaking extends BaseContract {
       size: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
-
-    stringToUint(
-      s: string,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber, boolean] & { result: BigNumber; hasError: boolean }>;
 
     supportedCollectionAt(
       index: BigNumberish,
@@ -761,6 +752,8 @@ export class SquadStaking extends BaseContract {
 
     minSquadSize(overrides?: CallOverrides): Promise<BigNumber>;
 
+    nftMetadataRegistry(overrides?: CallOverrides): Promise<BigNumber>;
+
     onERC721Received(
       arg0: string,
       arg1: string,
@@ -816,8 +809,6 @@ export class SquadStaking extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    stringToUint(s: string, overrides?: CallOverrides): Promise<BigNumber>;
-
     supportedCollectionAt(
       index: BigNumberish,
       overrides?: CallOverrides
@@ -872,6 +863,10 @@ export class SquadStaking extends BaseContract {
 
     minSquadSize(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    nftMetadataRegistry(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     onERC721Received(
       arg0: string,
       arg1: string,
@@ -924,11 +919,6 @@ export class SquadStaking extends BaseContract {
       collection: string,
       tokenId: BigNumberish,
       size: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    stringToUint(
-      s: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

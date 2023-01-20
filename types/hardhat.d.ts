@@ -13,6 +13,10 @@ import * as Contracts from ".";
 declare module "hardhat/types/runtime" {
   interface HardhatEthersHelpers extends HardhatEthersHelpersBase {
     getContractFactory(
+      name: "OwnableUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.OwnableUpgradeable__factory>;
+    getContractFactory(
       name: "IERC2981Upgradeable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC2981Upgradeable__factory>;
@@ -177,9 +181,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.NFTVault__factory>;
     getContractFactory(
+      name: "NFTMetadataRegistry",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.NFTMetadataRegistry__factory>;
+    getContractFactory(
       name: "SquadStaking",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.SquadStaking__factory>;
+    getContractFactory(
+      name: "SquadStakingV2",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SquadStakingV2__factory>;
     getContractFactory(
       name: "Staking",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -189,6 +201,11 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TestERC721__factory>;
 
+    getContractAt(
+      name: "OwnableUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.OwnableUpgradeable>;
     getContractAt(
       name: "IERC2981Upgradeable",
       address: string,
@@ -395,10 +412,20 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.NFTVault>;
     getContractAt(
+      name: "NFTMetadataRegistry",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.NFTMetadataRegistry>;
+    getContractAt(
       name: "SquadStaking",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.SquadStaking>;
+    getContractAt(
+      name: "SquadStakingV2",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SquadStakingV2>;
     getContractAt(
       name: "Staking",
       address: string,

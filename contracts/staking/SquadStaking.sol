@@ -6,10 +6,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 
 import "../launchpad/TeritoriNft.sol";
 
-contract SquadStaking is Ownable, Pausable {
+contract SquadStaking is Ownable, Pausable, ERC721Holder {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     event Stake(address user, uint256 startTime, uint256 endTime);
@@ -29,7 +30,7 @@ contract SquadStaking is Ownable, Pausable {
 
     uint256 public minSquadSize;
     uint256 public maxSquadSize;
-    uint256 public cooldownInDays;
+    uint256 public cooldownPeriod;
     mapping(uint256 => uint256) public bonusMultipliers;
     EnumerableSet.AddressSet internal _supportedCollections;
     mapping(address => SquadInfo) public _userSquadInfo;
@@ -37,12 +38,12 @@ contract SquadStaking is Ownable, Pausable {
     constructor(
         uint256 _minSquadSize,
         uint256 _maxSquadSize,
-        uint256 _cooldownInDays,
+        uint256 _cooldownPeriod,
         uint256[] memory _bonusMultipliers
     ) Ownable() Pausable() {
         minSquadSize = _minSquadSize;
         maxSquadSize = _maxSquadSize;
-        cooldownInDays = _cooldownInDays;
+        cooldownPeriod = _cooldownPeriod;
         for (uint256 i = 0; i < _bonusMultipliers.length; i++) {
             bonusMultipliers[i] = _bonusMultipliers[i];
         }
@@ -64,8 +65,8 @@ contract SquadStaking is Ownable, Pausable {
         maxSquadSize = _maxSquadSize;
     }
 
-    function setCooldownInDays(uint256 _cooldownInDays) external onlyOwner {
-        cooldownInDays = _cooldownInDays;
+    function setCooldownPeriod(uint256 _cooldownPeriod) external onlyOwner {
+        cooldownPeriod = _cooldownPeriod;
     }
 
     function setBonusMultiplier(
@@ -127,9 +128,9 @@ contract SquadStaking is Ownable, Pausable {
 
     function stake(NftInfo[] memory nfts) external whenNotPaused {
         require(_userSquadInfo[msg.sender].nfts.length == 0, "squad exists");
-        uint256 lastStakeDay = _userSquadInfo[msg.sender].startTime / 1 days;
+        uint256 lastStakeDay = _userSquadInfo[msg.sender].startTime;
         require(
-            lastStakeDay + cooldownInDays <= block.timestamp / 1 days,
+            lastStakeDay + cooldownPeriod <= block.timestamp,
             "wait until cooldown"
         );
         require(
@@ -163,7 +164,7 @@ contract SquadStaking is Ownable, Pausable {
 
     function unstake() external whenNotPaused {
         require(
-            _userSquadInfo[msg.sender].nfts.length == 0,
+            _userSquadInfo[msg.sender].nfts.length != 0,
             "squad not exists"
         );
         require(

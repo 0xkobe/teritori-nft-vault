@@ -25,12 +25,14 @@ interface BreedingInterface extends ethers.utils.Interface {
     "breed(uint256,uint256)": FunctionFragment;
     "breedConfig()": FunctionFragment;
     "breedList(uint256)": FunctionFragment;
+    "breedRequestsCount()": FunctionFragment;
     "childCollection()": FunctionFragment;
     "childCollectionConfig()": FunctionFragment;
     "mint(tuple[])": FunctionFragment;
     "mintWithMetadata(tuple[])": FunctionFragment;
     "minter()": FunctionFragment;
     "nftBreededCount(uint256)": FunctionFragment;
+    "onERC721Received(address,address,uint256,bytes)": FunctionFragment;
     "owner()": FunctionFragment;
     "parentCollection()": FunctionFragment;
     "pause()": FunctionFragment;
@@ -58,6 +60,10 @@ interface BreedingInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "breedList",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "breedRequestsCount",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "childCollection",
@@ -101,6 +107,10 @@ interface BreedingInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "nftBreededCount",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "onERC721Received",
+    values: [string, string, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
@@ -161,6 +171,10 @@ interface BreedingInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "breedList", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "breedRequestsCount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "childCollection",
     data: BytesLike
   ): Result;
@@ -176,6 +190,10 @@ interface BreedingInterface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "minter", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "nftBreededCount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "onERC721Received",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
@@ -351,6 +369,8 @@ export class Breeding extends BaseContract {
       }
     >;
 
+    breedRequestsCount(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     childCollection(overrides?: CallOverrides): Promise<[string]>;
 
     childCollectionConfig(
@@ -397,6 +417,14 @@ export class Breeding extends BaseContract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
+
+    onERC721Received(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      arg3: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
@@ -498,6 +526,8 @@ export class Breeding extends BaseContract {
     }
   >;
 
+  breedRequestsCount(overrides?: CallOverrides): Promise<BigNumber>;
+
   childCollection(overrides?: CallOverrides): Promise<string>;
 
   childCollectionConfig(
@@ -544,6 +574,14 @@ export class Breeding extends BaseContract {
     arg0: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
+
+  onERC721Received(
+    arg0: string,
+    arg1: string,
+    arg2: BigNumberish,
+    arg3: BytesLike,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
@@ -650,6 +688,8 @@ export class Breeding extends BaseContract {
       }
     >;
 
+    breedRequestsCount(overrides?: CallOverrides): Promise<BigNumber>;
+
     childCollection(overrides?: CallOverrides): Promise<string>;
 
     childCollectionConfig(
@@ -696,6 +736,14 @@ export class Breeding extends BaseContract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    onERC721Received(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      arg3: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<string>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
@@ -872,6 +920,8 @@ export class Breeding extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    breedRequestsCount(overrides?: CallOverrides): Promise<BigNumber>;
+
     childCollection(overrides?: CallOverrides): Promise<BigNumber>;
 
     childCollectionConfig(overrides?: CallOverrides): Promise<BigNumber>;
@@ -909,6 +959,14 @@ export class Breeding extends BaseContract {
     nftBreededCount(
       arg0: BigNumberish,
       overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    onERC721Received(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      arg3: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
@@ -989,6 +1047,10 @@ export class Breeding extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    breedRequestsCount(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     childCollection(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     childCollectionConfig(
@@ -1028,6 +1090,14 @@ export class Breeding extends BaseContract {
     nftBreededCount(
       arg0: BigNumberish,
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    onERC721Received(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      arg3: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;

@@ -6,11 +6,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 
 import "../launchpad/TeritoriNft.sol";
 import "../lib/UniSafeERC20.sol";
 
-contract Breeding is Ownable, Pausable, ReentrancyGuard {
+contract Breeding is Ownable, Pausable, ReentrancyGuard, ERC721Holder {
     using UniSafeERC20 for IERC20;
 
     event WithdrawFund(address token, uint256 amount);
@@ -301,5 +302,9 @@ contract Breeding is Ownable, Pausable, ReentrancyGuard {
         returns (uint256[] memory)
     {
         return _userBreedList[user];
+    }
+
+    function breedRequestsCount() external view returns(uint256) {
+        return breedList.length;
     }
 }

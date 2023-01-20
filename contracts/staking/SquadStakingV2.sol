@@ -6,10 +6,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 
 import "./NFTMetadataRegistry.sol";
 
-contract SquadStakingV2 is Ownable, Pausable {
+contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     event Stake(address user, uint256 startTime, uint256 endTime);
@@ -166,7 +167,7 @@ contract SquadStakingV2 is Ownable, Pausable {
 
     function unstake() external whenNotPaused {
         require(
-            _userSquadInfo[msg.sender].nfts.length == 0,
+            _userSquadInfo[msg.sender].nfts.length != 0,
             "squad not exists"
         );
         require(
