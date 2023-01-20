@@ -221,4 +221,123 @@ describe("SquadStakingV2 Test", () => {
 
         expect(await nft.ownerOf("1")).to.equal(user.address);
     })
+
+    it("stake cooldown", async () => {
+        await nft.connect(user).setApprovalForAll(staking.address, true);
+        await staking.connect(user).stake([
+            {
+                collection: nft.address,
+                tokenId: "1"
+            },
+            {
+                collection: nft.address,
+                tokenId: "2"
+            },
+            {
+                collection: nft.address,
+                tokenId: "3"
+            },
+            {
+                collection: nft.address,
+                tokenId: "4"
+            },
+            {
+                collection: nft.address,
+                tokenId: "5"
+            },
+        ]);
+
+        await network.provider.send("evm_increaseTime", [45000]);
+        await staking.connect(user).unstake();
+
+        await expect(staking.connect(user).stake([
+            {
+                collection: nft.address,
+                tokenId: "1"
+            },
+            {
+                collection: nft.address,
+                tokenId: "2"
+            },
+            {
+                collection: nft.address,
+                tokenId: "3"
+            },
+            {
+                collection: nft.address,
+                tokenId: "4"
+            },
+            {
+                collection: nft.address,
+                tokenId: "5"
+            },
+        ])).to.revertedWith('wait until cooldown');
+    })
+
+    it("pause/unpause", async () => {
+        expect(await staking.paused()).to.equal(false);
+
+        await expect(staking.unpause()).to.revertedWith("Pausable: not paused");
+        await expect(staking.connect(user).pause()).to.revertedWith("Ownable: caller is not the owner");
+        await staking.pause();
+
+        expect(await staking.paused()).to.equal(true);
+
+        await expect(staking.pause()).to.revertedWith("Pausable: paused");
+        await expect(staking.connect(user).unpause()).to.revertedWith("Ownable: caller is not the owner");
+        await staking.unpause();
+
+        expect(await staking.paused()).to.equal(false);
+    })
+
+    it("setSquadSize", async () => {
+        expect(await staking.minSquadSize()).to.equal(2);
+        expect(await staking.maxSquadSize()).to.equal(5);
+
+        await expect(staking.connect(user).setSquadSize(3, 6)).to.revertedWith("Ownable: caller is not the owner")
+        await staking.setSquadSize(3, 6);
+
+        expect(await staking.minSquadSize()).to.equal(3);
+        expect(await staking.maxSquadSize()).to.equal(6);
+    })
+
+    it("setCooldownPeriod", async () => {
+        expect(await staking.cooldownPeriod()).to.equal(86400);
+
+        await expect(staking.connect(user).setCooldownPeriod(43200)).to.revertedWith("Ownable: caller is not the owner")
+        await staking.setCooldownPeriod(43200);
+
+        expect(await staking.cooldownPeriod()).to.equal(43200);
+    })
+
+    it("setBonusMultiplier", async () => {
+        expect(await staking.bonusMultipliers(2)).to.equal(ethers.utils.parseEther('1'));
+        expect(await staking.bonusMultipliers(3)).to.equal(ethers.utils.parseEther('1.2'));
+        expect(await staking.bonusMultipliers(4)).to.equal(ethers.utils.parseEther('1.5'));
+        expect(await staking.bonusMultipliers(5)).to.equal(ethers.utils.parseEther('2'));
+
+        await expect(staking.connect(user).setBonusMultiplier(
+            [2, 3, 4, 5],
+            [ethers.utils.parseEther('1.2'), ethers.utils.parseEther('1.3'), ethers.utils.parseEther('1.4'), ethers.utils.parseEther('1.5')]
+        )).to.revertedWith("Ownable: caller is not the owner")
+        await staking.setBonusMultiplier(
+            [2, 3, 4, 5],
+            [ethers.utils.parseEther('1.2'), ethers.utils.parseEther('1.3'), ethers.utils.parseEther('1.4'), ethers.utils.parseEther('1.5')]
+        );
+
+        expect(await staking.bonusMultipliers(2)).to.equal(ethers.utils.parseEther('1.2'));
+        expect(await staking.bonusMultipliers(3)).to.equal(ethers.utils.parseEther('1.3'));
+        expect(await staking.bonusMultipliers(4)).to.equal(ethers.utils.parseEther('1.4'));
+        expect(await staking.bonusMultipliers(5)).to.equal(ethers.utils.parseEther('1.5'));
+    })
+
+    it("setSupportedCollection", async () => {
+        await expect(staking.connect(user).setSupportedCollection(nft.address, true)).to.revertedWith('Ownable: caller is not the owner');
+
+        await staking.setSupportedCollection(nft.address, true);
+        expect(await staking.isSupportedCollection(nft.address)).to.equal(true);
+
+        expect(await staking.supportedCollectionLength()).to.equal(1);
+        expect(await staking.supportedCollectionAt(0)).to.equal(nft.address);
+    })
 });

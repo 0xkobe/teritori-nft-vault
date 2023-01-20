@@ -128,9 +128,9 @@ contract SquadStaking is Ownable, Pausable, ERC721Holder {
 
     function stake(NftInfo[] memory nfts) external whenNotPaused {
         require(_userSquadInfo[msg.sender].nfts.length == 0, "squad exists");
-        uint256 lastStakeDay = _userSquadInfo[msg.sender].startTime;
         require(
-            lastStakeDay + cooldownPeriod <= block.timestamp,
+            _userSquadInfo[msg.sender].startTime + cooldownPeriod <=
+                block.timestamp,
             "wait until cooldown"
         );
         require(
@@ -174,7 +174,7 @@ contract SquadStaking is Ownable, Pausable, ERC721Holder {
 
         SquadInfo memory info = _userSquadInfo[msg.sender];
 
-        delete _userSquadInfo[msg.sender];
+        delete _userSquadInfo[msg.sender].nfts;
         for (uint256 i = 0; i < info.nfts.length; i++) {
             IERC721(info.nfts[i].collection).safeTransferFrom(
                 address(this),
