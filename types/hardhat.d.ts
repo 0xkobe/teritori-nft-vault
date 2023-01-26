@@ -165,6 +165,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Breeding__factory>;
     getContractFactory(
+      name: "Distributor",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Distributor__factory>;
+    getContractFactory(
       name: "TeritoriMinter",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TeritoriMinter__factory>;
@@ -391,6 +395,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Breeding>;
+    getContractAt(
+      name: "Distributor",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Distributor>;
     getContractAt(
       name: "TeritoriMinter",
       address: string,
