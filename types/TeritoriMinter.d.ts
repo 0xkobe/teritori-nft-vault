@@ -44,6 +44,7 @@ interface TeritoriMinterInterface extends ethers.utils.Interface {
     "tokenRequestsCount()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "unpause()": FunctionFragment;
+    "updateReveal(bool,string)": FunctionFragment;
     "userMinted(address)": FunctionFragment;
     "userState(address)": FunctionFragment;
     "userWhitelisted(uint256,address)": FunctionFragment;
@@ -148,6 +149,10 @@ interface TeritoriMinterInterface extends ethers.utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(functionFragment: "unpause", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "updateReveal",
+    values: [boolean, string]
+  ): string;
   encodeFunctionData(functionFragment: "userMinted", values: [string]): string;
   encodeFunctionData(functionFragment: "userState", values: [string]): string;
   encodeFunctionData(
@@ -219,6 +224,10 @@ interface TeritoriMinterInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "unpause", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "updateReveal",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "userMinted", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "userState", data: BytesLike): Result;
   decodeFunctionResult(
@@ -434,6 +443,12 @@ export class TeritoriMinter extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    updateReveal(
+      _revealed: boolean,
+      _revealURI: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     userMinted(arg0: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
     userState(
@@ -597,6 +612,12 @@ export class TeritoriMinter extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  updateReveal(
+    _revealed: boolean,
+    _revealURI: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   userMinted(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
   userState(
@@ -751,6 +772,12 @@ export class TeritoriMinter extends BaseContract {
     ): Promise<void>;
 
     unpause(overrides?: CallOverrides): Promise<void>;
+
+    updateReveal(
+      _revealed: boolean,
+      _revealURI: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     userMinted(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -958,6 +985,12 @@ export class TeritoriMinter extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    updateReveal(
+      _revealed: boolean,
+      _revealURI: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     userMinted(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     userState(user: string, overrides?: CallOverrides): Promise<BigNumber>;
@@ -1098,6 +1131,12 @@ export class TeritoriMinter extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     unpause(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    updateReveal(
+      _revealed: boolean,
+      _revealURI: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

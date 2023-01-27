@@ -18,7 +18,7 @@ describe("SquadStakingV2 Test", () => {
 
         const TeritoriMinter = await ethers.getContractFactory("TeritoriMinter");
         teritoriMinter = <TeritoriMinter>await TeritoriMinter.deploy(
-            "Parent Collection", "Parent", "parent-contract-uri", teritoriNftImpl.address, minter.address, ethers.utils.parseEther("0.005")
+            "Parent Collection", "Parent", "parent-contract-uri", teritoriNftImpl.address, minter.address, ethers.utils.parseEther("0.005"), true, ""
         );
         await teritoriMinter.deployed();
 

@@ -78,6 +78,8 @@ async function Instantiate() {
     nftImplementationAddress,
     deployer.address,
     collectionInfo.minterFee,
+    collectionInfo.reveal,
+    collectionInfo.revealURI,
   );
   await minter.deployed();
 

@@ -50,10 +50,18 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
         string memory _contractURI,
         address _nft_impl,
         address _minter,
-        uint256 _minterFee
+        uint256 _minterFee,
+        bool _revealed,
+        string memory _revealURI
     ) Ownable() Pausable() ReentrancyGuard() {
         nft = Clones.clone(_nft_impl);
-        TeritoriNft(nft).initialize(_name, _symbol, _contractURI);
+        TeritoriNft(nft).initialize(
+            _name,
+            _symbol,
+            _contractURI,
+            _revealed,
+            _revealURI
+        );
         minter = _minter;
         minterFee = _minterFee;
     }
@@ -76,6 +84,13 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
 
     function setConfig(Config memory newConfig) external onlyOwner {
         config = newConfig;
+    }
+
+    function updateReveal(bool _revealed, string memory _revealURI)
+        external
+        onlyOwner
+    {
+        TeritoriNft(nft).updateReveal(_revealed, _revealURI);
     }
 
     function startMint() external onlyOwner {

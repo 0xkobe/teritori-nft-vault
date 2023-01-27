@@ -25,7 +25,7 @@ interface TeritoriNftInterface extends ethers.utils.Interface {
     "balanceOf(address)": FunctionFragment;
     "contractURI()": FunctionFragment;
     "getApproved(uint256)": FunctionFragment;
-    "initialize(string,string,string)": FunctionFragment;
+    "initialize(string,string,string,bool,string)": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
     "mint(address,uint256,address,uint96,string)": FunctionFragment;
     "mintWithMetadata(address,uint256,address,uint96,string,(string,string,string,string,string,tuple[]))": FunctionFragment;
@@ -33,6 +33,8 @@ interface TeritoriNftInterface extends ethers.utils.Interface {
     "name()": FunctionFragment;
     "nftInfo(uint256)": FunctionFragment;
     "ownerOf(uint256)": FunctionFragment;
+    "revealURI()": FunctionFragment;
+    "revealed()": FunctionFragment;
     "royaltyInfo(uint256,uint256)": FunctionFragment;
     "safeTransferFrom(address,address,uint256)": FunctionFragment;
     "setApprovalForAll(address,bool)": FunctionFragment;
@@ -43,6 +45,7 @@ interface TeritoriNftInterface extends ethers.utils.Interface {
     "tokenURI(uint256)": FunctionFragment;
     "totalSupply()": FunctionFragment;
     "transferFrom(address,address,uint256)": FunctionFragment;
+    "updateReveal(bool,string)": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -60,7 +63,7 @@ interface TeritoriNftInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "initialize",
-    values: [string, string, string]
+    values: [string, string, string, boolean, string]
   ): string;
   encodeFunctionData(
     functionFragment: "isApprovedForAll",
@@ -98,6 +101,8 @@ interface TeritoriNftInterface extends ethers.utils.Interface {
     functionFragment: "ownerOf",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "revealURI", values?: undefined): string;
+  encodeFunctionData(functionFragment: "revealed", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "royaltyInfo",
     values: [BigNumberish, BigNumberish]
@@ -135,6 +140,10 @@ interface TeritoriNftInterface extends ethers.utils.Interface {
     functionFragment: "transferFrom",
     values: [string, string, BigNumberish]
   ): string;
+  encodeFunctionData(
+    functionFragment: "updateReveal",
+    values: [boolean, string]
+  ): string;
 
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
@@ -160,6 +169,8 @@ interface TeritoriNftInterface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "nftInfo", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "ownerOf", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "revealURI", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "revealed", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "royaltyInfo",
     data: BytesLike
@@ -192,6 +203,10 @@ interface TeritoriNftInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "transferFrom",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "updateReveal",
     data: BytesLike
   ): Result;
 
@@ -293,6 +308,8 @@ export class TeritoriNft extends BaseContract {
       _name: string,
       _symbol: string,
       _contractURI: string,
+      _revealed: boolean,
+      _revealURI: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -355,13 +372,36 @@ export class TeritoriNft extends BaseContract {
             value: string;
           })[];
         }
-      ]
+      ] & {
+        info: [
+          string,
+          string,
+          string,
+          string,
+          string,
+          ([string, string] & { trait_type: string; value: string })[]
+        ] & {
+          name: string;
+          description: string;
+          image: string;
+          external_url: string;
+          animation_url: string;
+          attributes: ([string, string] & {
+            trait_type: string;
+            value: string;
+          })[];
+        };
+      }
     >;
 
     ownerOf(
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[string]>;
+
+    revealURI(overrides?: CallOverrides): Promise<[string]>;
+
+    revealed(overrides?: CallOverrides): Promise<[boolean]>;
 
     royaltyInfo(
       _tokenId: BigNumberish,
@@ -421,6 +461,12 @@ export class TeritoriNft extends BaseContract {
       tokenId: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    updateReveal(
+      _revealed: boolean,
+      _revealURI: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
   };
 
   approve(
@@ -442,6 +488,8 @@ export class TeritoriNft extends BaseContract {
     _name: string,
     _symbol: string,
     _contractURI: string,
+    _revealed: boolean,
+    _revealURI: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -504,6 +552,10 @@ export class TeritoriNft extends BaseContract {
 
   ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
+  revealURI(overrides?: CallOverrides): Promise<string>;
+
+  revealed(overrides?: CallOverrides): Promise<boolean>;
+
   royaltyInfo(
     _tokenId: BigNumberish,
     _salePrice: BigNumberish,
@@ -560,6 +612,12 @@ export class TeritoriNft extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  updateReveal(
+    _revealed: boolean,
+    _revealURI: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   callStatic: {
     approve(
       to: string,
@@ -580,6 +638,8 @@ export class TeritoriNft extends BaseContract {
       _name: string,
       _symbol: string,
       _contractURI: string,
+      _revealed: boolean,
+      _revealURI: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -645,6 +705,10 @@ export class TeritoriNft extends BaseContract {
 
     ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
+    revealURI(overrides?: CallOverrides): Promise<string>;
+
+    revealed(overrides?: CallOverrides): Promise<boolean>;
+
     royaltyInfo(
       _tokenId: BigNumberish,
       _salePrice: BigNumberish,
@@ -698,6 +762,12 @@ export class TeritoriNft extends BaseContract {
       from: string,
       to: string,
       tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    updateReveal(
+      _revealed: boolean,
+      _revealURI: string,
       overrides?: CallOverrides
     ): Promise<void>;
   };
@@ -786,6 +856,8 @@ export class TeritoriNft extends BaseContract {
       _name: string,
       _symbol: string,
       _contractURI: string,
+      _revealed: boolean,
+      _revealURI: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -834,6 +906,10 @@ export class TeritoriNft extends BaseContract {
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    revealURI(overrides?: CallOverrides): Promise<BigNumber>;
+
+    revealed(overrides?: CallOverrides): Promise<BigNumber>;
 
     royaltyInfo(
       _tokenId: BigNumberish,
@@ -893,6 +969,12 @@ export class TeritoriNft extends BaseContract {
       tokenId: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
+
+    updateReveal(
+      _revealed: boolean,
+      _revealURI: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -918,6 +1000,8 @@ export class TeritoriNft extends BaseContract {
       _name: string,
       _symbol: string,
       _contractURI: string,
+      _revealed: boolean,
+      _revealURI: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -966,6 +1050,10 @@ export class TeritoriNft extends BaseContract {
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    revealURI(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    revealed(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     royaltyInfo(
       _tokenId: BigNumberish,
@@ -1023,6 +1111,12 @@ export class TeritoriNft extends BaseContract {
       from: string,
       to: string,
       tokenId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    updateReveal(
+      _revealed: boolean,
+      _revealURI: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
   };

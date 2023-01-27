@@ -28,18 +28,38 @@ contract TeritoriNft is
     string public contractURI;
     mapping(uint256 => Metadata) internal _extensions;
 
+    bool public revealed;
+    string public revealURI;
+
     function initialize(
         string memory _name,
         string memory _symbol,
-        string memory _contractURI
+        string memory _contractURI,
+        bool _revealed,
+        string memory _revealURI
     ) external initializer {
         __ERC721_init(_name, _symbol);
         minter = msg.sender;
         contractURI = _contractURI;
+        revealed = _revealed;
+        revealURI = _revealURI;
     }
 
-    function nftInfo(uint256 tokenId) external view returns (Metadata memory) {
-        return _extensions[tokenId];
+    function nftInfo(uint256 tokenId)
+        external
+        view
+        returns (Metadata memory info)
+    {
+        if (revealed) {
+            info = _extensions[tokenId];
+        }
+    }
+
+    function updateReveal(bool _revealed, string memory _revealURI) external {
+        require(msg.sender == minter, "unauthorized");
+
+        revealed = _revealed;
+        revealURI = _revealURI;
     }
 
     function mint(
@@ -110,7 +130,10 @@ contract TeritoriNft is
         override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
         returns (string memory)
     {
-        return ERC721URIStorageUpgradeable.tokenURI(tokenId);
+        if (revealed) {
+            return ERC721URIStorageUpgradeable.tokenURI(tokenId);
+        }
+        return revealURI;
     }
 
     /**

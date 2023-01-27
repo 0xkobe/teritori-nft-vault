@@ -72,7 +72,9 @@ contract Breeding is Ownable, Pausable, ReentrancyGuard, ERC721Holder {
         TeritoriNft(childCollection).initialize(
             _childName,
             _childSymbol,
-            _childURI
+            _childURI,
+            true,
+            ""
         );
 
         breedConfig = _breedConfig;
@@ -304,7 +306,7 @@ contract Breeding is Ownable, Pausable, ReentrancyGuard, ERC721Holder {
         return _userBreedList[user];
     }
 
-    function breedRequestsCount() external view returns(uint256) {
+    function breedRequestsCount() external view returns (uint256) {
         return breedList.length;
     }
 }
