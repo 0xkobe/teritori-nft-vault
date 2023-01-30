@@ -37,6 +37,7 @@ interface TeritoriMinterInterface extends ethers.utils.Interface {
     "setConfig((uint256,address,uint256,uint256,uint256,uint256))": FunctionFragment;
     "setMinter(address)": FunctionFragment;
     "setMinterFee(uint256)": FunctionFragment;
+    "setTokenURI(uint256,string)": FunctionFragment;
     "setWhitelist(uint256,address[],bool)": FunctionFragment;
     "setWhitelistConfig(uint256[],tuple[])": FunctionFragment;
     "startMint()": FunctionFragment;
@@ -121,6 +122,10 @@ interface TeritoriMinterInterface extends ethers.utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "setTokenURI",
+    values: [BigNumberish, string]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setWhitelist",
     values: [BigNumberish, string[], boolean]
   ): string;
@@ -200,6 +205,10 @@ interface TeritoriMinterInterface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "setMinter", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setMinterFee",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setTokenURI",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -406,6 +415,12 @@ export class TeritoriMinter extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    setTokenURI(
+      tokenId: BigNumberish,
+      tokenUri: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     setWhitelist(
       whitelistPhase: BigNumberish,
       users: string[],
@@ -578,6 +593,12 @@ export class TeritoriMinter extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  setTokenURI(
+    tokenId: BigNumberish,
+    tokenUri: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   setWhitelist(
     whitelistPhase: BigNumberish,
     users: string[],
@@ -737,6 +758,12 @@ export class TeritoriMinter extends BaseContract {
 
     setMinterFee(
       newMinterFee: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setTokenURI(
+      tokenId: BigNumberish,
+      tokenUri: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -948,6 +975,12 @@ export class TeritoriMinter extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    setTokenURI(
+      tokenId: BigNumberish,
+      tokenUri: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     setWhitelist(
       whitelistPhase: BigNumberish,
       users: string[],
@@ -1092,6 +1125,12 @@ export class TeritoriMinter extends BaseContract {
 
     setMinterFee(
       newMinterFee: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setTokenURI(
+      tokenId: BigNumberish,
+      tokenUri: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

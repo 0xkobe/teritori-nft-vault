@@ -62,6 +62,12 @@ contract TeritoriNft is
         revealURI = _revealURI;
     }
 
+    function setTokenURI(uint256 tokenId, string memory tokenUri) external {
+        require(msg.sender == minter, "unauthorized");
+
+        _setTokenURI(tokenId, tokenUri);
+    }
+
     function mint(
         address receiver,
         uint256 tokenId,

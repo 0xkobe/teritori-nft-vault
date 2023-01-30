@@ -287,4 +287,10 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
         }
         userCanMint = userCanMint && mintCount < config.publicMintMax;
     }
+
+    function setTokenURI(uint256 tokenId, string memory tokenUri) external {
+        require(msg.sender == minter, "UNAUTHORIZED");
+
+        TeritoriNft(nft).setTokenURI(tokenId, tokenUri);
+    }
 }

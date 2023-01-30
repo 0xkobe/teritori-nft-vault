@@ -317,4 +317,37 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
         await teritoriMinter.updateReveal(true, "revealURI");
         expect(await teritoriNft.tokenURI("1")).to.equal('tokenUri');
     })
+
+    it("setTokenUri", async () => {
+        await teritoriMinter.updateReveal(false, "revealURI");
+
+        await teritoriMinter.connect(user).requestMint(user.address, 1, {
+            value: ethers.utils.parseEther("0.1")
+        });
+
+        await expect(teritoriMinter.connect(user).mint([{
+            tokenId: "1",
+            royaltyReceiver: minter.address,
+            royaltyPercentage: "10",
+            tokenUri: "tokenUri",
+        }])).to.revertedWith("UNAUTHORIZED");
+
+        await teritoriMinter.mint([{
+            tokenId: "1",
+            royaltyReceiver: minter.address,
+            royaltyPercentage: "10",
+            tokenUri: "tokenUri",
+        }]);
+
+        expect(await teritoriNft.ownerOf("1")).to.equal(user.address);
+        expect((await teritoriNft.royaltyInfo("1", 10000))[0]).to.equal(minter.address);
+        expect((await teritoriNft.royaltyInfo("1", 10000))[1]).to.equal(10);
+
+        expect(await teritoriNft.tokenURI("1")).to.equal('revealURI');
+        await teritoriMinter.updateReveal(true, "revealURI");
+        expect(await teritoriNft.tokenURI("1")).to.equal('tokenUri');
+
+        await teritoriMinter.setTokenURI("1", "new token uri");
+        expect(await teritoriNft.tokenURI("1")).to.equal('new token uri');
+    })
 });
