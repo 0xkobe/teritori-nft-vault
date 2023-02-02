@@ -34,6 +34,7 @@ interface TeritoriMinterInterface extends ethers.utils.Interface {
     "paused()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "requestMint(address,uint256)": FunctionFragment;
+    "setBaseURI(string)": FunctionFragment;
     "setConfig((uint256,address,uint256,uint256,uint256,uint256))": FunctionFragment;
     "setMinter(address)": FunctionFragment;
     "setMinterFee(uint256)": FunctionFragment;
@@ -103,6 +104,7 @@ interface TeritoriMinterInterface extends ethers.utils.Interface {
     functionFragment: "requestMint",
     values: [string, BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "setBaseURI", values: [string]): string;
   encodeFunctionData(
     functionFragment: "setConfig",
     values: [
@@ -201,6 +203,7 @@ interface TeritoriMinterInterface extends ethers.utils.Interface {
     functionFragment: "requestMint",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "setBaseURI", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "setConfig", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "setMinter", data: BytesLike): Result;
   decodeFunctionResult(
@@ -393,6 +396,11 @@ export class TeritoriMinter extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    setBaseURI(
+      newBaseURI: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     setConfig(
       newConfig: {
         maxSupply: BigNumberish;
@@ -571,6 +579,11 @@ export class TeritoriMinter extends BaseContract {
     overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  setBaseURI(
+    newBaseURI: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   setConfig(
     newConfig: {
       maxSupply: BigNumberish;
@@ -741,6 +754,8 @@ export class TeritoriMinter extends BaseContract {
       count: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    setBaseURI(newBaseURI: string, overrides?: CallOverrides): Promise<void>;
 
     setConfig(
       newConfig: {
@@ -953,6 +968,11 @@ export class TeritoriMinter extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    setBaseURI(
+      newBaseURI: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     setConfig(
       newConfig: {
         maxSupply: BigNumberish;
@@ -1104,6 +1124,11 @@ export class TeritoriMinter extends BaseContract {
       user: string,
       count: BigNumberish,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setBaseURI(
+      newBaseURI: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     setConfig(

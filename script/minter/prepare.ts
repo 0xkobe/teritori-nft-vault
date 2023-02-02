@@ -31,19 +31,19 @@ async function prepareToken(i: number, nftstorage: NFTStorage, maxSupply: number
     };
   }
 
-  if (!metadata.tokenURI) {
-    const content = JSON.stringify(metadata, null, 2)
-    const type = "application/json"
-    const dirCid = await nftstorage.storeBlob(new File([content], { type }))
-    const tokenURI = `ipfs://${dirCid}`
+  // if (!metadata.tokenURI) {
+  //   const content = JSON.stringify(metadata, null, 2)
+  //   const type = "application/json"
+  //   const dirCid = await nftstorage.storeBlob(new File([content], { type }))
+  //   const tokenURI = `ipfs://${dirCid}`
 
-    console.log(`${i}/${maxSupply} ${tokenURI}`)
+  //   console.log(`${i}/${maxSupply} ${tokenURI}`)
 
-    metadata = {
-      ...metadata,
-      tokenURI: getURL(tokenURI),
-    };
-  }
+  //   metadata = {
+  //     ...metadata,
+  //     tokenURI: getURL(tokenURI),
+  //   };
+  // }
 
   fs.writeFileSync(path.join(metadataDir, `${i}.json`), JSON.stringify(metadata, undefined, 2))
 }
@@ -57,7 +57,7 @@ async function prepare() {
   const nftstorage = new NFTStorage({ token: nftStorageAPIKey })
 
   const tokens: number[] = []
-  const batch_count = 10;
+  const batch_count = 1;
   for (let i = 1; i <= maxSupply; i += batch_count) {
     try {
       await Promise.all(
@@ -72,6 +72,17 @@ async function prepare() {
       break;
     }
   }
+
+  const files = [];
+  for (let i = 1; i <= maxSupply; i++) {
+    const jsonPath = path.join(metadataDir, `${i}.json`)
+    const jsonContent = fs.readFileSync(jsonPath)
+    const type = "application/json"
+    files.push(new File([jsonContent], `${i}`, { type }));
+  }
+  const dirCid = await nftstorage.storeDirectory(files);
+  const baseURI = getURL(`ipfs://${dirCid}/`)
+  console.log("base URL:", baseURI)
 
   fs.writeFileSync(tokensFile, JSON.stringify(tokens, undefined, 2))
 }

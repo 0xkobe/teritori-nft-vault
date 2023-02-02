@@ -30,6 +30,7 @@ contract TeritoriNft is
 
     bool public revealed;
     string public revealURI;
+    string public baseURI;
 
     function initialize(
         string memory _name,
@@ -60,6 +61,12 @@ contract TeritoriNft is
 
         revealed = _revealed;
         revealURI = _revealURI;
+    }
+
+    function setBaseURI(string memory newBaseURI) external {
+        require(msg.sender == minter, "unauthorized");
+
+        baseURI = newBaseURI;
     }
 
     function setTokenURI(uint256 tokenId, string memory tokenUri) external {
@@ -124,6 +131,18 @@ contract TeritoriNft is
             ERC721Upgradeable.supportsInterface(interfaceId) ||
             ERC721RoyaltyUpgradeable.supportsInterface(interfaceId) ||
             ERC721EnumerableUpgradeable.supportsInterface(interfaceId);
+    }
+
+    /**
+     * @dev Base URI for computing {tokenURI}. If set, the resulting URI for each
+     * token will be the concatenation of the `baseURI` and the `tokenId`. Empty
+     * by default, can be overridden in child contracts.
+     */
+    function _baseURI() internal view override returns (string memory) {
+        if (revealed) {
+            return baseURI;
+        }
+        return "";
     }
 
     /**

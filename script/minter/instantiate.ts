@@ -5,7 +5,7 @@ import { nftStorageAPIKey } from "./data/secrets";
 import path from "path"
 import { NFTStorage, File } from 'nft.storage'
 import mime from "mime"
-import { ethers } from "hardhat"
+import { ethers, run } from "hardhat"
 import { dataDir, getMaxSupply, getURL, loadState, saveState } from "./lib";
 import { TeritoriMinter__factory } from '../../types'
 
@@ -114,6 +114,20 @@ async function Instantiate() {
     )).wait();
     console.log(`Whitelist phase ${i} Addresses set`)
   }
+
+  await run('verify:verify', {
+    address: state.minterContract,
+    constructorArguments: [
+      collectionInfo.name,
+      collectionInfo.symbol,
+      metadataURL,
+      nftImplementationAddress,
+      deployer.address,
+      collectionInfo.minterFee,
+      collectionInfo.reveal,
+      collectionInfo.revealURI,
+    ]
+  })
 }
 
 Instantiate();

@@ -64,16 +64,39 @@ async function tryMint(minter: TeritoriMinter) {
         tokenId: item.token_id,
         royaltyPercentage: collectionInfo.royaltyPercentage,
         royaltyReceiver: collectionInfo.royaltyPaymentAddress,
-        tokenUri: ""
+        tokenUri: item.tokenURI || "",
+        // extension: {
+        //   name: item.name,
+        //   description: item.description,
+        //   image: item.image,
+        //   external_url: item.external_url,
+        //   attributes: item.attributes,
+        // }
       })))
       const tx = await (await minter.mint(
         items.map(item => ({
           tokenId: item.token_id,
           royaltyPercentage: collectionInfo.royaltyPercentage,
           royaltyReceiver: collectionInfo.royaltyPaymentAddress,
-          tokenUri: item.tokenURI,
+          tokenUri: item.tokenURI || "",
         }))
       )).wait();
+      // const tx = await (await minter.mintWithMetadata(
+      //   items.map(item => ({
+      //     tokenId: item.token_id,
+      //     royaltyPercentage: collectionInfo.royaltyPercentage,
+      //     royaltyReceiver: collectionInfo.royaltyPaymentAddress,
+      //     tokenUri: item.tokenURI,
+      //     extension: {
+      //       name: item.name,
+      //       description: item.description,
+      //       image: item.image,
+      //       external_url: item.external_url || "",
+      //       animation_url: item.animation_url || "",
+      //       attributes: item.attributes,
+      //     }
+      //   }))
+      // )).wait();
 
       for (let j = 0; j < items.length; j++) {
         await addToMinted(items[j].token_id);
