@@ -30,7 +30,7 @@ interface DistributorInterface extends ethers.utils.Interface {
     "transferOwnership(address)": FunctionFragment;
     "updateMerkleRoot(bytes32)": FunctionFragment;
     "updateReporter(address)": FunctionFragment;
-    "userCalimedAmount(address,address)": FunctionFragment;
+    "userClaimedAmount(address,address)": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -64,7 +64,7 @@ interface DistributorInterface extends ethers.utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "userCalimedAmount",
+    functionFragment: "userClaimedAmount",
     values: [string, string]
   ): string;
 
@@ -93,7 +93,7 @@ interface DistributorInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "userCalimedAmount",
+    functionFragment: "userClaimedAmount",
     data: BytesLike
   ): Result;
 
@@ -210,7 +210,7 @@ export class Distributor extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    userCalimedAmount(
+    userClaimedAmount(
       arg0: string,
       arg1: string,
       overrides?: CallOverrides
@@ -255,7 +255,7 @@ export class Distributor extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  userCalimedAmount(
+  userClaimedAmount(
     arg0: string,
     arg1: string,
     overrides?: CallOverrides
@@ -295,7 +295,7 @@ export class Distributor extends BaseContract {
 
     updateReporter(_reporter: string, overrides?: CallOverrides): Promise<void>;
 
-    userCalimedAmount(
+    userClaimedAmount(
       arg0: string,
       arg1: string,
       overrides?: CallOverrides
@@ -393,7 +393,7 @@ export class Distributor extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    userCalimedAmount(
+    userClaimedAmount(
       arg0: string,
       arg1: string,
       overrides?: CallOverrides
@@ -439,7 +439,7 @@ export class Distributor extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    userCalimedAmount(
+    userClaimedAmount(
       arg0: string,
       arg1: string,
       overrides?: CallOverrides
