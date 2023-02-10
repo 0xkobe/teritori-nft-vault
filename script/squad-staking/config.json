@@ -1,0 +1,16 @@
+{
+    "supportedCollections": [],
+    "minSquadSize": 1,
+    "maxSquadSize": 6,
+    "squadCountLimit": 2,
+    "cooldownPeriod": 86400,
+    "bonusMultiplier": [
+        0,
+        100,
+        105,
+        125,
+        131,
+        139,
+        161
+    ]
+}

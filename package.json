@@ -34,6 +34,7 @@
     "web3": "^1.3.5"
   },
   "dependencies": {
+    "@openzeppelin/hardhat-upgrades": "^1.22.1",
     "@types/chai": "^4.3.4",
     "@types/mime": "^3.0.1",
     "@types/mocha": "^10.0.1",
