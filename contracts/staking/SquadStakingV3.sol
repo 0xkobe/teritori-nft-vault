@@ -34,9 +34,10 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
     uint256 public maxSquadCount;
     uint256 public cooldownPeriod;
     mapping(uint256 => uint256) public bonusMultipliers;
-    EnumerableSet.AddressSet internal _supportedCollections;
-    mapping(address => SquadInfo) public _userSquadInfo;
-    mapping(address => SquadInfo[]) public _userSquads;
+    EnumerableSet.AddressSet private _supportedCollections;
+    mapping(address => mapping(uint256 => SquadInfo)) private _userSquads;
+    mapping(address => uint256) private userLastWithdrawnIndex;
+    mapping(address => uint256) private userLastDepositIndex;
 
     constructor(
         address _nftMetadataRegistry,
@@ -72,10 +73,7 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
         maxSquadSize = _maxSquadSize;
     }
 
-    function setMaxSquadCount(uint256 _maxSquadCount)
-        external
-        onlyOwner
-    {
+    function setMaxSquadCount(uint256 _maxSquadCount) external onlyOwner {
         maxSquadCount = _maxSquadCount;
     }
 
@@ -135,18 +133,21 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
     function userSquadInfo(address user)
         external
         view
-        returns (SquadInfo memory)
+        returns (SquadInfo[] memory squads)
     {
-        return _userSquadInfo[user];
+        uint256 count = userLastDepositIndex[user] -
+            userLastWithdrawnIndex[user];
+        squads = new SquadInfo[]();
+        for (uint256 i = 0; i < count; ++i) {
+            squads[i] = _userSquads[user][i + userLastWithdrawnIndex[user] + 1];
+        }
+    }
+
+    function userSquadCount(address user) external view returns (uint256) {
+        return userLastDepositIndex[user] - userLastWithdrawnIndex[user];
     }
 
     function stake(NftInfo[] memory nfts) external whenNotPaused {
-        require(_userSquadInfo[msg.sender].nfts.length == 0, "squad exists");
-        require(
-            _userSquadInfo[msg.sender].startTime + cooldownPeriod <=
-                block.timestamp,
-            "wait until cooldown"
-        );
         require(
             nfts.length >= minSquadSize && nfts.length <= maxSquadSize,
             "invalid number of nfts"
@@ -167,28 +168,23 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
         );
         uint256 startTime = block.timestamp;
         uint256 endTime = startTime + duration;
-        _userSquadInfo[msg.sender].startTime = startTime;
-        _userSquadInfo[msg.sender].endTime = endTime;
+
+        uint256 depositIndex = userLastDepositIndex[user] + 1;
+        _userSquads[msg.sender][depositIndex].startTime = startTime;
+        _userSquads[msg.sender][depositIndex].endTime = endTime;
         for (uint256 i = 0; i < nfts.length; i++) {
-            _userSquadInfo[msg.sender].nfts.push(nfts[i]);
+            _userSquads[msg.sender][depositIndex].nfts.push(nfts[i]);
         }
+        userLastDepositIndex[user] = depositIndex;
 
         emit Stake(msg.sender, startTime, endTime);
     }
 
     function unstake() external whenNotPaused {
-        require(
-            _userSquadInfo[msg.sender].nfts.length != 0,
-            "squad not exists"
-        );
-        require(
-            _userSquadInfo[msg.sender].endTime <= block.timestamp,
-            "wait until staking period"
-        );
+        SquadInfo memory info = _userSquadInfo[msg.sender][
+            userLastWithdrawnIndex[msg.sender] + 1
+        ];
 
-        SquadInfo memory info = _userSquadInfo[msg.sender];
-
-        delete _userSquadInfo[msg.sender].nfts;
         for (uint256 i = 0; i < info.nfts.length; i++) {
             IERC721(info.nfts[i].collection).safeTransferFrom(
                 address(this),
