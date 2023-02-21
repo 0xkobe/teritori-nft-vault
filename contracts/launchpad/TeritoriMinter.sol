@@ -106,7 +106,7 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
             "INVALID_LENGTH"
         );
         uint256 length = whitelistPhases.length;
-        for (uint256 i = 0; i < length; i++) {
+        for (uint256 i = 0; i < length; ++i) {
             whitelists[whitelistPhases[i]] = newWhitelistMintConfigs[i];
         }
     }
@@ -117,7 +117,7 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
         bool whitelisted
     ) external onlyOwner {
         uint256 changes = 0;
-        for (uint256 i = 0; i < users.length; i++) {
+        for (uint256 i = 0; i < users.length; ++i) {
             if (userWhitelisted[whitelistPhase][users[i]] != whitelisted) {
                 userWhitelisted[whitelistPhase][users[i]] = whitelisted;
                 changes++;
@@ -146,7 +146,7 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
         uint256 mintCount = userMinted[user];
         uint256 currentPhaseStart = config.mintStartTime;
         uint256 mintPrice = config.publicMintPrice;
-        for (uint256 i = 0; i < config.whitelistCount; i++) {
+        for (uint256 i = 0; i < config.whitelistCount; ++i) {
             WhitelistConfig memory whitelist = whitelists[i];
             if (currentPhaseStart + whitelist.mintPeriod >= block.timestamp) {
                 mintPrice = whitelist.mintPrice;
@@ -171,7 +171,7 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
         }
 
         userMinted[user] += count;
-        for (uint256 i = 0; i < count; i++) {
+        for (uint256 i = 0; i < count; ++i) {
             tokenRequests[tokenRequestsCount + i] = user;
         }
         tokenRequestsCount += count;
@@ -193,7 +193,7 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
             "NO_TOKEN_REQUEST"
         );
 
-        for (uint256 i = 0; i < mintData.length; i++) {
+        for (uint256 i = 0; i < mintData.length; ++i) {
             address user = tokenRequests[currentSupply];
             currentSupply++;
 
@@ -225,7 +225,7 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
             "NO_TOKEN_REQUEST"
         );
 
-        for (uint256 i = 0; i < mintData.length; i++) {
+        for (uint256 i = 0; i < mintData.length; ++i) {
             address user = tokenRequests[currentSupply];
             currentSupply++;
 
@@ -273,7 +273,7 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
         uint256 currentPhaseStart = config.mintStartTime;
         currentPhase = config.whitelistCount;
         mintPrice = config.publicMintPrice;
-        for (uint256 i = 0; i < config.whitelistCount; i++) {
+        for (uint256 i = 0; i < config.whitelistCount; ++i) {
             WhitelistConfig memory whitelist = whitelists[i];
             if (currentPhaseStart + whitelist.mintPeriod >= block.timestamp) {
                 mintPrice = whitelist.mintPrice;

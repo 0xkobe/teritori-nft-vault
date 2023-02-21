@@ -197,7 +197,7 @@ contract NFTVault is Ownable, ReentrancyGuard, ERC721Holder {
     }
 
     function withdrawAll(address[] memory tokens) public {
-        for (uint256 i = 0; i < tokens.length; i++) {
+        for (uint256 i = 0; i < tokens.length; ++i) {
             withdraw(tokens[i]);
         }
     }

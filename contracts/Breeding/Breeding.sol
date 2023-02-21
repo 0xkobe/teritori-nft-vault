@@ -243,7 +243,7 @@ contract Breeding is Ownable, Pausable, ReentrancyGuard, ERC721Holder {
             "ALL_BREED_PROCESSED"
         );
 
-        for (uint256 i = 0; i < mintData.length; i++) {
+        for (uint256 i = 0; i < mintData.length; ++i) {
             breedList[currentSupply].childTokenId = mintData[i].tokenId;
             TeritoriNft(childCollection).mint(
                 breedList[currentSupply].owner,
@@ -280,7 +280,7 @@ contract Breeding is Ownable, Pausable, ReentrancyGuard, ERC721Holder {
             "ALL_BREED_PROCESSED"
         );
 
-        for (uint256 i = 0; i < mintData.length; i++) {
+        for (uint256 i = 0; i < mintData.length; ++i) {
             breedList[currentSupply].childTokenId = mintData[i].tokenId;
             TeritoriNft(childCollection).mintWithMetadata(
                 breedList[currentSupply].owner,

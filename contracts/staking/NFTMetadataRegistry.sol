@@ -17,7 +17,7 @@ contract NFTMetadataRegistry is OwnableUpgradeable {
         uint256[] memory stanimaArray
     ) external onlyOwner {
         require(tokenIdArray.length == stanimaArray.length, "invalid array");
-        for (uint256 i = 0; i < tokenIdArray.length; i++) {
+        for (uint256 i = 0; i < tokenIdArray.length; ++i) {
             stamina[collection][tokenIdArray[i]] = stanimaArray[i];
         }
     }

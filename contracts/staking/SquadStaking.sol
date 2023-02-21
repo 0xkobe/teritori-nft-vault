@@ -44,7 +44,7 @@ contract SquadStaking is Ownable, Pausable, ERC721Holder {
         minSquadSize = _minSquadSize;
         maxSquadSize = _maxSquadSize;
         cooldownPeriod = _cooldownPeriod;
-        for (uint256 i = 0; i < _bonusMultipliers.length; i++) {
+        for (uint256 i = 0; i < _bonusMultipliers.length; ++i) {
             bonusMultipliers[i] = _bonusMultipliers[i];
         }
     }
@@ -74,7 +74,7 @@ contract SquadStaking is Ownable, Pausable, ERC721Holder {
         uint256[] memory _bonusMultipliers
     ) external onlyOwner {
         require(_size.length == _bonusMultipliers.length, "length mismatch");
-        for (uint256 i = 0; i < _bonusMultipliers.length; i++) {
+        for (uint256 i = 0; i < _bonusMultipliers.length; ++i) {
             bonusMultipliers[_size[i]] = _bonusMultipliers[i];
         }
     }
@@ -113,7 +113,7 @@ contract SquadStaking is Ownable, Pausable, ERC721Holder {
     {
         uint256 length = _supportedCollections.length();
         collections = new address[](length);
-        for (uint256 i = 0; i < length; i++) {
+        for (uint256 i = 0; i < length; ++i) {
             collections[i] = _supportedCollections.at(index);
         }
     }
@@ -138,7 +138,7 @@ contract SquadStaking is Ownable, Pausable, ERC721Holder {
             "invalid number of nfts"
         );
 
-        for (uint256 i = 0; i < nfts.length; i++) {
+        for (uint256 i = 0; i < nfts.length; ++i) {
             IERC721(nfts[i].collection).safeTransferFrom(
                 msg.sender,
                 address(this),
@@ -155,7 +155,7 @@ contract SquadStaking is Ownable, Pausable, ERC721Holder {
         uint256 endTime = startTime + duration;
         _userSquadInfo[msg.sender].startTime = startTime;
         _userSquadInfo[msg.sender].endTime = endTime;
-        for (uint256 i = 0; i < nfts.length; i++) {
+        for (uint256 i = 0; i < nfts.length; ++i) {
             _userSquadInfo[msg.sender].nfts.push(nfts[i]);
         }
 
@@ -175,7 +175,7 @@ contract SquadStaking is Ownable, Pausable, ERC721Holder {
         SquadInfo memory info = _userSquadInfo[msg.sender];
 
         delete _userSquadInfo[msg.sender].nfts;
-        for (uint256 i = 0; i < info.nfts.length; i++) {
+        for (uint256 i = 0; i < info.nfts.length; ++i) {
             IERC721(info.nfts[i].collection).safeTransferFrom(
                 address(this),
                 msg.sender,
@@ -199,7 +199,7 @@ contract SquadStaking is Ownable, Pausable, ERC721Holder {
         TeritoriNft.Metadata memory metadata = TeritoriNft(collection).nftInfo(
             tokenId
         );
-        for (uint256 i = 0; i < metadata.attributes.length; i++) {
+        for (uint256 i = 0; i < metadata.attributes.length; ++i) {
             TeritoriNft.Attribute memory attribute = metadata.attributes[i];
             if (
                 keccak256(abi.encodePacked(attribute.trait_type)) ==
@@ -224,7 +224,7 @@ contract SquadStaking is Ownable, Pausable, ERC721Holder {
         returns (uint256 result, bool hasError)
     {
         bytes memory b = bytes(s);
-        for (uint256 i = 0; i < b.length; i++) {
+        for (uint256 i = 0; i < b.length; ++i) {
             if (uint8(b[i]) >= 48 && uint8(b[i]) <= 57) {
                 result = result * 10 + (uint8(b[i]) - 48);
             } else {

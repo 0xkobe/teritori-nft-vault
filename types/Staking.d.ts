@@ -21,7 +21,7 @@ import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
 interface StakingInterface extends ethers.utils.Interface {
   functions: {
-    "cooldownInDays()": FunctionFragment;
+    "cooldownPeriod()": FunctionFragment;
     "getUserStakeList(address)": FunctionFragment;
     "isSupportedCollection(address)": FunctionFragment;
     "nftStakeIndex(address,uint256)": FunctionFragment;
@@ -30,7 +30,7 @@ interface StakingInterface extends ethers.utils.Interface {
     "pause()": FunctionFragment;
     "paused()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
-    "setCooldownInDays(uint256)": FunctionFragment;
+    "setCooldownPeriod(uint256)": FunctionFragment;
     "setSupportedCollection(address,bool)": FunctionFragment;
     "stake(address,uint256)": FunctionFragment;
     "stakeDuration(address,uint256)": FunctionFragment;
@@ -47,7 +47,7 @@ interface StakingInterface extends ethers.utils.Interface {
   };
 
   encodeFunctionData(
-    functionFragment: "cooldownInDays",
+    functionFragment: "cooldownPeriod",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -74,7 +74,7 @@ interface StakingInterface extends ethers.utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "setCooldownInDays",
+    functionFragment: "setCooldownPeriod",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -128,7 +128,7 @@ interface StakingInterface extends ethers.utils.Interface {
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "cooldownInDays",
+    functionFragment: "cooldownPeriod",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -155,7 +155,7 @@ interface StakingInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setCooldownInDays",
+    functionFragment: "setCooldownPeriod",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -284,7 +284,7 @@ export class Staking extends BaseContract {
   interface: StakingInterface;
 
   functions: {
-    cooldownInDays(overrides?: CallOverrides): Promise<[BigNumber]>;
+    cooldownPeriod(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     getUserStakeList(
       user: string,
@@ -329,8 +329,8 @@ export class Staking extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    setCooldownInDays(
-      _cooldownInDays: BigNumberish,
+    setCooldownPeriod(
+      _cooldownPeriod: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -405,7 +405,7 @@ export class Staking extends BaseContract {
     ): Promise<[BigNumber]>;
   };
 
-  cooldownInDays(overrides?: CallOverrides): Promise<BigNumber>;
+  cooldownPeriod(overrides?: CallOverrides): Promise<BigNumber>;
 
   getUserStakeList(
     user: string,
@@ -448,8 +448,8 @@ export class Staking extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  setCooldownInDays(
-    _cooldownInDays: BigNumberish,
+  setCooldownPeriod(
+    _cooldownPeriod: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -524,7 +524,7 @@ export class Staking extends BaseContract {
   ): Promise<BigNumber>;
 
   callStatic: {
-    cooldownInDays(overrides?: CallOverrides): Promise<BigNumber>;
+    cooldownPeriod(overrides?: CallOverrides): Promise<BigNumber>;
 
     getUserStakeList(
       user: string,
@@ -563,8 +563,8 @@ export class Staking extends BaseContract {
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
-    setCooldownInDays(
-      _cooldownInDays: BigNumberish,
+    setCooldownPeriod(
+      _cooldownPeriod: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -720,7 +720,7 @@ export class Staking extends BaseContract {
   };
 
   estimateGas: {
-    cooldownInDays(overrides?: CallOverrides): Promise<BigNumber>;
+    cooldownPeriod(overrides?: CallOverrides): Promise<BigNumber>;
 
     getUserStakeList(
       user: string,
@@ -756,8 +756,8 @@ export class Staking extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    setCooldownInDays(
-      _cooldownInDays: BigNumberish,
+    setCooldownPeriod(
+      _cooldownPeriod: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -823,7 +823,7 @@ export class Staking extends BaseContract {
   };
 
   populateTransaction: {
-    cooldownInDays(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    cooldownPeriod(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getUserStakeList(
       user: string,
@@ -859,8 +859,8 @@ export class Staking extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    setCooldownInDays(
-      _cooldownInDays: BigNumberish,
+    setCooldownPeriod(
+      _cooldownPeriod: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

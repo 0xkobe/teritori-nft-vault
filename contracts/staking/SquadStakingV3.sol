@@ -25,6 +25,12 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
         uint256 endTime;
         NftInfo[] nfts;
     }
+    struct SquadInfoWithIndex {
+        uint256 index;
+        uint256 startTime;
+        uint256 endTime;
+        NftInfo[] nfts;
+    }
 
     uint256 public constant BONUS_MULTIPLIER_BASE_POINT = 1e18;
 
@@ -35,7 +41,7 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
     uint256 public cooldownPeriod;
     mapping(uint256 => uint256) public bonusMultipliers;
     EnumerableSet.AddressSet private _supportedCollections;
-    mapping(address => mapping(uint256 => SquadInfo)) private _userSquads;
+    mapping(address => mapping(uint256 => SquadInfo)) public userSquads;
     mapping(address => uint256) private userLastWithdrawnIndex;
     mapping(address => uint256) private userLastDepositIndex;
 
@@ -52,7 +58,7 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
         maxSquadSize = _maxSquadSize;
         maxSquadCount = _maxSquadCount;
         cooldownPeriod = _cooldownPeriod;
-        for (uint256 i = 0; i < _bonusMultipliers.length; i++) {
+        for (uint256 i = 0; i < _bonusMultipliers.length; ++i) {
             bonusMultipliers[i] = _bonusMultipliers[i];
         }
     }
@@ -86,7 +92,7 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
         uint256[] memory _bonusMultipliers
     ) external onlyOwner {
         require(_size.length == _bonusMultipliers.length, "length mismatch");
-        for (uint256 i = 0; i < _bonusMultipliers.length; i++) {
+        for (uint256 i = 0; i < _bonusMultipliers.length; ++i) {
             bonusMultipliers[_size[i]] = _bonusMultipliers[i];
         }
     }
@@ -125,7 +131,7 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
     {
         uint256 length = _supportedCollections.length();
         collections = new address[](length);
-        for (uint256 i = 0; i < length; i++) {
+        for (uint256 i = 0; i < length; ++i) {
             collections[i] = _supportedCollections.at(index);
         }
     }
@@ -133,13 +139,17 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
     function userSquadInfo(address user)
         external
         view
-        returns (SquadInfo[] memory squads)
+        returns (SquadInfoWithIndex[] memory squads)
     {
         uint256 count = userLastDepositIndex[user] -
             userLastWithdrawnIndex[user];
-        squads = new SquadInfo[]();
+        squads = new SquadInfoWithIndex[](count);
         for (uint256 i = 0; i < count; ++i) {
-            squads[i] = _userSquads[user][i + userLastWithdrawnIndex[user] + 1];
+            uint256 index = i + userLastWithdrawnIndex[user] + 1;
+            squads[i].index = index;
+            squads[i].startTime = userSquads[user][index].startTime;
+            squads[i].endTime = userSquads[user][index].endTime;
+            squads[i].nfts = userSquads[user][index].nfts;
         }
     }
 
@@ -153,7 +163,7 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
             "invalid number of nfts"
         );
 
-        for (uint256 i = 0; i < nfts.length; i++) {
+        for (uint256 i = 0; i < nfts.length; ++i) {
             IERC721(nfts[i].collection).safeTransferFrom(
                 msg.sender,
                 address(this),
@@ -169,29 +179,38 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
         uint256 startTime = block.timestamp;
         uint256 endTime = startTime + duration;
 
-        uint256 depositIndex = userLastDepositIndex[user] + 1;
-        _userSquads[msg.sender][depositIndex].startTime = startTime;
-        _userSquads[msg.sender][depositIndex].endTime = endTime;
-        for (uint256 i = 0; i < nfts.length; i++) {
-            _userSquads[msg.sender][depositIndex].nfts.push(nfts[i]);
+        uint256 depositIndex = userLastDepositIndex[msg.sender] + 1;
+        userSquads[msg.sender][depositIndex].startTime = startTime;
+        userSquads[msg.sender][depositIndex].endTime = endTime;
+        for (uint256 i = 0; i < nfts.length; ++i) {
+            userSquads[msg.sender][depositIndex].nfts.push(nfts[i]);
         }
-        userLastDepositIndex[user] = depositIndex;
+        userLastDepositIndex[msg.sender] = depositIndex;
 
         emit Stake(msg.sender, startTime, endTime);
     }
 
-    function unstake() external whenNotPaused {
-        SquadInfo memory info = _userSquadInfo[msg.sender][
-            userLastWithdrawnIndex[msg.sender] + 1
-        ];
+    function unstake(uint256 index) external whenNotPaused {
+        SquadInfo memory info = userSquads[msg.sender][index];
+        require(info.nfts.length > 0, "invalid index");
+        require(info.endTime >= block.timestamp, "during staking period");
+        require(
+            info.startTime + cooldownPeriod >= block.timestamp,
+            "during cooldown period"
+        );
 
-        for (uint256 i = 0; i < info.nfts.length; i++) {
+        for (uint256 i = 0; i < info.nfts.length; ++i) {
             IERC721(info.nfts[i].collection).safeTransferFrom(
                 address(this),
                 msg.sender,
                 info.nfts[i].tokenId
             );
         }
+
+        uint256 withdrawIndex = userLastWithdrawnIndex[msg.sender] + 1;
+        userSquads[msg.sender][index] = userSquads[msg.sender][withdrawIndex];
+        delete userSquads[msg.sender][withdrawIndex];
+        userLastWithdrawnIndex[msg.sender] = withdrawIndex;
 
         emit Unstake(msg.sender);
     }

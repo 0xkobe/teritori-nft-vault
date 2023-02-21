@@ -28,7 +28,7 @@ contract Staking is Ownable, Pausable {
         bool withdrawn;
     }
 
-    uint256 public cooldownInDays;
+    uint256 public cooldownPeriod;
     EnumerableSet.AddressSet internal _supportedCollections;
 
     uint256 public stakeListLength;
@@ -36,8 +36,8 @@ contract Staking is Ownable, Pausable {
     mapping(address => mapping(uint256 => uint256)) public nftStakeIndex;
     mapping(address => uint256[]) public userStakeList;
 
-    constructor(uint256 _cooldownInDays) Ownable() Pausable() {
-        cooldownInDays = _cooldownInDays;
+    constructor(uint256 _cooldownPeriod) Ownable() Pausable() {
+        cooldownPeriod = _cooldownPeriod;
     }
 
     function pause() external onlyOwner whenNotPaused {
@@ -48,8 +48,8 @@ contract Staking is Ownable, Pausable {
         _unpause();
     }
 
-    function setCooldownInDays(uint256 _cooldownInDays) external onlyOwner {
-        cooldownInDays = _cooldownInDays;
+    function setCooldownPeriod(uint256 _cooldownPeriod) external onlyOwner {
+        cooldownPeriod = _cooldownPeriod;
     }
 
     function setSupportedCollection(address collection, bool supported)
@@ -86,7 +86,7 @@ contract Staking is Ownable, Pausable {
     {
         uint256 length = _supportedCollections.length();
         collections = new address[](length);
-        for (uint256 i = 0; i < length; i++) {
+        for (uint256 i = 0; i < length; ++i) {
             collections[i] = _supportedCollections.at(index);
         }
     }
@@ -109,15 +109,15 @@ contract Staking is Ownable, Pausable {
 
     function stake(address collection, uint256 tokenId) external whenNotPaused {
         require(isSupportedCollection(collection), "not supported collection");
-        uint256 lastStakeDay = 0;
+        uint256 lastStakeTime = 0;
         if (userStakeList[msg.sender].length > 0) {
             uint256 index = userStakeList[msg.sender][
                 userStakeList[msg.sender].length - 1
             ];
-            lastStakeDay = stakeList[index].startTime / 1 days;
+            lastStakeTime = stakeList[index].startTime;
         }
         require(
-            lastStakeDay + cooldownInDays <= block.timestamp / 1 days,
+            lastStakeTime + cooldownPeriod <= block.timestamp,
             "wait until cooldown"
         );
 
@@ -179,7 +179,7 @@ contract Staking is Ownable, Pausable {
         TeritoriNft.Metadata memory metadata = TeritoriNft(collection).nftInfo(
             tokenId
         );
-        for (uint256 i = 0; i < metadata.attributes.length; i++) {
+        for (uint256 i = 0; i < metadata.attributes.length; ++i) {
             TeritoriNft.Attribute memory attribute = metadata.attributes[i];
             if (
                 keccak256(abi.encodePacked(attribute.trait_type)) ==
@@ -201,7 +201,7 @@ contract Staking is Ownable, Pausable {
         returns (uint256 result, bool hasError)
     {
         bytes memory b = bytes(s);
-        for (uint256 i = 0; i < b.length; i++) {
+        for (uint256 i = 0; i < b.length; ++i) {
             if (uint8(b[i]) >= 48 && uint8(b[i]) <= 57) {
                 result = result * 10 + (uint8(b[i]) - 48);
             } else {

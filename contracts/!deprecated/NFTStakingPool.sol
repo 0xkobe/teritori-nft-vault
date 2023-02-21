@@ -115,7 +115,7 @@ contract NFTStakingPool is Ownable {
 
         EnumerableSet.UintSet storage nftSet = userNftSet[_owner];
         uint256 length = nftSet.length();
-        for (uint256 i = 0; i < length; i++) {
+        for (uint256 i = 0; i < length; ++i) {
             uint256 tokenId = nftSet.at(i);
 
             IERC721(collection).safeTransferFrom(address(this), _to, tokenId);

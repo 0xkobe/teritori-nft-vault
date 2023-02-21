@@ -47,7 +47,7 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
         minSquadSize = _minSquadSize;
         maxSquadSize = _maxSquadSize;
         cooldownPeriod = _cooldownPeriod;
-        for (uint256 i = 0; i < _bonusMultipliers.length; i++) {
+        for (uint256 i = 0; i < _bonusMultipliers.length; ++i) {
             bonusMultipliers[i] = _bonusMultipliers[i];
         }
     }
@@ -77,7 +77,7 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
         uint256[] memory _bonusMultipliers
     ) external onlyOwner {
         require(_size.length == _bonusMultipliers.length, "length mismatch");
-        for (uint256 i = 0; i < _bonusMultipliers.length; i++) {
+        for (uint256 i = 0; i < _bonusMultipliers.length; ++i) {
             bonusMultipliers[_size[i]] = _bonusMultipliers[i];
         }
     }
@@ -116,7 +116,7 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
     {
         uint256 length = _supportedCollections.length();
         collections = new address[](length);
-        for (uint256 i = 0; i < length; i++) {
+        for (uint256 i = 0; i < length; ++i) {
             collections[i] = _supportedCollections.at(index);
         }
     }
@@ -141,7 +141,7 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
             "invalid number of nfts"
         );
 
-        for (uint256 i = 0; i < nfts.length; i++) {
+        for (uint256 i = 0; i < nfts.length; ++i) {
             IERC721(nfts[i].collection).safeTransferFrom(
                 msg.sender,
                 address(this),
@@ -158,7 +158,7 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
         uint256 endTime = startTime + duration;
         _userSquadInfo[msg.sender].startTime = startTime;
         _userSquadInfo[msg.sender].endTime = endTime;
-        for (uint256 i = 0; i < nfts.length; i++) {
+        for (uint256 i = 0; i < nfts.length; ++i) {
             _userSquadInfo[msg.sender].nfts.push(nfts[i]);
         }
 
@@ -178,7 +178,7 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
         SquadInfo memory info = _userSquadInfo[msg.sender];
 
         delete _userSquadInfo[msg.sender].nfts;
-        for (uint256 i = 0; i < info.nfts.length; i++) {
+        for (uint256 i = 0; i < info.nfts.length; ++i) {
             IERC721(info.nfts[i].collection).safeTransferFrom(
                 address(this),
                 msg.sender,
