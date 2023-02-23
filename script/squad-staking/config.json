@@ -1,5 +1,7 @@
 {
-    "supportedCollections": [],
+    "supportedCollections": [
+        "0xad8D10B10b6e2944E137801B71B1ab09a1Bf4A18"
+    ],
     "minSquadSize": 1,
     "maxSquadSize": 6,
     "squadCountLimit": 2,

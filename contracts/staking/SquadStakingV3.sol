@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 
 import "./NFTMetadataRegistry.sol";
 
-contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
+contract SquadStakingV3 is Ownable, Pausable, ERC721Holder {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     event Stake(address user, uint256 startTime, uint256 endTime);

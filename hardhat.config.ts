@@ -3,7 +3,7 @@ import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-web3";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-etherscan";
-import "@openzeppelin/hardhat-upgrades";
+// import "@openzeppelin/hardhat-upgrades";
 import "hardhat-gas-reporter";
 import "hardhat-abi-exporter";
 import "solidity-coverage";

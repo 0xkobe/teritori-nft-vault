@@ -64,29 +64,21 @@ async function tryMint(breeding: Breeding) {
         tokenId: item.token_id,
         royaltyPercentage: collectionInfo.royaltyPercentage,
         royaltyReceiver: collectionInfo.royaltyPaymentAddress,
-        tokenUri: "",
-        extension: {
-          name: item.name,
-          description: item.description,
-          image: item.image,
-          external_url: item.external_url,
-          attributes: item.attributes,
-        }
+        tokenUri: item.tokenURI || "",
+        // extension: {
+        //   name: item.name,
+        //   description: item.description,
+        //   image: item.image,
+        //   external_url: item.external_url,
+        //   attributes: item.attributes,
+        // }
       })))
-      const tx = await (await breeding.mintWithMetadata(
+      const tx = await (await breeding.mint(
         items.map(item => ({
           tokenId: item.token_id,
           royaltyPercentage: collectionInfo.royaltyPercentage,
           royaltyReceiver: collectionInfo.royaltyPaymentAddress,
-          tokenUri: item.tokenURI,
-          extension: {
-            name: item.name,
-            description: item.description,
-            image: item.image,
-            external_url: item.external_url || "",
-            animation_url: item.animation_url || "",
-            attributes: item.attributes,
-          }
+          tokenUri: item.tokenURI || "",
         }))
       )).wait();
 

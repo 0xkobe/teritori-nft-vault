@@ -13,7 +13,7 @@ async function Deploy() {
   );
   await registry.deployed();
 
-  console.log("Metadat Registry deployed at ", registry.address);
+  console.log("Metadata Registry deployed at ", registry.address);
 
   const SquadStakingV2 = await ethers.getContractFactory("SquadStakingV2");
   const staking = await SquadStakingV2.deploy(
