@@ -99,12 +99,14 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
                 {
                     mintMax: 1,
                     mintPeriod: 100,
-                    mintPrice: ethers.utils.parseEther("0.01")
+                    mintPrice: ethers.utils.parseEther("0.01"),
+                    delayPeriod: 0
                 },
                 {
                     mintMax: 2,
                     mintPeriod: 100,
-                    mintPrice: ethers.utils.parseEther("0.05")
+                    mintPrice: ethers.utils.parseEther("0.05"),
+                    delayPeriod: 0
                 }
             ]
         );
@@ -159,12 +161,14 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
                 {
                     mintMax: 1,
                     mintPeriod: 100,
-                    mintPrice: ethers.utils.parseEther("0.01")
+                    mintPrice: ethers.utils.parseEther("0.01"),
+                    delayPeriod: 0
                 },
                 {
                     mintMax: 2,
                     mintPeriod: 100,
-                    mintPrice: ethers.utils.parseEther("0.05")
+                    mintPrice: ethers.utils.parseEther("0.05"),
+                    delayPeriod: 0
                 }
             ]
         );
@@ -336,7 +340,7 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
             tokenId: "1",
             royaltyReceiver: minter.address,
             royaltyPercentage: "10",
-            tokenUri: "tokenUri",
+            tokenUri: "",
         }]);
 
         expect(await teritoriNft.ownerOf("1")).to.equal(user.address);
@@ -345,9 +349,12 @@ describe("TeritoriMinter / TeritoriNft Test", () => {
 
         expect(await teritoriNft.tokenURI("1")).to.equal('revealURI');
         await teritoriMinter.updateReveal(true, "revealURI");
-        expect(await teritoriNft.tokenURI("1")).to.equal('tokenUri');
+        expect(await teritoriNft.tokenURI("1")).to.equal('');
 
-        await teritoriMinter.setTokenURI("1", "new token uri");
-        expect(await teritoriNft.tokenURI("1")).to.equal('new token uri');
+        await teritoriMinter.setBaseURI("baseURI/")
+        expect(await teritoriNft.tokenURI("1")).to.equal('baseURI/1');
+
+        await teritoriMinter.updateReveal(false, "revealURI");
+        expect(await teritoriNft.tokenURI("1")).to.equal('revealURI');
     })
 });

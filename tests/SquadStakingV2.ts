@@ -26,7 +26,7 @@ describe("SquadStakingV2 Test", () => {
 
         // mint 2 nfts with royalty info
         const config = {
-            maxSupply: 2,
+            maxSupply: 5,
             mintToken: ethers.constants.AddressZero,
             mintStartTime: (await ethers.provider.getBlock("latest")).timestamp,
             whitelistCount: 0,

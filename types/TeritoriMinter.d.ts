@@ -34,6 +34,7 @@ interface TeritoriMinterInterface extends ethers.utils.Interface {
     "paused()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "requestMint(address,uint256)": FunctionFragment;
+    "requestMintByAdmin(address,uint256)": FunctionFragment;
     "setBaseURI(string)": FunctionFragment;
     "setConfig((uint256,address,uint256,uint256,uint256,uint256))": FunctionFragment;
     "setMinter(address)": FunctionFragment;
@@ -104,6 +105,10 @@ interface TeritoriMinterInterface extends ethers.utils.Interface {
     functionFragment: "requestMint",
     values: [string, BigNumberish]
   ): string;
+  encodeFunctionData(
+    functionFragment: "requestMintByAdmin",
+    values: [string, BigNumberish]
+  ): string;
   encodeFunctionData(functionFragment: "setBaseURI", values: [string]): string;
   encodeFunctionData(
     functionFragment: "setConfig",
@@ -139,6 +144,7 @@ interface TeritoriMinterInterface extends ethers.utils.Interface {
         mintMax: BigNumberish;
         mintPeriod: BigNumberish;
         mintPrice: BigNumberish;
+        delayPeriod: BigNumberish;
       }[]
     ]
   ): string;
@@ -201,6 +207,10 @@ interface TeritoriMinterInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "requestMint",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "requestMintByAdmin",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "setBaseURI", data: BytesLike): Result;
@@ -396,6 +406,12 @@ export class TeritoriMinter extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    requestMintByAdmin(
+      user: string,
+      count: BigNumberish,
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     setBaseURI(
       newBaseURI: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -442,6 +458,7 @@ export class TeritoriMinter extends BaseContract {
         mintMax: BigNumberish;
         mintPeriod: BigNumberish;
         mintPrice: BigNumberish;
+        delayPeriod: BigNumberish;
       }[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -500,10 +517,11 @@ export class TeritoriMinter extends BaseContract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, BigNumber, BigNumber] & {
+      [BigNumber, BigNumber, BigNumber, BigNumber] & {
         mintMax: BigNumber;
         mintPeriod: BigNumber;
         mintPrice: BigNumber;
+        delayPeriod: BigNumber;
       }
     >;
 
@@ -579,6 +597,12 @@ export class TeritoriMinter extends BaseContract {
     overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  requestMintByAdmin(
+    user: string,
+    count: BigNumberish,
+    overrides?: PayableOverrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   setBaseURI(
     newBaseURI: string,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -625,6 +649,7 @@ export class TeritoriMinter extends BaseContract {
       mintMax: BigNumberish;
       mintPeriod: BigNumberish;
       mintPrice: BigNumberish;
+      delayPeriod: BigNumberish;
     }[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -680,10 +705,11 @@ export class TeritoriMinter extends BaseContract {
     arg0: BigNumberish,
     overrides?: CallOverrides
   ): Promise<
-    [BigNumber, BigNumber, BigNumber] & {
+    [BigNumber, BigNumber, BigNumber, BigNumber] & {
       mintMax: BigNumber;
       mintPeriod: BigNumber;
       mintPrice: BigNumber;
+      delayPeriod: BigNumber;
     }
   >;
 
@@ -755,6 +781,12 @@ export class TeritoriMinter extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    requestMintByAdmin(
+      user: string,
+      count: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     setBaseURI(newBaseURI: string, overrides?: CallOverrides): Promise<void>;
 
     setConfig(
@@ -795,6 +827,7 @@ export class TeritoriMinter extends BaseContract {
         mintMax: BigNumberish;
         mintPeriod: BigNumberish;
         mintPrice: BigNumberish;
+        delayPeriod: BigNumberish;
       }[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -849,10 +882,11 @@ export class TeritoriMinter extends BaseContract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, BigNumber, BigNumber] & {
+      [BigNumber, BigNumber, BigNumber, BigNumber] & {
         mintMax: BigNumber;
         mintPeriod: BigNumber;
         mintPrice: BigNumber;
+        delayPeriod: BigNumber;
       }
     >;
 
@@ -968,6 +1002,12 @@ export class TeritoriMinter extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    requestMintByAdmin(
+      user: string,
+      count: BigNumberish,
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     setBaseURI(
       newBaseURI: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1014,6 +1054,7 @@ export class TeritoriMinter extends BaseContract {
         mintMax: BigNumberish;
         mintPeriod: BigNumberish;
         mintPrice: BigNumberish;
+        delayPeriod: BigNumberish;
       }[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -1126,6 +1167,12 @@ export class TeritoriMinter extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    requestMintByAdmin(
+      user: string,
+      count: BigNumberish,
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     setBaseURI(
       newBaseURI: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1172,6 +1219,7 @@ export class TeritoriMinter extends BaseContract {
         mintMax: BigNumberish;
         mintPeriod: BigNumberish;
         mintPrice: BigNumberish;
+        delayPeriod: BigNumberish;
       }[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;

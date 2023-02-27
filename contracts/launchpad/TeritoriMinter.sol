@@ -20,6 +20,7 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
         uint256 mintMax;
         uint256 mintPeriod;
         uint256 mintPrice;
+        uint256 delayPeriod;
     }
     struct Config {
         uint256 maxSupply;
@@ -131,6 +132,34 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
         }
     }
 
+    function requestMintByAdmin(address user, uint256 count)
+        external
+        payable
+        whenNotPaused
+        nonReentrant
+    {
+        require(msg.sender == owner(), "Unauthorized");
+        require(
+            config.mintStartTime != 0 &&
+                config.mintStartTime <= block.timestamp,
+            "MINT_NOT_STARTED"
+        );
+
+        require(
+            userMinted[user] + count <= config.publicMintMax,
+            "EXCEED_MINT_MAX"
+        );
+
+        userMinted[user] += count;
+        for (uint256 i = 0; i < count; ++i) {
+            tokenRequests[tokenRequestsCount + i] = user;
+        }
+        tokenRequestsCount += count;
+        require(tokenRequestsCount <= config.maxSupply, "EXCEED_MAX_SUPPLY");
+
+        emit MintRequest(user);
+    }
+
     function requestMint(address user, uint256 count)
         external
         payable
@@ -148,7 +177,16 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
         uint256 mintPrice = config.publicMintPrice;
         for (uint256 i = 0; i < config.whitelistCount; ++i) {
             WhitelistConfig memory whitelist = whitelists[i];
-            if (currentPhaseStart + whitelist.mintPeriod >= block.timestamp) {
+            if (
+                currentPhaseStart +
+                    whitelist.mintPeriod +
+                    whitelist.delayPeriod >=
+                block.timestamp
+            ) {
+                require(
+                    currentPhaseStart + whitelist.mintPeriod >= block.timestamp,
+                    "IN_DELAY"
+                );
                 mintPrice = whitelist.mintPrice;
                 require(userWhitelisted[i][user], "NOT_WHITELISTED");
                 require(
@@ -157,7 +195,7 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
                 );
                 break;
             }
-            currentPhaseStart += whitelist.mintPeriod;
+            currentPhaseStart += whitelist.mintPeriod + whitelist.delayPeriod;
         }
 
         require(mintCount + count <= config.publicMintMax, "EXCEED_MINT_MAX");
@@ -175,6 +213,7 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
             tokenRequests[tokenRequestsCount + i] = user;
         }
         tokenRequestsCount += count;
+        require(tokenRequestsCount <= config.maxSupply, "EXCEED_MAX_SUPPLY");
 
         emit MintRequest(user);
     }
@@ -275,15 +314,22 @@ contract TeritoriMinter is Ownable, Pausable, ReentrancyGuard {
         mintPrice = config.publicMintPrice;
         for (uint256 i = 0; i < config.whitelistCount; ++i) {
             WhitelistConfig memory whitelist = whitelists[i];
-            if (currentPhaseStart + whitelist.mintPeriod >= block.timestamp) {
+            if (
+                currentPhaseStart +
+                    whitelist.mintPeriod +
+                    whitelist.delayPeriod >=
+                block.timestamp
+            ) {
                 mintPrice = whitelist.mintPrice;
                 currentPhase = i;
                 userCanMint =
+                    currentPhaseStart + whitelist.mintPeriod >=
+                    block.timestamp &&
                     userWhitelisted[i][user] &&
                     mintCount < whitelist.mintMax;
                 break;
             }
-            currentPhaseStart += whitelist.mintPeriod;
+            currentPhaseStart += whitelist.mintPeriod + whitelist.delayPeriod;
         }
         userCanMint = userCanMint && mintCount < config.publicMintMax;
     }
