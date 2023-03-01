@@ -7,7 +7,7 @@ import { NFTStorage, File } from 'nft.storage'
 import mime from "mime"
 import { ethers, run } from "hardhat"
 import { dataDir, getMaxSupply, getURL, loadState, saveState } from "./lib";
-import { TeritoriMinter__factory } from '../../types'
+import { TeritoriMinterV2__factory } from '../../types'
 
 async function Instantiate() {
   const [deployer] = await ethers.getSigners();
@@ -70,7 +70,7 @@ async function Instantiate() {
 
   console.log("Metadata URL:", metadataURL)
 
-  const TeritoriMinter = <TeritoriMinter__factory>await ethers.getContractFactory('TeritoriMinter');
+  const TeritoriMinter = <TeritoriMinterV2__factory>await ethers.getContractFactory('TeritoriMinterV2');
   const minter = await TeritoriMinter.deploy(
     collectionInfo.name,
     collectionInfo.symbol,
@@ -98,6 +98,8 @@ async function Instantiate() {
       whitelistCount: collectionInfo.whitelists.length,
       publicMintPrice: collectionInfo.publicMintPrice,
       publicMintMax: collectionInfo.publicMintMax || maxSupply,
+      royaltyReceiver: collectionInfo.royaltyPaymentAddress,
+      royaltyPercentage: collectionInfo.royaltyPercentage,
     }
   )).wait();
   console.log("Minter configuration set");

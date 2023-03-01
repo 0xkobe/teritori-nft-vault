@@ -173,6 +173,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TeritoriMinter__factory>;
     getContractFactory(
+      name: "TeritoriMinterV2",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.TeritoriMinterV2__factory>;
+    getContractFactory(
       name: "TeritoriNft",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TeritoriNft__factory>;
@@ -409,6 +413,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.TeritoriMinter>;
+    getContractAt(
+      name: "TeritoriMinterV2",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.TeritoriMinterV2>;
     getContractAt(
       name: "TeritoriNft",
       address: string,

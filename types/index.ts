@@ -41,6 +41,7 @@ export type { NFTStakingPoolManager } from "./NFTStakingPoolManager";
 export type { Breeding } from "./Breeding";
 export type { Distributor } from "./Distributor";
 export type { TeritoriMinter } from "./TeritoriMinter";
+export type { TeritoriMinterV2 } from "./TeritoriMinterV2";
 export type { TeritoriNft } from "./TeritoriNft";
 export type { UniSafeERC20 } from "./UniSafeERC20";
 export type { NFTVault } from "./NFTVault";
@@ -91,6 +92,7 @@ export { NFTStakingPoolManager__factory } from "./factories/NFTStakingPoolManage
 export { Breeding__factory } from "./factories/Breeding__factory";
 export { Distributor__factory } from "./factories/Distributor__factory";
 export { TeritoriMinter__factory } from "./factories/TeritoriMinter__factory";
+export { TeritoriMinterV2__factory } from "./factories/TeritoriMinterV2__factory";
 export { TeritoriNft__factory } from "./factories/TeritoriNft__factory";
 export { UniSafeERC20__factory } from "./factories/UniSafeERC20__factory";
 export { NFTVault__factory } from "./factories/NFTVault__factory";

@@ -13,7 +13,8 @@ const internalImageFileName = "nft.png"
 async function prepareToken(i: number, nftstorage: NFTStorage, maxSupply: number) {
   let metadata = JSON.parse(fs.readFileSync(path.join(metadataDir, `${i}.json`)).toString())
   if (!metadata.image.toString().includes('ipfs')) {
-    const imagePath = path.join(metadataDir, metadata.image)
+    // const imagePath = path.join(metadataDir, metadata.image)
+    const imagePath = path.join(metadataDir, `${i}.png`)
     const imageContent = fs.readFileSync(imagePath)
     const imageType = mime.getType(imagePath)
     const dirCid = await nftstorage.storeDirectory([new File([imageContent], internalImageFileName, { type: imageType })])
@@ -73,6 +74,8 @@ async function prepare() {
     }
   }
 
+  fs.writeFileSync(tokensFile, JSON.stringify(tokens, undefined, 2))
+
   const files = [];
   for (let i = 1; i <= maxSupply; i++) {
     const jsonPath = path.join(metadataDir, `${i}.json`)
@@ -83,8 +86,6 @@ async function prepare() {
   const dirCid = await nftstorage.storeDirectory(files);
   const baseURI = getURL(`ipfs://${dirCid}/`)
   console.log("base URL:", baseURI)
-
-  fs.writeFileSync(tokensFile, JSON.stringify(tokens, undefined, 2))
 }
 
 prepare();
