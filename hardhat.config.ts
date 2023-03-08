@@ -20,7 +20,7 @@ export default {
       allowUnlimitedContractSize: true,
     },
     mainnet: {
-      url: `https://polygon-mainnet.g.alchemy.com/v2/${process.env.RPC_NODE_KEY}`,
+      url: `https://eth-mainnet.g.alchemy.com/v2/${process.env.RPC_NODE_KEY}`,
       accounts: [process.env.PRIVATE_KEY],
     },
     goerli: {

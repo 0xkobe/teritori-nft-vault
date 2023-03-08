@@ -11,3 +11,5 @@ metadata.zip
 metadata_total.zip
 whitelist1.json
 whitelist2.json
+/banner.*
+/image.*
