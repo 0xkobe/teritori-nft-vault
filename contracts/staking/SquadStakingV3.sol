@@ -41,7 +41,7 @@ contract SquadStakingV3 is Ownable, Pausable, ERC721Holder {
     uint256 public cooldownPeriod;
     mapping(uint256 => uint256) public bonusMultipliers;
     EnumerableSet.AddressSet private _supportedCollections;
-    mapping(address => mapping(uint256 => SquadInfo)) public userSquads;
+    mapping(address => mapping(uint256 => SquadInfo)) private userSquads;
     mapping(address => uint256) private userLastWithdrawnIndex;
     mapping(address => uint256) private userLastDepositIndex;
 
@@ -193,9 +193,9 @@ contract SquadStakingV3 is Ownable, Pausable, ERC721Holder {
     function unstake(uint256 index) external whenNotPaused {
         SquadInfo memory info = userSquads[msg.sender][index];
         require(info.nfts.length > 0, "invalid index");
-        require(info.endTime >= block.timestamp, "during staking period");
+        require(info.endTime <= block.timestamp, "during staking period");
         require(
-            info.startTime + cooldownPeriod >= block.timestamp,
+            info.startTime + cooldownPeriod <= block.timestamp,
             "during cooldown period"
         );
 

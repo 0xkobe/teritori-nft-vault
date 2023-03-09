@@ -49,7 +49,6 @@ interface SquadStakingV3Interface extends ethers.utils.Interface {
     "unstake(uint256)": FunctionFragment;
     "userSquadCount(address)": FunctionFragment;
     "userSquadInfo(address)": FunctionFragment;
-    "userSquads(address,uint256)": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -152,10 +151,6 @@ interface SquadStakingV3Interface extends ethers.utils.Interface {
     functionFragment: "userSquadInfo",
     values: [string]
   ): string;
-  encodeFunctionData(
-    functionFragment: "userSquads",
-    values: [string, BigNumberish]
-  ): string;
 
   decodeFunctionResult(
     functionFragment: "BONUS_MULTIPLIER_BASE_POINT",
@@ -251,7 +246,6 @@ interface SquadStakingV3Interface extends ethers.utils.Interface {
     functionFragment: "userSquadInfo",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "userSquads", data: BytesLike): Result;
 
   events: {
     "OwnershipTransferred(address,address)": EventFragment;
@@ -481,14 +475,6 @@ export class SquadStakingV3 extends BaseContract {
         })[];
       }
     >;
-
-    userSquads(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, BigNumber] & { startTime: BigNumber; endTime: BigNumber }
-    >;
   };
 
   BONUS_MULTIPLIER_BASE_POINT(overrides?: CallOverrides): Promise<BigNumber>;
@@ -621,14 +607,6 @@ export class SquadStakingV3 extends BaseContract {
     })[]
   >;
 
-  userSquads(
-    arg0: string,
-    arg1: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<
-    [BigNumber, BigNumber] & { startTime: BigNumber; endTime: BigNumber }
-  >;
-
   callStatic: {
     BONUS_MULTIPLIER_BASE_POINT(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -749,14 +727,6 @@ export class SquadStakingV3 extends BaseContract {
           tokenId: BigNumber;
         })[];
       })[]
-    >;
-
-    userSquads(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, BigNumber] & { startTime: BigNumber; endTime: BigNumber }
     >;
   };
 
@@ -926,12 +896,6 @@ export class SquadStakingV3 extends BaseContract {
     userSquadCount(user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     userSquadInfo(user: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    userSquads(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -1056,12 +1020,6 @@ export class SquadStakingV3 extends BaseContract {
 
     userSquadInfo(
       user: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    userSquads(
-      arg0: string,
-      arg1: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };

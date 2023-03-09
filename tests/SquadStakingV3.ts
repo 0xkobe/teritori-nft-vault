@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { ethers, network } from "hardhat";
 import { NFTMetadataRegistry, SquadStakingV3, TeritoriMinter, TeritoriNft } from "../types";
 
-describe.only("SquadStakingV3 Test", () => {
+describe("SquadStakingV3 Test", () => {
     let minter: SignerWithAddress, user: SignerWithAddress, royaltyReceiver: SignerWithAddress;
     let teritoriNftImpl: TeritoriNft;
     let teritoriMinter: TeritoriMinter, nft: TeritoriNft;
@@ -255,5 +255,45 @@ describe.only("SquadStakingV3 Test", () => {
 
         info = await staking.userSquadInfo(user.address);
         expect(info[1].endTime.sub(info[1].startTime)).to.equal(13500);
+    })
+
+    it('unstake', async () => {
+        await expect(staking.unstake(1)).to.revertedWith('invalid index');
+
+        await nft.connect(user).setApprovalForAll(staking.address, true);
+        await staking.connect(user).stake([
+            {
+                collection: nft.address,
+                tokenId: "1"
+            },
+            {
+                collection: nft.address,
+                tokenId: "2"
+            },
+            {
+                collection: nft.address,
+                tokenId: "3"
+            },
+            {
+                collection: nft.address,
+                tokenId: "4"
+            },
+            {
+                collection: nft.address,
+                tokenId: "5"
+            },
+        ]);
+
+        await expect(staking.connect(user).unstake(1)).to.revertedWith('during staking period')
+
+        await network.provider.send("evm_increaseTime", [45000]);
+
+        await expect(staking.connect(user).unstake(1)).to.revertedWith('during cooldown period')
+
+        await network.provider.send("evm_increaseTime", [45000]);
+
+        await staking.connect(user).unstake(1);
+
+        expect(await nft.ownerOf("1")).to.equal(user.address);
     })
 });
