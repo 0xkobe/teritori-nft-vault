@@ -21,7 +21,8 @@ async function start() {
     const staminas = staminaData.slice(i, i + batch_count);
     console.log(staminas)
 
-    const tx = await (await registry.setNftStamina(
+    const tx = await (await registry.setNftMetadata(
+      "0xd5a7979ffc063a968e739c62c537ad288115ff53fe26bed1217a11adff77b483",
       collectionAddress,
       staminas.map(item => item.tokenId.toString()),
       staminas.map(item => item.stamina.toString()),

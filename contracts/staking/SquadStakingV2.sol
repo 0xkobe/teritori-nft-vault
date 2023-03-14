@@ -27,6 +27,7 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
     }
 
     uint256 public constant BONUS_MULTIPLIER_BASE_POINT = 1e18;
+    bytes32 public constant STAMINA = keccak256("STAMINA");
 
     address public nftMetadataRegistry;
     uint256 public minSquadSize;
@@ -60,10 +61,10 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
         _unpause();
     }
 
-    function setSquadSize(uint256 _minSquadSize, uint256 _maxSquadSize)
-        external
-        onlyOwner
-    {
+    function setSquadSize(
+        uint256 _minSquadSize,
+        uint256 _maxSquadSize
+    ) external onlyOwner {
         minSquadSize = _minSquadSize;
         maxSquadSize = _maxSquadSize;
     }
@@ -82,10 +83,10 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
         }
     }
 
-    function setSupportedCollection(address collection, bool supported)
-        external
-        onlyOwner
-    {
+    function setSupportedCollection(
+        address collection,
+        bool supported
+    ) external onlyOwner {
         if (supported) {
             _supportedCollections.add(collection);
         } else {
@@ -101,19 +102,15 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
         return _supportedCollections.length();
     }
 
-    function supportedCollectionAt(uint256 index)
-        external
-        view
-        returns (address)
-    {
+    function supportedCollectionAt(
+        uint256 index
+    ) external view returns (address) {
         return _supportedCollections.at(index);
     }
 
-    function supportedCollections(uint256 index)
-        external
-        view
-        returns (address[] memory collections)
-    {
+    function supportedCollections(
+        uint256 index
+    ) external view returns (address[] memory collections) {
         uint256 length = _supportedCollections.length();
         collections = new address[](length);
         for (uint256 i = 0; i < length; ++i) {
@@ -121,11 +118,9 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
         }
     }
 
-    function userSquadInfo(address user)
-        external
-        view
-        returns (SquadInfo memory)
-    {
+    function userSquadInfo(
+        address user
+    ) external view returns (SquadInfo memory) {
         return _userSquadInfo[user];
     }
 
@@ -142,6 +137,10 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
         );
 
         for (uint256 i = 0; i < nfts.length; ++i) {
+            require(
+                isSupportedCollection(nfts[i].collection),
+                "not supported collection"
+            );
             IERC721(nfts[i].collection).safeTransferFrom(
                 msg.sender,
                 address(this),
@@ -197,7 +196,8 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
         uint256 bonusMultiplier = bonusMultipliers[size];
         require(bonusMultiplier != 0, "invalid bonus multiplier");
 
-        uint256 stamina = NFTMetadataRegistry(nftMetadataRegistry).stamina(
+        uint256 stamina = NFTMetadataRegistry(nftMetadataRegistry).metadata(
+            STAMINA,
             collection,
             tokenId
         );

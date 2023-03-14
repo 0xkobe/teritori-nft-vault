@@ -22,10 +22,10 @@ import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 interface NFTMetadataRegistryInterface extends ethers.utils.Interface {
   functions: {
     "initialize()": FunctionFragment;
+    "metadata(bytes32,address,uint256)": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
-    "setNftStamina(address,uint256[],uint256[])": FunctionFragment;
-    "stamina(address,uint256)": FunctionFragment;
+    "setNftMetadata(bytes32,address,uint256[],uint256[])": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
   };
 
@@ -33,18 +33,18 @@ interface NFTMetadataRegistryInterface extends ethers.utils.Interface {
     functionFragment: "initialize",
     values?: undefined
   ): string;
+  encodeFunctionData(
+    functionFragment: "metadata",
+    values: [BytesLike, string, BigNumberish]
+  ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "setNftStamina",
-    values: [string, BigNumberish[], BigNumberish[]]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "stamina",
-    values: [string, BigNumberish]
+    functionFragment: "setNftMetadata",
+    values: [BytesLike, string, BigNumberish[], BigNumberish[]]
   ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
@@ -52,16 +52,16 @@ interface NFTMetadataRegistryInterface extends ethers.utils.Interface {
   ): string;
 
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "metadata", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setNftStamina",
+    functionFragment: "setNftMetadata",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "stamina", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
@@ -130,24 +130,26 @@ export class NFTMetadataRegistry extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    metadata(
+      arg0: BytesLike,
+      arg1: string,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
     owner(overrides?: CallOverrides): Promise<[string]>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    setNftStamina(
+    setNftMetadata(
+      metadata_key: BytesLike,
       collection: string,
       tokenIdArray: BigNumberish[],
       stanimaArray: BigNumberish[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
-
-    stamina(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
 
     transferOwnership(
       newOwner: string,
@@ -159,24 +161,26 @@ export class NFTMetadataRegistry extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  metadata(
+    arg0: BytesLike,
+    arg1: string,
+    arg2: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
   owner(overrides?: CallOverrides): Promise<string>;
 
   renounceOwnership(
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  setNftStamina(
+  setNftMetadata(
+    metadata_key: BytesLike,
     collection: string,
     tokenIdArray: BigNumberish[],
     stanimaArray: BigNumberish[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
-
-  stamina(
-    arg0: string,
-    arg1: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
 
   transferOwnership(
     newOwner: string,
@@ -186,22 +190,24 @@ export class NFTMetadataRegistry extends BaseContract {
   callStatic: {
     initialize(overrides?: CallOverrides): Promise<void>;
 
+    metadata(
+      arg0: BytesLike,
+      arg1: string,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     owner(overrides?: CallOverrides): Promise<string>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
-    setNftStamina(
+    setNftMetadata(
+      metadata_key: BytesLike,
       collection: string,
       tokenIdArray: BigNumberish[],
       stanimaArray: BigNumberish[],
       overrides?: CallOverrides
     ): Promise<void>;
-
-    stamina(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
 
     transferOwnership(
       newOwner: string,
@@ -240,23 +246,25 @@ export class NFTMetadataRegistry extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    metadata(
+      arg0: BytesLike,
+      arg1: string,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    setNftStamina(
+    setNftMetadata(
+      metadata_key: BytesLike,
       collection: string,
       tokenIdArray: BigNumberish[],
       stanimaArray: BigNumberish[],
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    stamina(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     transferOwnership(
@@ -270,23 +278,25 @@ export class NFTMetadataRegistry extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    metadata(
+      arg0: BytesLike,
+      arg1: string,
+      arg2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    setNftStamina(
+    setNftMetadata(
+      metadata_key: BytesLike,
       collection: string,
       tokenIdArray: BigNumberish[],
       stanimaArray: BigNumberish[],
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    stamina(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     transferOwnership(

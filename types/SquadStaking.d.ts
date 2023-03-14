@@ -39,7 +39,6 @@ interface SquadStakingInterface extends ethers.utils.Interface {
     "setSupportedCollection(address,bool)": FunctionFragment;
     "stake(tuple[])": FunctionFragment;
     "stakeDuration(address,uint256,uint256)": FunctionFragment;
-    "stringToUint(string)": FunctionFragment;
     "supportedCollectionAt(uint256)": FunctionFragment;
     "supportedCollectionLength()": FunctionFragment;
     "supportedCollections(uint256)": FunctionFragment;
@@ -111,10 +110,6 @@ interface SquadStakingInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "stakeDuration",
     values: [string, BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "stringToUint",
-    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "supportedCollectionAt",
@@ -197,10 +192,6 @@ interface SquadStakingInterface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "stake", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "stakeDuration",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "stringToUint",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -385,11 +376,6 @@ export class SquadStaking extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    stringToUint(
-      s: string,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber, boolean] & { result: BigNumber; hasError: boolean }>;
-
     supportedCollectionAt(
       index: BigNumberish,
       overrides?: CallOverrides
@@ -516,11 +502,6 @@ export class SquadStaking extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  stringToUint(
-    s: string,
-    overrides?: CallOverrides
-  ): Promise<[BigNumber, boolean] & { result: BigNumber; hasError: boolean }>;
-
   supportedCollectionAt(
     index: BigNumberish,
     overrides?: CallOverrides
@@ -640,11 +621,6 @@ export class SquadStaking extends BaseContract {
       size: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
-
-    stringToUint(
-      s: string,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber, boolean] & { result: BigNumber; hasError: boolean }>;
 
     supportedCollectionAt(
       index: BigNumberish,
@@ -816,8 +792,6 @@ export class SquadStaking extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    stringToUint(s: string, overrides?: CallOverrides): Promise<BigNumber>;
-
     supportedCollectionAt(
       index: BigNumberish,
       overrides?: CallOverrides
@@ -924,11 +898,6 @@ export class SquadStaking extends BaseContract {
       collection: string,
       tokenId: BigNumberish,
       size: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    stringToUint(
-      s: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

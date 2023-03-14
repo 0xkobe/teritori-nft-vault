@@ -57,10 +57,10 @@ contract SquadStaking is Ownable, Pausable, ERC721Holder {
         _unpause();
     }
 
-    function setSquadSize(uint256 _minSquadSize, uint256 _maxSquadSize)
-        external
-        onlyOwner
-    {
+    function setSquadSize(
+        uint256 _minSquadSize,
+        uint256 _maxSquadSize
+    ) external onlyOwner {
         minSquadSize = _minSquadSize;
         maxSquadSize = _maxSquadSize;
     }
@@ -79,10 +79,10 @@ contract SquadStaking is Ownable, Pausable, ERC721Holder {
         }
     }
 
-    function setSupportedCollection(address collection, bool supported)
-        external
-        onlyOwner
-    {
+    function setSupportedCollection(
+        address collection,
+        bool supported
+    ) external onlyOwner {
         if (supported) {
             _supportedCollections.add(collection);
         } else {
@@ -98,19 +98,15 @@ contract SquadStaking is Ownable, Pausable, ERC721Holder {
         return _supportedCollections.length();
     }
 
-    function supportedCollectionAt(uint256 index)
-        external
-        view
-        returns (address)
-    {
+    function supportedCollectionAt(
+        uint256 index
+    ) external view returns (address) {
         return _supportedCollections.at(index);
     }
 
-    function supportedCollections(uint256 index)
-        external
-        view
-        returns (address[] memory collections)
-    {
+    function supportedCollections(
+        uint256 index
+    ) external view returns (address[] memory collections) {
         uint256 length = _supportedCollections.length();
         collections = new address[](length);
         for (uint256 i = 0; i < length; ++i) {
@@ -118,11 +114,9 @@ contract SquadStaking is Ownable, Pausable, ERC721Holder {
         }
     }
 
-    function userSquadInfo(address user)
-        external
-        view
-        returns (SquadInfo memory)
-    {
+    function userSquadInfo(
+        address user
+    ) external view returns (SquadInfo memory) {
         return _userSquadInfo[user];
     }
 
@@ -139,6 +133,10 @@ contract SquadStaking is Ownable, Pausable, ERC721Holder {
         );
 
         for (uint256 i = 0; i < nfts.length; ++i) {
+            require(
+                isSupportedCollection(nfts[i].collection),
+                "not supported collection"
+            );
             IERC721(nfts[i].collection).safeTransferFrom(
                 msg.sender,
                 address(this),
@@ -218,11 +216,9 @@ contract SquadStaking is Ownable, Pausable, ERC721Holder {
             BONUS_MULTIPLIER_BASE_POINT;
     }
 
-    function stringToUint(string memory s)
-        public
-        pure
-        returns (uint256 result, bool hasError)
-    {
+    function stringToUint(
+        string memory s
+    ) private pure returns (uint256 result, bool hasError) {
         bytes memory b = bytes(s);
         for (uint256 i = 0; i < b.length; ++i) {
             if (uint8(b[i]) >= 48 && uint8(b[i]) <= 57) {

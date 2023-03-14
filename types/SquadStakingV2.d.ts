@@ -22,6 +22,7 @@ import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 interface SquadStakingV2Interface extends ethers.utils.Interface {
   functions: {
     "BONUS_MULTIPLIER_BASE_POINT()": FunctionFragment;
+    "STAMINA()": FunctionFragment;
     "_userSquadInfo(address)": FunctionFragment;
     "bonusMultipliers(uint256)": FunctionFragment;
     "cooldownPeriod()": FunctionFragment;
@@ -53,6 +54,7 @@ interface SquadStakingV2Interface extends ethers.utils.Interface {
     functionFragment: "BONUS_MULTIPLIER_BASE_POINT",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "STAMINA", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "_userSquadInfo",
     values: [string]
@@ -143,6 +145,7 @@ interface SquadStakingV2Interface extends ethers.utils.Interface {
     functionFragment: "BONUS_MULTIPLIER_BASE_POINT",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "STAMINA", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "_userSquadInfo",
     data: BytesLike
@@ -307,6 +310,8 @@ export class SquadStakingV2 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
+    STAMINA(overrides?: CallOverrides): Promise<[string]>;
+
     _userSquadInfo(
       arg0: string,
       overrides?: CallOverrides
@@ -435,6 +440,8 @@ export class SquadStakingV2 extends BaseContract {
 
   BONUS_MULTIPLIER_BASE_POINT(overrides?: CallOverrides): Promise<BigNumber>;
 
+  STAMINA(overrides?: CallOverrides): Promise<string>;
+
   _userSquadInfo(
     arg0: string,
     overrides?: CallOverrides
@@ -560,6 +567,8 @@ export class SquadStakingV2 extends BaseContract {
 
   callStatic: {
     BONUS_MULTIPLIER_BASE_POINT(overrides?: CallOverrides): Promise<BigNumber>;
+
+    STAMINA(overrides?: CallOverrides): Promise<string>;
 
     _userSquadInfo(
       arg0: string,
@@ -734,6 +743,8 @@ export class SquadStakingV2 extends BaseContract {
   estimateGas: {
     BONUS_MULTIPLIER_BASE_POINT(overrides?: CallOverrides): Promise<BigNumber>;
 
+    STAMINA(overrides?: CallOverrides): Promise<BigNumber>;
+
     _userSquadInfo(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     bonusMultipliers(
@@ -841,6 +852,8 @@ export class SquadStakingV2 extends BaseContract {
     BONUS_MULTIPLIER_BASE_POINT(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    STAMINA(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     _userSquadInfo(
       arg0: string,

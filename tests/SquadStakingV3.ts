@@ -88,7 +88,8 @@ describe("SquadStakingV3 Test", () => {
         await registry.deployed();
         await registry.initialize();
 
-        await registry.setNftStamina(
+        await registry.setNftMetadata(
+            "0xd5a7979ffc063a968e739c62c537ad288115ff53fe26bed1217a11adff77b483",
             nft.address,
             ["1", "2", "3", "4", "5", "6", "7"],
             [50, 40, 20, 10, 5, 30, 50],
@@ -106,6 +107,7 @@ describe("SquadStakingV3 Test", () => {
             ],
         );
         await staking.deployed();
+        await staking.setSupportedCollection(nft.address, true);
     })
 
     it('initialize', async () => {
