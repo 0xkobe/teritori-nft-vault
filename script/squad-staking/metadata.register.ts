@@ -16,14 +16,15 @@ async function start() {
 
   const registry = await ethers.getContractAt('NFTMetadataRegistry', metadataRegistryAddress);
 
+  const staminaKey = await registry.queryMetadataKey("Stamina");
   const batch_count = 2;
   for (let i = 0; i < maxSupply; i += batch_count) {
     const staminas = staminaData.slice(i, i + batch_count);
     console.log(staminas)
 
-    const tx = await (await registry.setNftMetadata(
-      "0xd5a7979ffc063a968e739c62c537ad288115ff53fe26bed1217a11adff77b483",
+    const tx = await (await registry.registerNftMegadata(
       collectionAddress,
+      staminaKey,
       staminas.map(item => item.tokenId.toString()),
       staminas.map(item => item.stamina.toString()),
     )).wait();

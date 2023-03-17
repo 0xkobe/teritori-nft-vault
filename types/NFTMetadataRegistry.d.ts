@@ -22,10 +22,14 @@ import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 interface NFTMetadataRegistryInterface extends ethers.utils.Interface {
   functions: {
     "initialize()": FunctionFragment;
-    "metadata(bytes32,address,uint256)": FunctionFragment;
+    "isAdmin(address)": FunctionFragment;
+    "metadata(address,bytes32,uint256)": FunctionFragment;
     "owner()": FunctionFragment;
+    "queryMetadataKey(string)": FunctionFragment;
+    "queryNftMetadata(address,string,uint256)": FunctionFragment;
+    "registerNftMegadata(address,bytes32,uint256[],uint256[])": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
-    "setNftMetadata(bytes32,address,uint256[],uint256[])": FunctionFragment;
+    "setAdmin(address[],bool)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
   };
 
@@ -33,18 +37,31 @@ interface NFTMetadataRegistryInterface extends ethers.utils.Interface {
     functionFragment: "initialize",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "isAdmin", values: [string]): string;
   encodeFunctionData(
     functionFragment: "metadata",
-    values: [BytesLike, string, BigNumberish]
+    values: [string, BytesLike, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "queryMetadataKey",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "queryNftMetadata",
+    values: [string, string, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "registerNftMegadata",
+    values: [string, BytesLike, BigNumberish[], BigNumberish[]]
+  ): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "setNftMetadata",
-    values: [BytesLike, string, BigNumberish[], BigNumberish[]]
+    functionFragment: "setAdmin",
+    values: [string[], boolean]
   ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
@@ -52,16 +69,26 @@ interface NFTMetadataRegistryInterface extends ethers.utils.Interface {
   ): string;
 
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "isAdmin", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "metadata", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "queryMetadataKey",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "queryNftMetadata",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "registerNftMegadata",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "setNftMetadata",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "setAdmin", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
@@ -130,24 +157,41 @@ export class NFTMetadataRegistry extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    isAdmin(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
+
     metadata(
-      arg0: BytesLike,
-      arg1: string,
+      arg0: string,
+      arg1: BytesLike,
       arg2: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
+    queryMetadataKey(key: string, overrides?: CallOverrides): Promise<[string]>;
+
+    queryNftMetadata(
+      collection: string,
+      key: string,
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    registerNftMegadata(
+      collection: string,
+      metadata_key: BytesLike,
+      tokenIdArray: BigNumberish[],
+      stanimaArray: BigNumberish[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    setNftMetadata(
-      metadata_key: BytesLike,
-      collection: string,
-      tokenIdArray: BigNumberish[],
-      stanimaArray: BigNumberish[],
+    setAdmin(
+      _admins: string[],
+      _isAdmin: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -161,24 +205,41 @@ export class NFTMetadataRegistry extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  isAdmin(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+
   metadata(
-    arg0: BytesLike,
-    arg1: string,
+    arg0: string,
+    arg1: BytesLike,
     arg2: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
+  queryMetadataKey(key: string, overrides?: CallOverrides): Promise<string>;
+
+  queryNftMetadata(
+    collection: string,
+    key: string,
+    tokenId: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  registerNftMegadata(
+    collection: string,
+    metadata_key: BytesLike,
+    tokenIdArray: BigNumberish[],
+    stanimaArray: BigNumberish[],
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   renounceOwnership(
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  setNftMetadata(
-    metadata_key: BytesLike,
-    collection: string,
-    tokenIdArray: BigNumberish[],
-    stanimaArray: BigNumberish[],
+  setAdmin(
+    _admins: string[],
+    _isAdmin: boolean,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -190,22 +251,39 @@ export class NFTMetadataRegistry extends BaseContract {
   callStatic: {
     initialize(overrides?: CallOverrides): Promise<void>;
 
+    isAdmin(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+
     metadata(
-      arg0: BytesLike,
-      arg1: string,
+      arg0: string,
+      arg1: BytesLike,
       arg2: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
-    renounceOwnership(overrides?: CallOverrides): Promise<void>;
+    queryMetadataKey(key: string, overrides?: CallOverrides): Promise<string>;
 
-    setNftMetadata(
-      metadata_key: BytesLike,
+    queryNftMetadata(
       collection: string,
+      key: string,
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    registerNftMegadata(
+      collection: string,
+      metadata_key: BytesLike,
       tokenIdArray: BigNumberish[],
       stanimaArray: BigNumberish[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    renounceOwnership(overrides?: CallOverrides): Promise<void>;
+
+    setAdmin(
+      _admins: string[],
+      _isAdmin: boolean,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -246,24 +324,44 @@ export class NFTMetadataRegistry extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    isAdmin(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
     metadata(
-      arg0: BytesLike,
-      arg1: string,
+      arg0: string,
+      arg1: BytesLike,
       arg2: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
+    queryMetadataKey(
+      key: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    queryNftMetadata(
+      collection: string,
+      key: string,
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    registerNftMegadata(
+      collection: string,
+      metadata_key: BytesLike,
+      tokenIdArray: BigNumberish[],
+      stanimaArray: BigNumberish[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    setNftMetadata(
-      metadata_key: BytesLike,
-      collection: string,
-      tokenIdArray: BigNumberish[],
-      stanimaArray: BigNumberish[],
+    setAdmin(
+      _admins: string[],
+      _isAdmin: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -278,24 +376,47 @@ export class NFTMetadataRegistry extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    isAdmin(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     metadata(
-      arg0: BytesLike,
-      arg1: string,
+      arg0: string,
+      arg1: BytesLike,
       arg2: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    queryMetadataKey(
+      key: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    queryNftMetadata(
+      collection: string,
+      key: string,
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    registerNftMegadata(
+      collection: string,
+      metadata_key: BytesLike,
+      tokenIdArray: BigNumberish[],
+      stanimaArray: BigNumberish[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    setNftMetadata(
-      metadata_key: BytesLike,
-      collection: string,
-      tokenIdArray: BigNumberish[],
-      stanimaArray: BigNumberish[],
+    setAdmin(
+      _admins: string[],
+      _isAdmin: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

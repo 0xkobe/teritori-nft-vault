@@ -27,7 +27,7 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
     }
 
     uint256 public constant BONUS_MULTIPLIER_BASE_POINT = 1e18;
-    bytes32 public constant STAMINA = keccak256("STAMINA");
+    bytes32 public constant STAMINA = keccak256(abi.encode("Stamina"));
 
     address public nftMetadataRegistry;
     uint256 public minSquadSize;
@@ -197,8 +197,8 @@ contract SquadStakingV2 is Ownable, Pausable, ERC721Holder {
         require(bonusMultiplier != 0, "invalid bonus multiplier");
 
         uint256 stamina = NFTMetadataRegistry(nftMetadataRegistry).metadata(
-            STAMINA,
             collection,
+            STAMINA,
             tokenId
         );
         return
