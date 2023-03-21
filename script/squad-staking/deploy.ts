@@ -15,11 +15,12 @@ async function Deploy() {
 
   console.log("Metadata Registry deployed at ", registry.address);
 
-  const SquadStakingV2 = await ethers.getContractFactory("SquadStakingV2");
-  const staking = await SquadStakingV2.deploy(
+  const SquadStakingV3 = await ethers.getContractFactory("SquadStakingV3");
+  const staking = await SquadStakingV3.deploy(
     registry.address,
     config.minSquadSize,
     config.maxSquadSize,
+    config.squadCountLimit,
     config.cooldownPeriod,
     config.bonusMultiplier
   );

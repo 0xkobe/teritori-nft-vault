@@ -25,6 +25,16 @@ contract NFTMetadataRegistry is OwnableUpgradeable {
     function registerNftMegadata(
         address collection,
         bytes32 metadata_key,
+        uint256 tokenId,
+        uint256 stanima
+    ) external {
+        require(msg.sender == owner() || isAdmin[msg.sender], "unauthorized");
+        metadata[collection][metadata_key][tokenId] = stanima;
+    }
+
+    function registerNftMegadata(
+        address collection,
+        bytes32 metadata_key,
         uint256[] memory tokenIdArray,
         uint256[] memory stanimaArray
     ) external {

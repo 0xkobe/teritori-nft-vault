@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 
 import "../launchpad/TeritoriNft.sol";
 
+/// @dev use on-chain metadata
 contract SquadStaking is Ownable, Pausable, ERC721Holder {
     using EnumerableSet for EnumerableSet.AddressSet;
 

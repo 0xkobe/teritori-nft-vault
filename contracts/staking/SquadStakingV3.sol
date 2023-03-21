@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 
 import "./NFTMetadataRegistry.sol";
 
+/// @dev use metadata registry + multi squad staking
 contract SquadStakingV3 is Ownable, Pausable, ERC721Holder {
     using EnumerableSet for EnumerableSet.AddressSet;
 

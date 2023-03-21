@@ -45,6 +45,7 @@ export type { TeritoriMinterV2 } from "./TeritoriMinterV2";
 export type { TeritoriNft } from "./TeritoriNft";
 export type { UniSafeERC20 } from "./UniSafeERC20";
 export type { NFTVault } from "./NFTVault";
+export type { HPHealing } from "./HPHealing";
 export type { NFTMetadataRegistry } from "./NFTMetadataRegistry";
 export type { SquadStaking } from "./SquadStaking";
 export type { SquadStakingV2 } from "./SquadStakingV2";
@@ -96,6 +97,7 @@ export { TeritoriMinterV2__factory } from "./factories/TeritoriMinterV2__factory
 export { TeritoriNft__factory } from "./factories/TeritoriNft__factory";
 export { UniSafeERC20__factory } from "./factories/UniSafeERC20__factory";
 export { NFTVault__factory } from "./factories/NFTVault__factory";
+export { HPHealing__factory } from "./factories/HPHealing__factory";
 export { NFTMetadataRegistry__factory } from "./factories/NFTMetadataRegistry__factory";
 export { SquadStaking__factory } from "./factories/SquadStaking__factory";
 export { SquadStakingV2__factory } from "./factories/SquadStakingV2__factory";

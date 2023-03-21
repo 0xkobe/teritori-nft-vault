@@ -27,7 +27,7 @@ interface NFTMetadataRegistryInterface extends ethers.utils.Interface {
     "owner()": FunctionFragment;
     "queryMetadataKey(string)": FunctionFragment;
     "queryNftMetadata(address,string,uint256)": FunctionFragment;
-    "registerNftMegadata(address,bytes32,uint256[],uint256[])": FunctionFragment;
+    "registerNftMegadata(address,bytes32,uint256,uint256)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "setAdmin(address[],bool)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
@@ -53,7 +53,7 @@ interface NFTMetadataRegistryInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "registerNftMegadata",
-    values: [string, BytesLike, BigNumberish[], BigNumberish[]]
+    values: [string, BytesLike, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
@@ -177,7 +177,15 @@ export class NFTMetadataRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    registerNftMegadata(
+    "registerNftMegadata(address,bytes32,uint256,uint256)"(
+      collection: string,
+      metadata_key: BytesLike,
+      tokenId: BigNumberish,
+      stanima: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    "registerNftMegadata(address,bytes32,uint256[],uint256[])"(
       collection: string,
       metadata_key: BytesLike,
       tokenIdArray: BigNumberish[],
@@ -225,7 +233,15 @@ export class NFTMetadataRegistry extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  registerNftMegadata(
+  "registerNftMegadata(address,bytes32,uint256,uint256)"(
+    collection: string,
+    metadata_key: BytesLike,
+    tokenId: BigNumberish,
+    stanima: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  "registerNftMegadata(address,bytes32,uint256[],uint256[])"(
     collection: string,
     metadata_key: BytesLike,
     tokenIdArray: BigNumberish[],
@@ -271,7 +287,15 @@ export class NFTMetadataRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    registerNftMegadata(
+    "registerNftMegadata(address,bytes32,uint256,uint256)"(
+      collection: string,
+      metadata_key: BytesLike,
+      tokenId: BigNumberish,
+      stanima: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "registerNftMegadata(address,bytes32,uint256[],uint256[])"(
       collection: string,
       metadata_key: BytesLike,
       tokenIdArray: BigNumberish[],
@@ -347,7 +371,15 @@ export class NFTMetadataRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    registerNftMegadata(
+    "registerNftMegadata(address,bytes32,uint256,uint256)"(
+      collection: string,
+      metadata_key: BytesLike,
+      tokenId: BigNumberish,
+      stanima: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    "registerNftMegadata(address,bytes32,uint256[],uint256[])"(
       collection: string,
       metadata_key: BytesLike,
       tokenIdArray: BigNumberish[],
@@ -402,7 +434,15 @@ export class NFTMetadataRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    registerNftMegadata(
+    "registerNftMegadata(address,bytes32,uint256,uint256)"(
+      collection: string,
+      metadata_key: BytesLike,
+      tokenId: BigNumberish,
+      stanima: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    "registerNftMegadata(address,bytes32,uint256[],uint256[])"(
       collection: string,
       metadata_key: BytesLike,
       tokenIdArray: BigNumberish[],
