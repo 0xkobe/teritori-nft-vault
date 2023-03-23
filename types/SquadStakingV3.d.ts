@@ -25,6 +25,7 @@ interface SquadStakingV3Interface extends ethers.utils.Interface {
     "STAMINA()": FunctionFragment;
     "bonusMultipliers(uint256)": FunctionFragment;
     "cooldownPeriod()": FunctionFragment;
+    "getConfig()": FunctionFragment;
     "isSupportedCollection(address)": FunctionFragment;
     "maxSquadCount()": FunctionFragment;
     "maxSquadSize()": FunctionFragment;
@@ -65,6 +66,7 @@ interface SquadStakingV3Interface extends ethers.utils.Interface {
     functionFragment: "cooldownPeriod",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "getConfig", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "isSupportedCollection",
     values: [string]
@@ -167,6 +169,7 @@ interface SquadStakingV3Interface extends ethers.utils.Interface {
     functionFragment: "cooldownPeriod",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "getConfig", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "isSupportedCollection",
     data: BytesLike
@@ -340,6 +343,37 @@ export class SquadStakingV3 extends BaseContract {
 
     cooldownPeriod(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    getConfig(
+      overrides?: CallOverrides
+    ): Promise<
+      [
+        [string, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber[]] & {
+          owner: string;
+          minSquadSize: BigNumber;
+          maxSquadSize: BigNumber;
+          maxSquadCount: BigNumber;
+          cooldownPeriod: BigNumber;
+          bonusMultipliers: BigNumber[];
+        }
+      ] & {
+        config: [
+          string,
+          BigNumber,
+          BigNumber,
+          BigNumber,
+          BigNumber,
+          BigNumber[]
+        ] & {
+          owner: string;
+          minSquadSize: BigNumber;
+          maxSquadSize: BigNumber;
+          maxSquadCount: BigNumber;
+          cooldownPeriod: BigNumber;
+          bonusMultipliers: BigNumber[];
+        };
+      }
+    >;
+
     isSupportedCollection(
       nft: string,
       overrides?: CallOverrides
@@ -493,6 +527,19 @@ export class SquadStakingV3 extends BaseContract {
 
   cooldownPeriod(overrides?: CallOverrides): Promise<BigNumber>;
 
+  getConfig(
+    overrides?: CallOverrides
+  ): Promise<
+    [string, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber[]] & {
+      owner: string;
+      minSquadSize: BigNumber;
+      maxSquadSize: BigNumber;
+      maxSquadCount: BigNumber;
+      cooldownPeriod: BigNumber;
+      bonusMultipliers: BigNumber[];
+    }
+  >;
+
   isSupportedCollection(
     nft: string,
     overrides?: CallOverrides
@@ -625,6 +672,19 @@ export class SquadStakingV3 extends BaseContract {
     ): Promise<BigNumber>;
 
     cooldownPeriod(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getConfig(
+      overrides?: CallOverrides
+    ): Promise<
+      [string, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber[]] & {
+        owner: string;
+        minSquadSize: BigNumber;
+        maxSquadSize: BigNumber;
+        maxSquadCount: BigNumber;
+        cooldownPeriod: BigNumber;
+        bonusMultipliers: BigNumber[];
+      }
+    >;
 
     isSupportedCollection(
       nft: string,
@@ -805,6 +865,8 @@ export class SquadStakingV3 extends BaseContract {
 
     cooldownPeriod(overrides?: CallOverrides): Promise<BigNumber>;
 
+    getConfig(overrides?: CallOverrides): Promise<BigNumber>;
+
     isSupportedCollection(
       nft: string,
       overrides?: CallOverrides
@@ -922,6 +984,8 @@ export class SquadStakingV3 extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     cooldownPeriod(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getConfig(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     isSupportedCollection(
       nft: string,

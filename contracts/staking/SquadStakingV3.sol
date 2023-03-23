@@ -65,6 +65,27 @@ contract SquadStakingV3 is Ownable, Pausable, ERC721Holder {
         }
     }
 
+    struct Config {
+        address owner;
+        uint256 minSquadSize;
+        uint256 maxSquadSize;
+        uint256 maxSquadCount;
+        uint256 cooldownPeriod;
+        uint256[] bonusMultipliers;
+    }
+
+    function getConfig() external view returns (Config memory config) {
+        config.owner = owner();
+        config.minSquadSize = minSquadSize;
+        config.maxSquadSize = maxSquadSize;
+        config.maxSquadCount = maxSquadCount;
+        config.cooldownPeriod = cooldownPeriod;
+        config.bonusMultipliers = new uint256[](maxSquadCount + 1);
+        for (uint256 i = 0; i <= maxSquadCount; ++i) {
+            config.bonusMultipliers[i] = bonusMultipliers[i];
+        }
+    }
+
     function pause() external onlyOwner whenNotPaused {
         _pause();
     }
