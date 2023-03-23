@@ -16,10 +16,17 @@ contract HPHealing is Ownable, ERC721Holder {
     using UniSafeERC20 for IERC20;
     using EnumerableSet for EnumerableSet.AddressSet;
 
+    event StartHealing(
+        address user,
+        address collection,
+        uint256 tokenId,
+        uint256 price,
+        uint256 endTimestamp
+    );
+    event EndHealing(address user, address collection, uint256 tokenId);
+
     struct Healing {
-        bool withdrawn;
-        address collection;
-        uint256 tokenId;
+        address owner;
         uint256 endTimestamp;
     }
 
@@ -30,7 +37,7 @@ contract HPHealing is Ownable, ERC721Holder {
     address public healingToken;
     uint256 public healingPriceUnit;
     EnumerableSet.AddressSet private _supportedCollections;
-    mapping(address => Healing[]) public healings;
+    mapping(address => mapping(uint256 => Healing)) public healings; // collection => tokenID => Healing(user, endTimestamp)
 
     constructor(address _nftMetadataRegistry) Ownable() {
         nftMetadataRegistry = _nftMetadataRegistry;
@@ -103,16 +110,35 @@ contract HPHealing is Ownable, ERC721Holder {
         );
         IERC20(healingToken).uniSafeTransferFrom(msg.sender, price);
 
-        healings[msg.sender].push(
-            Healing({
-                withdrawn: false,
-                collection: collection,
-                tokenId: tokenId,
-                endTimestamp: block.timestamp +
-                    (price * 3600) /
-                    healingPriceUnit /
-                    10 // healing time = (100 - HP) / 10
-            })
+        uint256 endTimestamp = block.timestamp +
+            (price * 3600) /
+            healingPriceUnit /
+            10; // healing time = (100 - HP) / 10
+        healings[collection][tokenId] = Healing({
+            owner: msg.sender,
+            endTimestamp: endTimestamp
+        });
+
+        emit StartHealing(msg.sender, collection, tokenId, price, endTimestamp);
+    }
+
+    function withdraw(address collection, uint256 tokenId) external {
+        Healing memory healing = healings[collection][tokenId];
+        require(healing.owner == msg.sender, "unauthorized");
+        require(healing.endTimestamp <= block.timestamp, "in healing");
+
+        delete healings[collection][tokenId];
+
+        IERC721(collection).safeTransferFrom(
+            address(this),
+            msg.sender,
+            tokenId
         );
+
+        emit EndHealing(msg.sender, collection, tokenId);
+    }
+
+    function withdrawFunds(uint256 amount) external onlyOwner {
+        IERC20(healingToken).uniSafeTransfer(msg.sender, amount);
     }
 }

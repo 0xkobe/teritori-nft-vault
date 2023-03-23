@@ -40,6 +40,8 @@ interface HPHealingInterface extends ethers.utils.Interface {
     "supportedCollectionLength()": FunctionFragment;
     "supportedCollections(uint256)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
+    "withdraw(address,uint256)": FunctionFragment;
+    "withdrawFunds(uint256)": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -108,6 +110,14 @@ interface HPHealingInterface extends ethers.utils.Interface {
     functionFragment: "transferOwnership",
     values: [string]
   ): string;
+  encodeFunctionData(
+    functionFragment: "withdraw",
+    values: [string, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "withdrawFunds",
+    values: [BigNumberish]
+  ): string;
 
   decodeFunctionResult(functionFragment: "BASE_POINT", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "HP", data: BytesLike): Result;
@@ -166,16 +176,43 @@ interface HPHealingInterface extends ethers.utils.Interface {
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "withdrawFunds",
+    data: BytesLike
+  ): Result;
 
   events: {
+    "EndHealing(address,address,uint256)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
+    "StartHealing(address,address,uint256,uint256,uint256)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "EndHealing"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "StartHealing"): EventFragment;
 }
+
+export type EndHealingEvent = TypedEvent<
+  [string, string, BigNumber] & {
+    user: string;
+    collection: string;
+    tokenId: BigNumber;
+  }
+>;
 
 export type OwnershipTransferredEvent = TypedEvent<
   [string, string] & { previousOwner: string; newOwner: string }
+>;
+
+export type StartHealingEvent = TypedEvent<
+  [string, string, BigNumber, BigNumber, BigNumber] & {
+    user: string;
+    collection: string;
+    tokenId: BigNumber;
+    price: BigNumber;
+    endTimestamp: BigNumber;
+  }
 >;
 
 export class HPHealing extends BaseContract {
@@ -241,12 +278,7 @@ export class HPHealing extends BaseContract {
       arg1: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
-      [boolean, string, BigNumber, BigNumber] & {
-        withdrawn: boolean;
-        collection: string;
-        tokenId: BigNumber;
-        endTimestamp: BigNumber;
-      }
+      [string, BigNumber] & { owner: string; endTimestamp: BigNumber }
     >;
 
     isSupportedCollection(
@@ -304,6 +336,17 @@ export class HPHealing extends BaseContract {
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    withdraw(
+      collection: string,
+      tokenId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    withdrawFunds(
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
   };
 
   BASE_POINT(overrides?: CallOverrides): Promise<BigNumber>;
@@ -324,14 +367,7 @@ export class HPHealing extends BaseContract {
     arg0: string,
     arg1: BigNumberish,
     overrides?: CallOverrides
-  ): Promise<
-    [boolean, string, BigNumber, BigNumber] & {
-      withdrawn: boolean;
-      collection: string;
-      tokenId: BigNumber;
-      endTimestamp: BigNumber;
-    }
-  >;
+  ): Promise<[string, BigNumber] & { owner: string; endTimestamp: BigNumber }>;
 
   isSupportedCollection(
     nft: string,
@@ -389,6 +425,17 @@ export class HPHealing extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  withdraw(
+    collection: string,
+    tokenId: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  withdrawFunds(
+    amount: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   callStatic: {
     BASE_POINT(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -409,12 +456,7 @@ export class HPHealing extends BaseContract {
       arg1: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
-      [boolean, string, BigNumber, BigNumber] & {
-        withdrawn: boolean;
-        collection: string;
-        tokenId: BigNumber;
-        endTimestamp: BigNumber;
-      }
+      [string, BigNumber] & { owner: string; endTimestamp: BigNumber }
     >;
 
     isSupportedCollection(
@@ -470,9 +512,38 @@ export class HPHealing extends BaseContract {
       newOwner: string,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    withdraw(
+      collection: string,
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    withdrawFunds(
+      amount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
   };
 
   filters: {
+    "EndHealing(address,address,uint256)"(
+      user?: null,
+      collection?: null,
+      tokenId?: null
+    ): TypedEventFilter<
+      [string, string, BigNumber],
+      { user: string; collection: string; tokenId: BigNumber }
+    >;
+
+    EndHealing(
+      user?: null,
+      collection?: null,
+      tokenId?: null
+    ): TypedEventFilter<
+      [string, string, BigNumber],
+      { user: string; collection: string; tokenId: BigNumber }
+    >;
+
     "OwnershipTransferred(address,address)"(
       previousOwner?: string | null,
       newOwner?: string | null
@@ -487,6 +558,40 @@ export class HPHealing extends BaseContract {
     ): TypedEventFilter<
       [string, string],
       { previousOwner: string; newOwner: string }
+    >;
+
+    "StartHealing(address,address,uint256,uint256,uint256)"(
+      user?: null,
+      collection?: null,
+      tokenId?: null,
+      price?: null,
+      endTimestamp?: null
+    ): TypedEventFilter<
+      [string, string, BigNumber, BigNumber, BigNumber],
+      {
+        user: string;
+        collection: string;
+        tokenId: BigNumber;
+        price: BigNumber;
+        endTimestamp: BigNumber;
+      }
+    >;
+
+    StartHealing(
+      user?: null,
+      collection?: null,
+      tokenId?: null,
+      price?: null,
+      endTimestamp?: null
+    ): TypedEventFilter<
+      [string, string, BigNumber, BigNumber, BigNumber],
+      {
+        user: string;
+        collection: string;
+        tokenId: BigNumber;
+        price: BigNumber;
+        endTimestamp: BigNumber;
+      }
     >;
   };
 
@@ -564,6 +669,17 @@ export class HPHealing extends BaseContract {
 
     transferOwnership(
       newOwner: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    withdraw(
+      collection: string,
+      tokenId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    withdrawFunds(
+      amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
   };
@@ -646,6 +762,17 @@ export class HPHealing extends BaseContract {
 
     transferOwnership(
       newOwner: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    withdraw(
+      collection: string,
+      tokenId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    withdrawFunds(
+      amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
   };
