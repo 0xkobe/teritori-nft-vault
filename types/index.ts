@@ -50,6 +50,7 @@ export type { NFTMetadataRegistry } from "./NFTMetadataRegistry";
 export type { SquadStaking } from "./SquadStaking";
 export type { SquadStakingV2 } from "./SquadStakingV2";
 export type { SquadStakingV3 } from "./SquadStakingV3";
+export type { SquadStakingV4 } from "./SquadStakingV4";
 export type { Staking } from "./Staking";
 export type { TestERC721 } from "./TestERC721";
 
@@ -102,5 +103,6 @@ export { NFTMetadataRegistry__factory } from "./factories/NFTMetadataRegistry__f
 export { SquadStaking__factory } from "./factories/SquadStaking__factory";
 export { SquadStakingV2__factory } from "./factories/SquadStakingV2__factory";
 export { SquadStakingV3__factory } from "./factories/SquadStakingV3__factory";
+export { SquadStakingV4__factory } from "./factories/SquadStakingV4__factory";
 export { Staking__factory } from "./factories/Staking__factory";
 export { TestERC721__factory } from "./factories/TestERC721__factory";
