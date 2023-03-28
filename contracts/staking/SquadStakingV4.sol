@@ -35,6 +35,9 @@ contract SquadStakingV4 is Ownable, Pausable, ERC721Holder {
 
     uint256 public constant BASE_POINT = 1e18;
     bytes32 public constant STAMINA = keccak256(abi.encode("Stamina"));
+    bytes32 public constant PROTECTION = keccak256(abi.encode("Protection"));
+    bytes32 public constant HP = keccak256(abi.encode("HP"));
+    bytes32 public constant XP = keccak256(abi.encode("XP"));
 
     address public nftMetadataRegistry;
     uint256 public minSquadSize;
@@ -192,7 +195,12 @@ contract SquadStakingV4 is Ownable, Pausable, ERC721Holder {
             );
         }
 
-        // TODO: check valid HP
+        uint256 hp = NFTMetadataRegistry(nftMetadataRegistry).metadata(
+            nfts[0].collection,
+            HP,
+            nfts[0].tokenId
+        );
+        require(hp >= 50 * BASE_POINT, "Bad HP");
 
         uint256 duration = stakeDuration(
             nfts[0].collection,
@@ -229,13 +237,42 @@ contract SquadStakingV4 is Ownable, Pausable, ERC721Holder {
                 info.nfts[i].tokenId
             );
         }
+        uint256 duration = info.endTime - info.startTime;
         uint256 withdrawIndex = userLastWithdrawnIndex[msg.sender] + 1;
         userSquads[msg.sender][index] = userSquads[msg.sender][withdrawIndex];
         delete userSquads[msg.sender][withdrawIndex];
         userLastWithdrawnIndex[msg.sender] = withdrawIndex;
 
-        // Todo: Update HP
-        // Todo: Update XP
+        uint256 hp = NFTMetadataRegistry(nftMetadataRegistry).metadata(
+            info.nfts[0].collection,
+            HP,
+            info.nfts[0].tokenId
+        );
+        uint256 xp = NFTMetadataRegistry(nftMetadataRegistry).metadata(
+            info.nfts[0].collection,
+            XP,
+            info.nfts[0].tokenId
+        );
+        uint256 protection = NFTMetadataRegistry(nftMetadataRegistry).metadata(
+            info.nfts[0].collection,
+            PROTECTION,
+            info.nfts[0].tokenId
+        );
+        xp += (hp * duration) / 3600; // xp = xp + (hp / 100) * (staking time * 100)
+        hp = hp - hp / 5 + (protection * BASE_POINT * 6) / 100; // hp = hp - hp / 5 + protection * 0.06
+
+        NFTMetadataRegistry(nftMetadataRegistry).registerNftMegadata(
+            info.nfts[0].collection,
+            HP,
+            info.nfts[0].tokenId,
+            hp
+        );
+        NFTMetadataRegistry(nftMetadataRegistry).registerNftMegadata(
+            info.nfts[0].collection,
+            XP,
+            info.nfts[0].tokenId,
+            xp
+        );
 
         emit Unstake(msg.sender);
     }

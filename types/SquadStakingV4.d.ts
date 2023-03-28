@@ -22,7 +22,10 @@ import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 interface SquadStakingV4Interface extends ethers.utils.Interface {
   functions: {
     "BASE_POINT()": FunctionFragment;
+    "HP()": FunctionFragment;
+    "PROTECTION()": FunctionFragment;
     "STAMINA()": FunctionFragment;
+    "XP()": FunctionFragment;
     "bonusMultipliers(uint256)": FunctionFragment;
     "cooldownPeriod()": FunctionFragment;
     "getConfig()": FunctionFragment;
@@ -57,7 +60,13 @@ interface SquadStakingV4Interface extends ethers.utils.Interface {
     functionFragment: "BASE_POINT",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "HP", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "PROTECTION",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "STAMINA", values?: undefined): string;
+  encodeFunctionData(functionFragment: "XP", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "bonusMultipliers",
     values: [BigNumberish]
@@ -157,7 +166,10 @@ interface SquadStakingV4Interface extends ethers.utils.Interface {
   ): string;
 
   decodeFunctionResult(functionFragment: "BASE_POINT", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "HP", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "PROTECTION", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "STAMINA", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "XP", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "bonusMultipliers",
     data: BytesLike
@@ -329,7 +341,13 @@ export class SquadStakingV4 extends BaseContract {
   functions: {
     BASE_POINT(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    HP(overrides?: CallOverrides): Promise<[string]>;
+
+    PROTECTION(overrides?: CallOverrides): Promise<[string]>;
+
     STAMINA(overrides?: CallOverrides): Promise<[string]>;
+
+    XP(overrides?: CallOverrides): Promise<[string]>;
 
     bonusMultipliers(
       arg0: BigNumberish,
@@ -513,7 +531,13 @@ export class SquadStakingV4 extends BaseContract {
 
   BASE_POINT(overrides?: CallOverrides): Promise<BigNumber>;
 
+  HP(overrides?: CallOverrides): Promise<string>;
+
+  PROTECTION(overrides?: CallOverrides): Promise<string>;
+
   STAMINA(overrides?: CallOverrides): Promise<string>;
+
+  XP(overrides?: CallOverrides): Promise<string>;
 
   bonusMultipliers(
     arg0: BigNumberish,
@@ -659,7 +683,13 @@ export class SquadStakingV4 extends BaseContract {
   callStatic: {
     BASE_POINT(overrides?: CallOverrides): Promise<BigNumber>;
 
+    HP(overrides?: CallOverrides): Promise<string>;
+
+    PROTECTION(overrides?: CallOverrides): Promise<string>;
+
     STAMINA(overrides?: CallOverrides): Promise<string>;
+
+    XP(overrides?: CallOverrides): Promise<string>;
 
     bonusMultipliers(
       arg0: BigNumberish,
@@ -851,7 +881,13 @@ export class SquadStakingV4 extends BaseContract {
   estimateGas: {
     BASE_POINT(overrides?: CallOverrides): Promise<BigNumber>;
 
+    HP(overrides?: CallOverrides): Promise<BigNumber>;
+
+    PROTECTION(overrides?: CallOverrides): Promise<BigNumber>;
+
     STAMINA(overrides?: CallOverrides): Promise<BigNumber>;
+
+    XP(overrides?: CallOverrides): Promise<BigNumber>;
 
     bonusMultipliers(
       arg0: BigNumberish,
@@ -969,7 +1005,13 @@ export class SquadStakingV4 extends BaseContract {
   populateTransaction: {
     BASE_POINT(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    HP(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    PROTECTION(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     STAMINA(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    XP(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     bonusMultipliers(
       arg0: BigNumberish,
