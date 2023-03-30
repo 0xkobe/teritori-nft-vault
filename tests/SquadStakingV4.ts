@@ -1,13 +1,14 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
-import { NFTMetadataRegistry, SquadStakingV2, TeritoriMinter, TeritoriNft } from "../types";
+import { NFTMetadataRegistry, SquadStakingV4, TeritoriMinter, TeritoriNft } from "../types";
 
-describe("SquadStakingV2 Test", () => {
+describe("SquadStakingV4 Test", () => {
     let minter: SignerWithAddress, user: SignerWithAddress, royaltyReceiver: SignerWithAddress;
     let teritoriNftImpl: TeritoriNft;
     let teritoriMinter: TeritoriMinter, nft: TeritoriNft;
-    let registry: NFTMetadataRegistry, staking: SquadStakingV2;
+    let registry: NFTMetadataRegistry, staking: SquadStakingV4;
+    let staminaKey, protectionKey, hpKey, xpKey;
 
     beforeEach(async () => {
         [minter, user, royaltyReceiver] = await ethers.getSigners();
@@ -26,16 +27,16 @@ describe("SquadStakingV2 Test", () => {
 
         // mint 2 nfts with royalty info
         const config = {
-            maxSupply: 5,
+            maxSupply: 100,
             mintToken: ethers.constants.AddressZero,
             mintStartTime: (await ethers.provider.getBlock("latest")).timestamp,
             whitelistCount: 0,
             publicMintPrice: ethers.utils.parseEther("0.1"),
-            publicMintMax: 5,
+            publicMintMax: 100,
         };
         await teritoriMinter.setConfig(config);
-        await teritoriMinter.connect(user).requestMint(user.address, 5, {
-            value: ethers.utils.parseEther("0.5")
+        await teritoriMinter.connect(user).requestMint(user.address, 10, {
+            value: ethers.utils.parseEther("1")
         });
 
         await teritoriMinter.mint([
@@ -69,6 +70,18 @@ describe("SquadStakingV2 Test", () => {
                 royaltyPercentage: "1000",
                 tokenUri: "",
             },
+            {
+                tokenId: "6",
+                royaltyReceiver: royaltyReceiver.address,
+                royaltyPercentage: "1000",
+                tokenUri: "",
+            },
+            {
+                tokenId: "7",
+                royaltyReceiver: royaltyReceiver.address,
+                royaltyPercentage: "1000",
+                tokenUri: "",
+            },
         ]);
 
         const NFTMetadataRegistry = await ethers.getContractFactory("NFTMetadataRegistry");
@@ -76,19 +89,35 @@ describe("SquadStakingV2 Test", () => {
         await registry.deployed();
         await registry.initialize();
 
-        const staminaKey = await registry.queryMetadataKey("Stamina");
+        staminaKey = await registry.queryMetadataKey("Stamina");
+        protectionKey = await registry.queryMetadataKey("Protection");
+        hpKey = await registry.queryMetadataKey("HP");
+        xpKey = await registry.queryMetadataKey("XP");
         await registry["registerNftMegadata(address,bytes32,uint256[],uint256[])"](
             nft.address,
             staminaKey,
-            ["1", "2", "3", "4", "5"],
-            [50, 40, 20, 10, 5],
+            ["1", "2", "3", "4", "5", "6", "7"],
+            [50, 40, 20, 10, 5, 30, 50],
+        );
+        await registry["registerNftMegadata(address,bytes32,uint256[],uint256[])"](
+            nft.address,
+            protectionKey,
+            ["1", "2", "3", "4", "5", "6", "7"],
+            [10, 10, 20, 20, 30, 30, 40],
+        );
+        await registry["registerNftMegadata(address,bytes32,uint256[],uint256[])"](
+            nft.address,
+            hpKey,
+            ["1", "2", "3", "4", "5", "6", "7"],
+            [ethers.utils.parseEther("100"), ethers.utils.parseEther("100"), ethers.utils.parseEther("100"), ethers.utils.parseEther("100"), ethers.utils.parseEther("100"), ethers.utils.parseEther("100"), ethers.utils.parseEther("100")],
         );
 
-        const SquadStakingV2 = await ethers.getContractFactory("SquadStakingV2");
-        staking = <SquadStakingV2>await SquadStakingV2.deploy(
+        const SquadStakingV4 = await ethers.getContractFactory("SquadStakingV4");
+        staking = <SquadStakingV4>await SquadStakingV4.deploy(
             registry.address,
             2,
             5,
+            2,
             86400,
             [
                 0, 0, ethers.utils.parseEther('1'), ethers.utils.parseEther('1.2'), ethers.utils.parseEther('1.5'), ethers.utils.parseEther('2')
@@ -96,185 +125,19 @@ describe("SquadStakingV2 Test", () => {
         );
         await staking.deployed();
         await staking.setSupportedCollection(nft.address, true);
+        await registry.setAdmin([staking.address], true);
     })
 
     it('initialize', async () => {
         expect(await staking.nftMetadataRegistry()).to.equal(registry.address);
         expect(await staking.minSquadSize()).to.equal(2);
         expect(await staking.maxSquadSize()).to.equal(5);
+        expect(await staking.maxSquadCount()).to.equal(2);
         expect(await staking.cooldownPeriod()).to.equal(86400);
         expect(await staking.bonusMultipliers(2)).to.equal("1000000000000000000");
         expect(await staking.bonusMultipliers(3)).to.equal("1200000000000000000");
         expect(await staking.bonusMultipliers(4)).to.equal("1500000000000000000");
         expect(await staking.bonusMultipliers(5)).to.equal("2000000000000000000");
-    })
-
-    it('stake', async () => {
-        await expect(staking.stake([])).to.revertedWith('invalid number of nfts');
-        await expect(staking.stake([
-            {
-                collection: nft.address,
-                tokenId: "1"
-            },
-            {
-                collection: nft.address,
-                tokenId: "2"
-            },
-            {
-                collection: nft.address,
-                tokenId: "3"
-            },
-            {
-                collection: nft.address,
-                tokenId: "4"
-            },
-            {
-                collection: nft.address,
-                tokenId: "5"
-            },
-            {
-                collection: nft.address,
-                tokenId: "6"
-            },
-        ])).to.revertedWith('invalid number of nfts');
-
-        await nft.connect(user).setApprovalForAll(staking.address, true);
-        await staking.connect(user).stake([
-            {
-                collection: nft.address,
-                tokenId: "1"
-            },
-            {
-                collection: nft.address,
-                tokenId: "2"
-            },
-            {
-                collection: nft.address,
-                tokenId: "3"
-            },
-            {
-                collection: nft.address,
-                tokenId: "4"
-            },
-            {
-                collection: nft.address,
-                tokenId: "5"
-            },
-        ]);
-
-        const info = await staking.userSquadInfo(user.address);
-        expect(info.endTime.sub(info.startTime)).to.equal(45000);
-
-        await expect(staking.connect(user).stake([
-            {
-                collection: nft.address,
-                tokenId: "1"
-            },
-            {
-                collection: nft.address,
-                tokenId: "2"
-            },
-            {
-                collection: nft.address,
-                tokenId: "3"
-            },
-            {
-                collection: nft.address,
-                tokenId: "4"
-            },
-            {
-                collection: nft.address,
-                tokenId: "5"
-            },
-        ])).to.revertedWith('squad exists');
-    })
-
-    it('unstake', async () => {
-        await expect(staking.unstake()).to.revertedWith('squad not exists');
-
-        await nft.connect(user).setApprovalForAll(staking.address, true);
-        await staking.connect(user).stake([
-            {
-                collection: nft.address,
-                tokenId: "1"
-            },
-            {
-                collection: nft.address,
-                tokenId: "2"
-            },
-            {
-                collection: nft.address,
-                tokenId: "3"
-            },
-            {
-                collection: nft.address,
-                tokenId: "4"
-            },
-            {
-                collection: nft.address,
-                tokenId: "5"
-            },
-        ]);
-
-        await expect(staking.connect(user).unstake()).to.revertedWith('wait until staking period')
-
-        await network.provider.send("evm_increaseTime", [45000]);
-
-        await staking.connect(user).unstake();
-
-        expect(await nft.ownerOf("1")).to.equal(user.address);
-    })
-
-    it("stake cooldown", async () => {
-        await nft.connect(user).setApprovalForAll(staking.address, true);
-        await staking.connect(user).stake([
-            {
-                collection: nft.address,
-                tokenId: "1"
-            },
-            {
-                collection: nft.address,
-                tokenId: "2"
-            },
-            {
-                collection: nft.address,
-                tokenId: "3"
-            },
-            {
-                collection: nft.address,
-                tokenId: "4"
-            },
-            {
-                collection: nft.address,
-                tokenId: "5"
-            },
-        ]);
-
-        await network.provider.send("evm_increaseTime", [45000]);
-        await staking.connect(user).unstake();
-
-        await expect(staking.connect(user).stake([
-            {
-                collection: nft.address,
-                tokenId: "1"
-            },
-            {
-                collection: nft.address,
-                tokenId: "2"
-            },
-            {
-                collection: nft.address,
-                tokenId: "3"
-            },
-            {
-                collection: nft.address,
-                tokenId: "4"
-            },
-            {
-                collection: nft.address,
-                tokenId: "5"
-            },
-        ])).to.revertedWith('wait until cooldown');
     })
 
     it("pause/unpause", async () => {
@@ -342,5 +205,115 @@ describe("SquadStakingV2 Test", () => {
 
         expect(await staking.supportedCollectionLength()).to.equal(1);
         expect(await staking.supportedCollectionAt(0)).to.equal(nft.address);
+    })
+    it('dual stake', async () => {
+        await expect(staking.stake([])).to.revertedWith('invalid number of nfts');
+        await expect(staking.stake([
+            {
+                collection: nft.address,
+                tokenId: "1"
+            },
+            {
+                collection: nft.address,
+                tokenId: "2"
+            },
+            {
+                collection: nft.address,
+                tokenId: "3"
+            },
+            {
+                collection: nft.address,
+                tokenId: "4"
+            },
+            {
+                collection: nft.address,
+                tokenId: "5"
+            },
+            {
+                collection: nft.address,
+                tokenId: "6"
+            },
+        ])).to.revertedWith('invalid number of nfts');
+
+        await nft.connect(user).setApprovalForAll(staking.address, true);
+        await staking.connect(user).stake([
+            {
+                collection: nft.address,
+                tokenId: "1"
+            },
+            {
+                collection: nft.address,
+                tokenId: "2"
+            },
+            {
+                collection: nft.address,
+                tokenId: "3"
+            },
+            {
+                collection: nft.address,
+                tokenId: "4"
+            },
+            {
+                collection: nft.address,
+                tokenId: "5"
+            },
+        ]);
+
+        let info = await staking.userSquadInfo(user.address);
+        expect(info[0].endTime.sub(info[0].startTime)).to.equal(45000);
+
+        await staking.connect(user).stake([
+            {
+                collection: nft.address,
+                tokenId: "6"
+            },
+            {
+                collection: nft.address,
+                tokenId: "7"
+            },
+        ]);
+
+        info = await staking.userSquadInfo(user.address);
+        expect(info[1].endTime.sub(info[1].startTime)).to.equal(13500);
+    })
+
+    it('unstake', async () => {
+        await expect(staking.unstake(1)).to.revertedWith('invalid index');
+
+        await nft.connect(user).setApprovalForAll(staking.address, true);
+        await staking.connect(user).stake([
+            {
+                collection: nft.address,
+                tokenId: "1"
+            },
+            {
+                collection: nft.address,
+                tokenId: "2"
+            },
+            {
+                collection: nft.address,
+                tokenId: "3"
+            },
+            {
+                collection: nft.address,
+                tokenId: "4"
+            },
+            {
+                collection: nft.address,
+                tokenId: "5"
+            },
+        ]);
+
+        await expect(staking.connect(user).unstake(1)).to.revertedWith('during staking period')
+
+        await network.provider.send("evm_increaseTime", [45000]);
+
+        await expect(staking.connect(user).unstake(1)).to.revertedWith('during cooldown period')
+
+        await network.provider.send("evm_increaseTime", [45000]);
+
+        await staking.connect(user).unstake(1);
+
+        expect(await nft.ownerOf("1")).to.equal(user.address);
     })
 });

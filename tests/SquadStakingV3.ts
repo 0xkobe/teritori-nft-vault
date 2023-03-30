@@ -89,7 +89,7 @@ describe("SquadStakingV3 Test", () => {
         await registry.initialize();
 
         const staminaKey = await registry.queryMetadataKey("Stamina");
-        await registry.registerNftMegadata(
+        await registry["registerNftMegadata(address,bytes32,uint256[],uint256[])"](
             nft.address,
             staminaKey,
             ["1", "2", "3", "4", "5", "6", "7"],
