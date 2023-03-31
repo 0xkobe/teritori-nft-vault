@@ -21,6 +21,7 @@ import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
 interface NFTMetadataRegistryInterface extends ethers.utils.Interface {
   functions: {
+    "BASE_POINT()": FunctionFragment;
     "initialize()": FunctionFragment;
     "isAdmin(address)": FunctionFragment;
     "metadata(address,bytes32,uint256)": FunctionFragment;
@@ -33,6 +34,10 @@ interface NFTMetadataRegistryInterface extends ethers.utils.Interface {
     "transferOwnership(address)": FunctionFragment;
   };
 
+  encodeFunctionData(
+    functionFragment: "BASE_POINT",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "initialize",
     values?: undefined
@@ -68,6 +73,7 @@ interface NFTMetadataRegistryInterface extends ethers.utils.Interface {
     values: [string]
   ): string;
 
+  decodeFunctionResult(functionFragment: "BASE_POINT", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "isAdmin", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "metadata", data: BytesLike): Result;
@@ -153,6 +159,8 @@ export class NFTMetadataRegistry extends BaseContract {
   interface: NFTMetadataRegistryInterface;
 
   functions: {
+    BASE_POINT(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     initialize(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -208,6 +216,8 @@ export class NFTMetadataRegistry extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
   };
+
+  BASE_POINT(overrides?: CallOverrides): Promise<BigNumber>;
 
   initialize(
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -265,6 +275,8 @@ export class NFTMetadataRegistry extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
+    BASE_POINT(overrides?: CallOverrides): Promise<BigNumber>;
+
     initialize(overrides?: CallOverrides): Promise<void>;
 
     isAdmin(arg0: string, overrides?: CallOverrides): Promise<boolean>;
@@ -344,6 +356,8 @@ export class NFTMetadataRegistry extends BaseContract {
   };
 
   estimateGas: {
+    BASE_POINT(overrides?: CallOverrides): Promise<BigNumber>;
+
     initialize(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -404,6 +418,8 @@ export class NFTMetadataRegistry extends BaseContract {
   };
 
   populateTransaction: {
+    BASE_POINT(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     initialize(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;

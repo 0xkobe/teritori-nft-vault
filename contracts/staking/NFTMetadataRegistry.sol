@@ -5,6 +5,7 @@ pragma abicoder v2;
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 contract NFTMetadataRegistry is OwnableUpgradeable {
+    uint256 public constant BASE_POINT = 1e18;
     mapping(address => mapping(bytes32 => mapping(uint256 => uint256)))
         public metadata;
     mapping(address => bool) public isAdmin;
