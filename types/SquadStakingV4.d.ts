@@ -23,6 +23,7 @@ interface SquadStakingV4Interface extends ethers.utils.Interface {
   functions: {
     "BASE_POINT()": FunctionFragment;
     "HP()": FunctionFragment;
+    "LUCK()": FunctionFragment;
     "PROTECTION()": FunctionFragment;
     "STAMINA()": FunctionFragment;
     "XP()": FunctionFragment;
@@ -44,11 +45,13 @@ interface SquadStakingV4Interface extends ethers.utils.Interface {
     "setMaxSquadCount(uint256)": FunctionFragment;
     "setSquadSize(uint256,uint256)": FunctionFragment;
     "setSupportedCollection(address,bool)": FunctionFragment;
+    "squads(uint256)": FunctionFragment;
     "stake(tuple[])": FunctionFragment;
     "stakeDuration(address,uint256,uint256)": FunctionFragment;
     "supportedCollectionAt(uint256)": FunctionFragment;
     "supportedCollectionLength()": FunctionFragment;
     "supportedCollections(uint256)": FunctionFragment;
+    "totalSquads()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "unpause()": FunctionFragment;
     "unstake(uint256)": FunctionFragment;
@@ -61,6 +64,7 @@ interface SquadStakingV4Interface extends ethers.utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "HP", values?: undefined): string;
+  encodeFunctionData(functionFragment: "LUCK", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "PROTECTION",
     values?: undefined
@@ -128,6 +132,10 @@ interface SquadStakingV4Interface extends ethers.utils.Interface {
     values: [string, boolean]
   ): string;
   encodeFunctionData(
+    functionFragment: "squads",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "stake",
     values: [{ collection: string; tokenId: BigNumberish }[]]
   ): string;
@@ -146,6 +154,10 @@ interface SquadStakingV4Interface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "supportedCollections",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "totalSquads",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
@@ -167,6 +179,7 @@ interface SquadStakingV4Interface extends ethers.utils.Interface {
 
   decodeFunctionResult(functionFragment: "BASE_POINT", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "HP", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "LUCK", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "PROTECTION", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "STAMINA", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "XP", data: BytesLike): Result;
@@ -230,6 +243,7 @@ interface SquadStakingV4Interface extends ethers.utils.Interface {
     functionFragment: "setSupportedCollection",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "squads", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "stake", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "stakeDuration",
@@ -245,6 +259,10 @@ interface SquadStakingV4Interface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "supportedCollections",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "totalSquads",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -265,9 +283,9 @@ interface SquadStakingV4Interface extends ethers.utils.Interface {
   events: {
     "OwnershipTransferred(address,address)": EventFragment;
     "Paused(address)": EventFragment;
-    "Stake(address,uint256,uint256)": EventFragment;
+    "Stake(address,uint256,uint256,uint256,uint256)": EventFragment;
     "Unpaused(address)": EventFragment;
-    "Unstake(address)": EventFragment;
+    "Unstake(address,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
@@ -284,16 +302,20 @@ export type OwnershipTransferredEvent = TypedEvent<
 export type PausedEvent = TypedEvent<[string] & { account: string }>;
 
 export type StakeEvent = TypedEvent<
-  [string, BigNumber, BigNumber] & {
+  [string, BigNumber, BigNumber, BigNumber, BigNumber] & {
     user: string;
+    index: BigNumber;
     startTime: BigNumber;
     endTime: BigNumber;
+    luck: BigNumber;
   }
 >;
 
 export type UnpausedEvent = TypedEvent<[string] & { account: string }>;
 
-export type UnstakeEvent = TypedEvent<[string] & { user: string }>;
+export type UnstakeEvent = TypedEvent<
+  [string, BigNumber] & { user: string; index: BigNumber }
+>;
 
 export class SquadStakingV4 extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -342,6 +364,8 @@ export class SquadStakingV4 extends BaseContract {
     BASE_POINT(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     HP(overrides?: CallOverrides): Promise<[string]>;
+
+    LUCK(overrides?: CallOverrides): Promise<[string]>;
 
     PROTECTION(overrides?: CallOverrides): Promise<[string]>;
 
@@ -448,6 +472,19 @@ export class SquadStakingV4 extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    squads(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<
+      [string, BigNumber, BigNumber, BigNumber, boolean] & {
+        owner: string;
+        startTime: BigNumber;
+        endTime: BigNumber;
+        luck: BigNumber;
+        withdrawn: boolean;
+      }
+    >;
+
     stake(
       nfts: { collection: string; tokenId: BigNumberish }[],
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -471,6 +508,8 @@ export class SquadStakingV4 extends BaseContract {
       index: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[string[]] & { collections: string[] }>;
+
+    totalSquads(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     transferOwnership(
       newOwner: string,
@@ -498,11 +537,13 @@ export class SquadStakingV4 extends BaseContract {
       [
         ([
           BigNumber,
+          string,
           BigNumber,
           BigNumber,
           ([string, BigNumber] & { collection: string; tokenId: BigNumber })[]
         ] & {
           index: BigNumber;
+          owner: string;
           startTime: BigNumber;
           endTime: BigNumber;
           nfts: ([string, BigNumber] & {
@@ -511,13 +552,15 @@ export class SquadStakingV4 extends BaseContract {
           })[];
         })[]
       ] & {
-        squads: ([
+        result: ([
           BigNumber,
+          string,
           BigNumber,
           BigNumber,
           ([string, BigNumber] & { collection: string; tokenId: BigNumber })[]
         ] & {
           index: BigNumber;
+          owner: string;
           startTime: BigNumber;
           endTime: BigNumber;
           nfts: ([string, BigNumber] & {
@@ -532,6 +575,8 @@ export class SquadStakingV4 extends BaseContract {
   BASE_POINT(overrides?: CallOverrides): Promise<BigNumber>;
 
   HP(overrides?: CallOverrides): Promise<string>;
+
+  LUCK(overrides?: CallOverrides): Promise<string>;
 
   PROTECTION(overrides?: CallOverrides): Promise<string>;
 
@@ -620,6 +665,19 @@ export class SquadStakingV4 extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  squads(
+    arg0: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<
+    [string, BigNumber, BigNumber, BigNumber, boolean] & {
+      owner: string;
+      startTime: BigNumber;
+      endTime: BigNumber;
+      luck: BigNumber;
+      withdrawn: boolean;
+    }
+  >;
+
   stake(
     nfts: { collection: string; tokenId: BigNumberish }[],
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -644,6 +702,8 @@ export class SquadStakingV4 extends BaseContract {
     overrides?: CallOverrides
   ): Promise<string[]>;
 
+  totalSquads(overrides?: CallOverrides): Promise<BigNumber>;
+
   transferOwnership(
     newOwner: string,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -666,11 +726,13 @@ export class SquadStakingV4 extends BaseContract {
   ): Promise<
     ([
       BigNumber,
+      string,
       BigNumber,
       BigNumber,
       ([string, BigNumber] & { collection: string; tokenId: BigNumber })[]
     ] & {
       index: BigNumber;
+      owner: string;
       startTime: BigNumber;
       endTime: BigNumber;
       nfts: ([string, BigNumber] & {
@@ -684,6 +746,8 @@ export class SquadStakingV4 extends BaseContract {
     BASE_POINT(overrides?: CallOverrides): Promise<BigNumber>;
 
     HP(overrides?: CallOverrides): Promise<string>;
+
+    LUCK(overrides?: CallOverrides): Promise<string>;
 
     PROTECTION(overrides?: CallOverrides): Promise<string>;
 
@@ -768,6 +832,19 @@ export class SquadStakingV4 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    squads(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<
+      [string, BigNumber, BigNumber, BigNumber, boolean] & {
+        owner: string;
+        startTime: BigNumber;
+        endTime: BigNumber;
+        luck: BigNumber;
+        withdrawn: boolean;
+      }
+    >;
+
     stake(
       nfts: { collection: string; tokenId: BigNumberish }[],
       overrides?: CallOverrides
@@ -792,6 +869,8 @@ export class SquadStakingV4 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<string[]>;
 
+    totalSquads(overrides?: CallOverrides): Promise<BigNumber>;
+
     transferOwnership(
       newOwner: string,
       overrides?: CallOverrides
@@ -809,11 +888,13 @@ export class SquadStakingV4 extends BaseContract {
     ): Promise<
       ([
         BigNumber,
+        string,
         BigNumber,
         BigNumber,
         ([string, BigNumber] & { collection: string; tokenId: BigNumber })[]
       ] & {
         index: BigNumber;
+        owner: string;
         startTime: BigNumber;
         endTime: BigNumber;
         nfts: ([string, BigNumber] & {
@@ -847,22 +928,38 @@ export class SquadStakingV4 extends BaseContract {
 
     Paused(account?: null): TypedEventFilter<[string], { account: string }>;
 
-    "Stake(address,uint256,uint256)"(
-      user?: null,
+    "Stake(address,uint256,uint256,uint256,uint256)"(
+      user?: string | null,
+      index?: BigNumberish | null,
       startTime?: null,
-      endTime?: null
+      endTime?: null,
+      luck?: null
     ): TypedEventFilter<
-      [string, BigNumber, BigNumber],
-      { user: string; startTime: BigNumber; endTime: BigNumber }
+      [string, BigNumber, BigNumber, BigNumber, BigNumber],
+      {
+        user: string;
+        index: BigNumber;
+        startTime: BigNumber;
+        endTime: BigNumber;
+        luck: BigNumber;
+      }
     >;
 
     Stake(
-      user?: null,
+      user?: string | null,
+      index?: BigNumberish | null,
       startTime?: null,
-      endTime?: null
+      endTime?: null,
+      luck?: null
     ): TypedEventFilter<
-      [string, BigNumber, BigNumber],
-      { user: string; startTime: BigNumber; endTime: BigNumber }
+      [string, BigNumber, BigNumber, BigNumber, BigNumber],
+      {
+        user: string;
+        index: BigNumber;
+        startTime: BigNumber;
+        endTime: BigNumber;
+        luck: BigNumber;
+      }
     >;
 
     "Unpaused(address)"(
@@ -871,17 +968,29 @@ export class SquadStakingV4 extends BaseContract {
 
     Unpaused(account?: null): TypedEventFilter<[string], { account: string }>;
 
-    "Unstake(address)"(
-      user?: null
-    ): TypedEventFilter<[string], { user: string }>;
+    "Unstake(address,uint256)"(
+      user?: string | null,
+      index?: BigNumberish | null
+    ): TypedEventFilter<
+      [string, BigNumber],
+      { user: string; index: BigNumber }
+    >;
 
-    Unstake(user?: null): TypedEventFilter<[string], { user: string }>;
+    Unstake(
+      user?: string | null,
+      index?: BigNumberish | null
+    ): TypedEventFilter<
+      [string, BigNumber],
+      { user: string; index: BigNumber }
+    >;
   };
 
   estimateGas: {
     BASE_POINT(overrides?: CallOverrides): Promise<BigNumber>;
 
     HP(overrides?: CallOverrides): Promise<BigNumber>;
+
+    LUCK(overrides?: CallOverrides): Promise<BigNumber>;
 
     PROTECTION(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -959,6 +1068,8 @@ export class SquadStakingV4 extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    squads(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
     stake(
       nfts: { collection: string; tokenId: BigNumberish }[],
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -983,6 +1094,8 @@ export class SquadStakingV4 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    totalSquads(overrides?: CallOverrides): Promise<BigNumber>;
+
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1006,6 +1119,8 @@ export class SquadStakingV4 extends BaseContract {
     BASE_POINT(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     HP(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    LUCK(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     PROTECTION(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -1085,6 +1200,11 @@ export class SquadStakingV4 extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    squads(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     stake(
       nfts: { collection: string; tokenId: BigNumberish }[],
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1110,6 +1230,8 @@ export class SquadStakingV4 extends BaseContract {
       index: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    totalSquads(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     transferOwnership(
       newOwner: string,

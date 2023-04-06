@@ -13,21 +13,32 @@ import "./NFTMetadataRegistry.sol";
 /// @dev squad staking v2, hp/xp mechanism
 contract SquadStakingV4 is Ownable, Pausable, ERC721Holder {
     using EnumerableSet for EnumerableSet.AddressSet;
+    using EnumerableSet for EnumerableSet.UintSet;
 
-    event Stake(address user, uint256 startTime, uint256 endTime);
-    event Unstake(address user);
+    event Stake(
+        address indexed user,
+        uint256 indexed index,
+        uint256 startTime,
+        uint256 endTime,
+        uint256 luck
+    );
+    event Unstake(address indexed user, uint256 indexed index);
 
     struct NftInfo {
         address collection;
         uint256 tokenId;
     }
     struct SquadInfo {
+        address owner;
         uint256 startTime;
         uint256 endTime;
+        uint256 luck;
+        bool withdrawn;
         NftInfo[] nfts;
     }
     struct SquadInfoWithIndex {
         uint256 index;
+        address owner;
         uint256 startTime;
         uint256 endTime;
         NftInfo[] nfts;
@@ -35,6 +46,7 @@ contract SquadStakingV4 is Ownable, Pausable, ERC721Holder {
 
     uint256 public constant BASE_POINT = 1e18;
     bytes32 public constant STAMINA = keccak256(abi.encode("Stamina"));
+    bytes32 public constant LUCK = keccak256(abi.encode("Luck"));
     bytes32 public constant PROTECTION = keccak256(abi.encode("Protection"));
     bytes32 public constant HP = keccak256(abi.encode("HP"));
     bytes32 public constant XP = keccak256(abi.encode("XP"));
@@ -46,9 +58,10 @@ contract SquadStakingV4 is Ownable, Pausable, ERC721Holder {
     uint256 public cooldownPeriod;
     mapping(uint256 => uint256) public bonusMultipliers;
     EnumerableSet.AddressSet private _supportedCollections;
-    mapping(address => mapping(uint256 => SquadInfo)) private userSquads;
-    mapping(address => uint256) private userLastWithdrawnIndex;
-    mapping(address => uint256) private userLastDepositIndex;
+
+    uint256 public totalSquads;
+    mapping(uint256 => SquadInfo) public squads;
+    mapping(address => EnumerableSet.UintSet) private userSquads;
 
     constructor(
         address _nftMetadataRegistry,
@@ -160,21 +173,21 @@ contract SquadStakingV4 is Ownable, Pausable, ERC721Holder {
 
     function userSquadInfo(
         address user
-    ) external view returns (SquadInfoWithIndex[] memory squads) {
-        uint256 count = userLastDepositIndex[user] -
-            userLastWithdrawnIndex[user];
-        squads = new SquadInfoWithIndex[](count);
-        for (uint256 i = 0; i < count; ++i) {
-            uint256 index = i + userLastWithdrawnIndex[user] + 1;
-            squads[i].index = index;
-            squads[i].startTime = userSquads[user][index].startTime;
-            squads[i].endTime = userSquads[user][index].endTime;
-            squads[i].nfts = userSquads[user][index].nfts;
+    ) external view returns (SquadInfoWithIndex[] memory result) {
+        uint256 length = userSquads[user].length();
+        result = new SquadInfoWithIndex[](length);
+        for (uint256 i = 0; i < length; ++i) {
+            uint256 index = userSquads[user].at(i);
+            result[i].index = index;
+            result[i].owner = squads[index].owner;
+            result[i].startTime = squads[index].startTime;
+            result[i].endTime = squads[index].endTime;
+            result[i].nfts = squads[index].nfts;
         }
     }
 
     function userSquadCount(address user) external view returns (uint256) {
-        return userLastDepositIndex[user] - userLastWithdrawnIndex[user];
+        return userSquads[user].length();
     }
 
     function stake(NftInfo[] memory nfts) external whenNotPaused {
@@ -183,6 +196,7 @@ contract SquadStakingV4 is Ownable, Pausable, ERC721Holder {
             "invalid number of nfts"
         );
 
+        uint256 luck;
         for (uint256 i = 0; i < nfts.length; ++i) {
             require(
                 isSupportedCollection(nfts[i].collection),
@@ -191,6 +205,11 @@ contract SquadStakingV4 is Ownable, Pausable, ERC721Holder {
             IERC721(nfts[i].collection).safeTransferFrom(
                 msg.sender,
                 address(this),
+                nfts[i].tokenId
+            );
+            luck += NFTMetadataRegistry(nftMetadataRegistry).metadata(
+                nfts[i].collection,
+                LUCK,
                 nfts[i].tokenId
             );
         }
@@ -210,38 +229,58 @@ contract SquadStakingV4 is Ownable, Pausable, ERC721Holder {
         uint256 startTime = block.timestamp;
         uint256 endTime = startTime + duration;
 
-        uint256 depositIndex = userLastDepositIndex[msg.sender] + 1;
-        userSquads[msg.sender][depositIndex].startTime = startTime;
-        userSquads[msg.sender][depositIndex].endTime = endTime;
+        // store squad
+        totalSquads++;
+        squads[totalSquads].owner = msg.sender;
+        squads[totalSquads].startTime = startTime;
+        squads[totalSquads].endTime = endTime;
+        squads[totalSquads].luck = luck;
         for (uint256 i = 0; i < nfts.length; ++i) {
-            userSquads[msg.sender][depositIndex].nfts.push(nfts[i]);
+            squads[totalSquads].nfts.push(nfts[i]);
         }
-        userLastDepositIndex[msg.sender] = depositIndex;
 
-        emit Stake(msg.sender, startTime, endTime);
+        // store user squad
+        userSquads[msg.sender].add(totalSquads);
+
+        emit Stake(msg.sender, totalSquads, startTime, endTime, luck);
     }
 
     function unstake(uint256 index) external whenNotPaused {
-        SquadInfo memory info = userSquads[msg.sender][index];
-        require(info.nfts.length > 0, "invalid index");
+        require(userSquads[msg.sender].contains(index), "invalid index");
+
+        SquadInfo memory info = squads[index];
         require(info.endTime <= block.timestamp, "during staking period");
         require(
             info.startTime + cooldownPeriod <= block.timestamp,
             "during cooldown period"
         );
 
+        uint256 protection;
         for (uint256 i = 0; i < info.nfts.length; ++i) {
             IERC721(info.nfts[i].collection).safeTransferFrom(
                 address(this),
                 msg.sender,
                 info.nfts[i].tokenId
             );
+            protection += NFTMetadataRegistry(nftMetadataRegistry).metadata(
+                info.nfts[i].collection,
+                PROTECTION,
+                info.nfts[i].tokenId
+            );
         }
         uint256 duration = info.endTime - info.startTime;
-        uint256 withdrawIndex = userLastWithdrawnIndex[msg.sender] + 1;
-        userSquads[msg.sender][index] = userSquads[msg.sender][withdrawIndex];
-        delete userSquads[msg.sender][withdrawIndex];
-        userLastWithdrawnIndex[msg.sender] = withdrawIndex;
+
+        // remove user squad
+        uint256[] memory userSquadIndexes = userSquads[msg.sender].values();
+        for (uint256 i = 0; i < userSquadIndexes.length; ++i) {
+            if (userSquadIndexes[i] == index) {
+                userSquads[msg.sender].remove(i);
+                break;
+            }
+        }
+
+        // remove squad
+        squads[index].withdrawn = true;
 
         uint256 hp = NFTMetadataRegistry(nftMetadataRegistry).metadata(
             info.nfts[0].collection,
@@ -251,11 +290,6 @@ contract SquadStakingV4 is Ownable, Pausable, ERC721Holder {
         uint256 xp = NFTMetadataRegistry(nftMetadataRegistry).metadata(
             info.nfts[0].collection,
             XP,
-            info.nfts[0].tokenId
-        );
-        uint256 protection = NFTMetadataRegistry(nftMetadataRegistry).metadata(
-            info.nfts[0].collection,
-            PROTECTION,
             info.nfts[0].tokenId
         );
         xp += (hp * duration) / 3600; // xp = xp + (hp / 100) * (staking time * 100)
@@ -274,7 +308,7 @@ contract SquadStakingV4 is Ownable, Pausable, ERC721Holder {
             xp
         );
 
-        emit Unstake(msg.sender);
+        emit Unstake(msg.sender, index);
     }
 
     function stakeDuration(

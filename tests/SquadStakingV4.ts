@@ -317,7 +317,7 @@ describe("SquadStakingV4 Test", () => {
         expect(await nft.ownerOf("1")).to.equal(user.address);
     })
 
-    it.only('check xp/hp value after unstake', async () => {
+    it('check xp/hp value after unstake', async () => {
         await nft.connect(user).setApprovalForAll(staking.address, true);
 
         // first stake
@@ -346,7 +346,7 @@ describe("SquadStakingV4 Test", () => {
         await network.provider.send("evm_increaseTime", [90000]);
         await staking.connect(user).unstake(1);
 
-        expect(await registry.metadata(nft.address, hpKey, "1")).to.equal("80600000000000000000");
+        expect(await registry.metadata(nft.address, hpKey, "1")).to.equal("85400000000000000000");
         expect(await registry.metadata(nft.address, xpKey, "1")).to.equal("1250000000000000000000");
 
         // second stake
@@ -375,8 +375,8 @@ describe("SquadStakingV4 Test", () => {
         await network.provider.send("evm_increaseTime", [90000]);
         await staking.connect(user).unstake(2);
 
-        expect(await registry.metadata(nft.address, hpKey, "1")).to.equal("65080000000000000000");
-        expect(await registry.metadata(nft.address, xpKey, "1")).to.equal("2257500000000000000000");
+        expect(await registry.metadata(nft.address, hpKey, "1")).to.equal("73720000000000000000");
+        expect(await registry.metadata(nft.address, xpKey, "1")).to.equal("2317500000000000000000");
 
         // third stake
         await staking.connect(user).stake([
@@ -404,43 +404,14 @@ describe("SquadStakingV4 Test", () => {
         await network.provider.send("evm_increaseTime", [90000]);
         await staking.connect(user).unstake(3);
 
-        expect(await registry.metadata(nft.address, hpKey, "1")).to.equal("52664000000000000000");
-        expect(await registry.metadata(nft.address, xpKey, "1")).to.equal("3071000000000000000000");
-
-        // fourth stake
-        await staking.connect(user).stake([
-            {
-                collection: nft.address,
-                tokenId: "1"
-            },
-            {
-                collection: nft.address,
-                tokenId: "2"
-            },
-            {
-                collection: nft.address,
-                tokenId: "3"
-            },
-            {
-                collection: nft.address,
-                tokenId: "4"
-            },
-            {
-                collection: nft.address,
-                tokenId: "5"
-            },
-        ]);
-        await network.provider.send("evm_increaseTime", [90000]);
-        await staking.connect(user).unstake(4);
-
-        expect(await registry.metadata(nft.address, hpKey, "1")).to.equal("42731200000000000000");
-        expect(await registry.metadata(nft.address, xpKey, "1")).to.equal("3729300000000000000000");
+        expect(await registry.metadata(nft.address, hpKey, "1")).to.equal("64376000000000000000");
+        expect(await registry.metadata(nft.address, xpKey, "1")).to.equal("3239000000000000000000");
     })
 
-    it.only("can't stake if hp is below 50%", async () => {
+    it("can't stake if hp is below 50%", async () => {
         await nft.connect(user).setApprovalForAll(staking.address, true);
 
-        for (let i = 1; i <= 4; i++) {
+        for (let i = 1; i <= 6; i++) {
             // first stake
             await staking.connect(user).stake([
                 {
@@ -469,8 +440,8 @@ describe("SquadStakingV4 Test", () => {
         }
 
         // check if it's below 50%
-        expect(await registry.metadata(nft.address, hpKey, "1")).to.equal("42731200000000000000");
-        expect(await registry.metadata(nft.address, xpKey, "1")).to.equal("3729300000000000000000");
+        expect(await registry.metadata(nft.address, hpKey, "1")).to.equal("46136512000000000000");
+        expect(await registry.metadata(nft.address, xpKey, "1")).to.equal("5391468000000000000000");
 
         // try stake again
         await expect(staking.connect(user).stake([
