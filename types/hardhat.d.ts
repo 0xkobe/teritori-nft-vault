@@ -185,6 +185,14 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.UniSafeERC20__factory>;
     getContractFactory(
+      name: "LootDistributor",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.LootDistributor__factory>;
+    getContractFactory(
+      name: "MysteryNft",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.MysteryNft__factory>;
+    getContractFactory(
       name: "NFTVault",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.NFTVault__factory>;
@@ -436,6 +444,16 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.UniSafeERC20>;
+    getContractAt(
+      name: "LootDistributor",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.LootDistributor>;
+    getContractAt(
+      name: "MysteryNft",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.MysteryNft>;
     getContractAt(
       name: "NFTVault",
       address: string,

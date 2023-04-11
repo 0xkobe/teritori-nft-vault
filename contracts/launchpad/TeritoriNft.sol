@@ -46,11 +46,9 @@ contract TeritoriNft is
         revealURI = _revealURI;
     }
 
-    function nftInfo(uint256 tokenId)
-        external
-        view
-        returns (Metadata memory info)
-    {
+    function nftInfo(
+        uint256 tokenId
+    ) external view returns (Metadata memory info) {
         if (revealed) {
             info = _extensions[tokenId];
         }
@@ -116,7 +114,9 @@ contract TeritoriNft is
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId)
+    function supportsInterface(
+        bytes4 interfaceId
+    )
         public
         view
         virtual
@@ -148,7 +148,9 @@ contract TeritoriNft is
     /**
      * @dev See {IERC721Metadata-tokenURI}.
      */
-    function tokenURI(uint256 tokenId)
+    function tokenURI(
+        uint256 tokenId
+    )
         public
         view
         virtual
@@ -164,7 +166,9 @@ contract TeritoriNft is
     /**
      * @dev See {ERC721-_burn}. This override additionally clears the royalty information for the token.
      */
-    function _burn(uint256 tokenId)
+    function _burn(
+        uint256 tokenId
+    )
         internal
         override(
             ERC721Upgradeable,
