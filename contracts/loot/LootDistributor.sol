@@ -18,6 +18,7 @@ contract LootDistributor is Ownable {
 
     mapping(address => uint256) public mysteryBoxAirdrops;
     mapping(address => uint256) public mysteryKeyAirdrops;
+    mapping(uint256 => bool) public distributeForDay;
 
     constructor(address _mysteryBox, address _mysteryKey) Ownable() {
         mysteryBox = _mysteryBox;
@@ -25,14 +26,17 @@ contract LootDistributor is Ownable {
     }
 
     function distribute(
-        address[] memory userForMysteryBox,
-        address[] memory userForMysterykey
+        uint256 day,
+        address[] memory usersForMysteryBox,
+        address[] memory usersForMysteryKey
     ) external onlyOwner {
-        for (uint256 i = 0; i < userForMysteryBox.length; ++i) {
-            mysteryBoxAirdrops[userForMysteryBox[i]] += 1;
+        require(!distributeForDay[day], "already distributed for this day");
+        distributeForDay[day] = true;
+        for (uint256 i = 0; i < usersForMysteryBox.length; ++i) {
+            mysteryBoxAirdrops[usersForMysteryBox[i]] += 1;
         }
-        for (uint256 i = 0; i < userForMysterykey.length; ++i) {
-            mysteryKeyAirdrops[userForMysterykey[i]] += 1;
+        for (uint256 i = 0; i < usersForMysteryKey.length; ++i) {
+            mysteryKeyAirdrops[usersForMysteryKey[i]] += 1;
         }
     }
 

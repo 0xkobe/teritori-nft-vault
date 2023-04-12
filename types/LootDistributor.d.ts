@@ -23,7 +23,8 @@ interface LootDistributorInterface extends ethers.utils.Interface {
   functions: {
     "claimMysteryBox()": FunctionFragment;
     "claimMysteryKey()": FunctionFragment;
-    "distribute(address[],address[])": FunctionFragment;
+    "distribute(uint256,address[],address[])": FunctionFragment;
+    "distributeForDay(uint256)": FunctionFragment;
     "mysteryBox()": FunctionFragment;
     "mysteryBoxAirdrops(address)": FunctionFragment;
     "mysteryKey()": FunctionFragment;
@@ -43,7 +44,11 @@ interface LootDistributorInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "distribute",
-    values: [string[], string[]]
+    values: [BigNumberish, string[], string[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "distributeForDay",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "mysteryBox",
@@ -80,6 +85,10 @@ interface LootDistributorInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "distribute", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "distributeForDay",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "mysteryBox", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "mysteryBoxAirdrops",
@@ -164,10 +173,16 @@ export class LootDistributor extends BaseContract {
     ): Promise<ContractTransaction>;
 
     distribute(
-      userForMysteryBox: string[],
-      userForMysterykey: string[],
+      day: BigNumberish,
+      usersForMysteryBox: string[],
+      usersForMysteryKey: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    distributeForDay(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
 
     mysteryBox(overrides?: CallOverrides): Promise<[string]>;
 
@@ -204,10 +219,16 @@ export class LootDistributor extends BaseContract {
   ): Promise<ContractTransaction>;
 
   distribute(
-    userForMysteryBox: string[],
-    userForMysterykey: string[],
+    day: BigNumberish,
+    usersForMysteryBox: string[],
+    usersForMysteryKey: string[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
+
+  distributeForDay(
+    arg0: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
 
   mysteryBox(overrides?: CallOverrides): Promise<string>;
 
@@ -240,10 +261,16 @@ export class LootDistributor extends BaseContract {
     claimMysteryKey(overrides?: CallOverrides): Promise<void>;
 
     distribute(
-      userForMysteryBox: string[],
-      userForMysterykey: string[],
+      day: BigNumberish,
+      usersForMysteryBox: string[],
+      usersForMysteryKey: string[],
       overrides?: CallOverrides
     ): Promise<void>;
+
+    distributeForDay(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
 
     mysteryBox(overrides?: CallOverrides): Promise<string>;
 
@@ -297,9 +324,15 @@ export class LootDistributor extends BaseContract {
     ): Promise<BigNumber>;
 
     distribute(
-      userForMysteryBox: string[],
-      userForMysterykey: string[],
+      day: BigNumberish,
+      usersForMysteryBox: string[],
+      usersForMysteryKey: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    distributeForDay(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     mysteryBox(overrides?: CallOverrides): Promise<BigNumber>;
@@ -338,9 +371,15 @@ export class LootDistributor extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     distribute(
-      userForMysteryBox: string[],
-      userForMysterykey: string[],
+      day: BigNumberish,
+      usersForMysteryBox: string[],
+      usersForMysteryKey: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    distributeForDay(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     mysteryBox(overrides?: CallOverrides): Promise<PopulatedTransaction>;

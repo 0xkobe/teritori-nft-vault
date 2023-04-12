@@ -6,9 +6,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 
-import "../launchpad/TeritoriNft.sol";
-import "../lib/UniSafeERC20.sol";
-
 /// @dev Mystery Box / Mystery Key
 contract MysteryNft is Ownable, ERC721Enumerable {
     address public minter;
