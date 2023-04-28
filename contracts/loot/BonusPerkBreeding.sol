@@ -12,12 +12,7 @@ import "../lib/UniSafeERC20.sol";
 import "./MysteryNft.sol";
 import "./BonusPerkNft.sol";
 
-contract BonusPerkDistributor is
-    Ownable,
-    Pausable,
-    ReentrancyGuard,
-    ERC721Holder
-{
+contract BonusPerkBreeding is Ownable, Pausable, ReentrancyGuard, ERC721Holder {
     using UniSafeERC20 for IERC20;
 
     event WithdrawFund(address token, uint256 amount);
@@ -42,23 +37,23 @@ contract BonusPerkDistributor is
     }
 
     address public minter;
-    address public mysteryBox;
-    address public mysteryKey;
+    address public riot;
     address public bonusPerk;
+    address public nftMetadataRegistry;
     BreedConfig public breedConfig;
 
     BreedInfo[] public breedList;
     mapping(address => uint256[]) private _userBreedList;
 
     constructor(
-        address _mysteryBox,
-        address _mysteryKey,
+        address _riot,
         address _bonusPerk,
+        address _nftMetadataRegistry,
         BreedConfig memory _breedConfig
     ) Ownable() Pausable() ReentrancyGuard() {
-        mysteryBox = _mysteryBox;
-        mysteryKey = _mysteryKey;
+        riot = _riot;
         bonusPerk = _bonusPerk;
+        nftMetadataRegistry = _nftMetadataRegistry;
         breedConfig = _breedConfig;
     }
 
