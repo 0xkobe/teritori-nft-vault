@@ -185,6 +185,18 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.UniSafeERC20__factory>;
     getContractFactory(
+      name: "BonusPerkBreeding",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.BonusPerkBreeding__factory>;
+    getContractFactory(
+      name: "BonusPerkDistributor",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.BonusPerkDistributor__factory>;
+    getContractFactory(
+      name: "BonusPerkNft",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.BonusPerkNft__factory>;
+    getContractFactory(
       name: "LootDistributor",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.LootDistributor__factory>;
@@ -444,6 +456,21 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.UniSafeERC20>;
+    getContractAt(
+      name: "BonusPerkBreeding",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.BonusPerkBreeding>;
+    getContractAt(
+      name: "BonusPerkDistributor",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.BonusPerkDistributor>;
+    getContractAt(
+      name: "BonusPerkNft",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.BonusPerkNft>;
     getContractAt(
       name: "LootDistributor",
       address: string,

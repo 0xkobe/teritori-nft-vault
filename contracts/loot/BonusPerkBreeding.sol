@@ -4,24 +4,17 @@ pragma abicoder v2;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 
 import "../lib/UniSafeERC20.sol";
-import "./MysteryNft.sol";
+import "../staking/NFTMetadataRegistry.sol";
 import "./BonusPerkNft.sol";
 
-contract BonusPerkBreeding is Ownable, Pausable, ReentrancyGuard, ERC721Holder {
+contract BonusPerkBreeding is Ownable, Pausable, ReentrancyGuard {
     using UniSafeERC20 for IERC20;
 
     event WithdrawFund(address token, uint256 amount);
-    event Breed(
-        address user,
-        uint256 mysteryBoxTokenId,
-        uint256 mysteryKeyTokenId
-    );
-    event Mint(address user, uint256 bonusPerkTokenId);
+    event Breed(address user, uint256 riotTokenId, uint256 bonusPerkTokenId);
 
     struct BreedConfig {
         uint256 startTime;
@@ -29,10 +22,14 @@ contract BonusPerkBreeding is Ownable, Pausable, ReentrancyGuard, ERC721Holder {
         address currency; // address(0) for ETH payment
     }
 
+    bytes32 public constant STAMINA = keccak256(abi.encode("Stamina"));
+    bytes32 public constant LUCK = keccak256(abi.encode("Luck"));
+    bytes32 public constant PROTECTION = keccak256(abi.encode("Protection"));
+    bytes32 public constant RARITY = keccak256(abi.encode("Rarity"));
+
     struct BreedInfo {
         address owner;
-        uint256 mysteryBoxTokenId;
-        uint256 mysteryKeyTokenId;
+        uint256 riotTokenId;
         uint256 bonusPerkTokenId;
     }
 
@@ -98,8 +95,8 @@ contract BonusPerkBreeding is Ownable, Pausable, ReentrancyGuard, ERC721Holder {
     }
 
     function breed(
-        uint256 mysteryBoxTokenId,
-        uint256 mysteryKeyTokenId
+        uint256 riotTokenId,
+        uint256 bonusPerkTokenId
     ) external payable whenNotPaused nonReentrant {
         require(
             breedConfig.startTime != 0 &&
@@ -115,45 +112,58 @@ contract BonusPerkBreeding is Ownable, Pausable, ReentrancyGuard, ERC721Holder {
 
         BreedInfo memory info = BreedInfo({
             owner: msg.sender,
-            mysteryBoxTokenId: mysteryBoxTokenId,
-            mysteryKeyTokenId: mysteryKeyTokenId,
-            bonusPerkTokenId: 0
+            riotTokenId: riotTokenId,
+            bonusPerkTokenId: bonusPerkTokenId
         });
 
         // check nft ownership
         require(
-            MysteryNft(mysteryBox).ownerOf(mysteryBoxTokenId) == msg.sender &&
-                MysteryNft(mysteryKey).ownerOf(mysteryKeyTokenId) == msg.sender,
+            BonusPerkNft(riot).ownerOf(riotTokenId) == msg.sender &&
+                BonusPerkNft(bonusPerk).ownerOf(bonusPerkTokenId) == msg.sender,
             "NOT_OWNER"
         );
-        MysteryNft(mysteryBox).burn(mysteryBoxTokenId);
-        MysteryNft(mysteryKey).burn(mysteryKeyTokenId);
+
+        // update riot metadata based on the bonus perk
+        BonusPerkNft(riot).burn(riotTokenId);
+
+        // Check Stamina
+        _handleBonusPerk(STAMINA, riotTokenId, bonusPerkTokenId);
+        _handleBonusPerk(PROTECTION, riotTokenId, bonusPerkTokenId);
+        _handleBonusPerk(LUCK, riotTokenId, bonusPerkTokenId);
+        _handleBonusPerk(RARITY, riotTokenId, bonusPerkTokenId);
+
+        // burn bonus perk
+        BonusPerkNft(bonusPerk).burn(bonusPerkTokenId);
 
         // save breed info
         breedList.push(info);
         _userBreedList[msg.sender].push(breedList.length - 1);
 
-        emit Breed(msg.sender, mysteryBoxTokenId, mysteryKeyTokenId);
+        emit Breed(msg.sender, riotTokenId, bonusPerkTokenId);
     }
 
-    function mint(uint256[] memory tokenIds) external nonReentrant {
-        require(msg.sender == minter, "UNAUTHORIZED");
-
-        uint256 currentSupply = BonusPerkNft(bonusPerk).totalSupply();
-        require(
-            currentSupply + tokenIds.length <= breedList.length,
-            "ALL_BREED_PROCESSED"
+    function _handleBonusPerk(
+        bytes32 key,
+        uint256 riotTokenId,
+        uint256 bonusPerkTokenId
+    ) internal {
+        uint256 bonus = NFTMetadataRegistry(nftMetadataRegistry).metadata(
+            bonusPerk,
+            key,
+            bonusPerkTokenId
         );
-
-        for (uint256 i = 0; i < tokenIds.length; ++i) {
-            breedList[currentSupply].bonusPerkTokenId = tokenIds[i];
-            BonusPerkNft(bonusPerk).mint(
-                breedList[currentSupply].owner,
-                tokenIds[i]
+        if (bonus > 0) {
+            uint256 cur = NFTMetadataRegistry(nftMetadataRegistry).metadata(
+                riot,
+                key,
+                riotTokenId
             );
-            emit Mint(breedList[currentSupply].owner, tokenIds[i]);
-
-            currentSupply++;
+            NFTMetadataRegistry(nftMetadataRegistry).registerNftMegadata(
+                riot,
+                key,
+                riotTokenId,
+                cur + bonus
+            );
         }
     }
 
