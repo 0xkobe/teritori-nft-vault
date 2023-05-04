@@ -12,7 +12,7 @@ import "../lib/UniSafeERC20.sol";
 import "./MysteryNft.sol";
 import "./BonusPerkNft.sol";
 
-contract BonusPerkDistributor is
+contract BonusPerkMinter is
     Ownable,
     Pausable,
     ReentrancyGuard,

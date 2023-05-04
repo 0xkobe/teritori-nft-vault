@@ -20,23 +20,22 @@ import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
-interface BonusPerkBreedingInterface extends ethers.utils.Interface {
+interface BonusPerkMinterInterface extends ethers.utils.Interface {
   functions: {
-    "LUCK()": FunctionFragment;
-    "PROTECTION()": FunctionFragment;
-    "STAMINA()": FunctionFragment;
     "bonusPerk()": FunctionFragment;
     "breed(uint256,uint256)": FunctionFragment;
     "breedConfig()": FunctionFragment;
     "breedList(uint256)": FunctionFragment;
     "breedRequestsCount()": FunctionFragment;
+    "mint(uint256[])": FunctionFragment;
     "minter()": FunctionFragment;
-    "nftMetadataRegistry()": FunctionFragment;
+    "mysteryBox()": FunctionFragment;
+    "mysteryKey()": FunctionFragment;
+    "onERC721Received(address,address,uint256,bytes)": FunctionFragment;
     "owner()": FunctionFragment;
     "pause()": FunctionFragment;
     "paused()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
-    "riot()": FunctionFragment;
     "setBreedConfig((uint256,uint256,address))": FunctionFragment;
     "setMinter(address)": FunctionFragment;
     "startBreed()": FunctionFragment;
@@ -46,12 +45,6 @@ interface BonusPerkBreedingInterface extends ethers.utils.Interface {
     "withdrawFund()": FunctionFragment;
   };
 
-  encodeFunctionData(functionFragment: "LUCK", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "PROTECTION",
-    values?: undefined
-  ): string;
-  encodeFunctionData(functionFragment: "STAMINA", values?: undefined): string;
   encodeFunctionData(functionFragment: "bonusPerk", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "breed",
@@ -69,10 +62,22 @@ interface BonusPerkBreedingInterface extends ethers.utils.Interface {
     functionFragment: "breedRequestsCount",
     values?: undefined
   ): string;
+  encodeFunctionData(
+    functionFragment: "mint",
+    values: [BigNumberish[]]
+  ): string;
   encodeFunctionData(functionFragment: "minter", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "nftMetadataRegistry",
+    functionFragment: "mysteryBox",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "mysteryKey",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "onERC721Received",
+    values: [string, string, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(functionFragment: "pause", values?: undefined): string;
@@ -81,7 +86,6 @@ interface BonusPerkBreedingInterface extends ethers.utils.Interface {
     functionFragment: "renounceOwnership",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "riot", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "setBreedConfig",
     values: [
@@ -107,9 +111,6 @@ interface BonusPerkBreedingInterface extends ethers.utils.Interface {
     values?: undefined
   ): string;
 
-  decodeFunctionResult(functionFragment: "LUCK", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "PROTECTION", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "STAMINA", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "bonusPerk", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "breed", data: BytesLike): Result;
   decodeFunctionResult(
@@ -121,9 +122,12 @@ interface BonusPerkBreedingInterface extends ethers.utils.Interface {
     functionFragment: "breedRequestsCount",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "minter", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "mysteryBox", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "mysteryKey", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "nftMetadataRegistry",
+    functionFragment: "onERC721Received",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
@@ -133,7 +137,6 @@ interface BonusPerkBreedingInterface extends ethers.utils.Interface {
     functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "riot", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setBreedConfig",
     data: BytesLike
@@ -156,6 +159,7 @@ interface BonusPerkBreedingInterface extends ethers.utils.Interface {
 
   events: {
     "Breed(address,uint256,uint256)": EventFragment;
+    "Mint(address,uint256)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
     "Paused(address)": EventFragment;
     "Unpaused(address)": EventFragment;
@@ -163,6 +167,7 @@ interface BonusPerkBreedingInterface extends ethers.utils.Interface {
   };
 
   getEvent(nameOrSignatureOrTopic: "Breed"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Mint"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Paused"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Unpaused"): EventFragment;
@@ -172,9 +177,13 @@ interface BonusPerkBreedingInterface extends ethers.utils.Interface {
 export type BreedEvent = TypedEvent<
   [string, BigNumber, BigNumber] & {
     user: string;
-    riotTokenId: BigNumber;
-    bonusPerkTokenId: BigNumber;
+    mysteryBoxTokenId: BigNumber;
+    mysteryKeyTokenId: BigNumber;
   }
+>;
+
+export type MintEvent = TypedEvent<
+  [string, BigNumber] & { user: string; bonusPerkTokenId: BigNumber }
 >;
 
 export type OwnershipTransferredEvent = TypedEvent<
@@ -189,7 +198,7 @@ export type WithdrawFundEvent = TypedEvent<
   [string, BigNumber] & { token: string; amount: BigNumber }
 >;
 
-export class BonusPerkBreeding extends BaseContract {
+export class BonusPerkMinter extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -230,20 +239,14 @@ export class BonusPerkBreeding extends BaseContract {
     toBlock?: string | number | undefined
   ): Promise<Array<TypedEvent<EventArgsArray & EventArgsObject>>>;
 
-  interface: BonusPerkBreedingInterface;
+  interface: BonusPerkMinterInterface;
 
   functions: {
-    LUCK(overrides?: CallOverrides): Promise<[string]>;
-
-    PROTECTION(overrides?: CallOverrides): Promise<[string]>;
-
-    STAMINA(overrides?: CallOverrides): Promise<[string]>;
-
     bonusPerk(overrides?: CallOverrides): Promise<[string]>;
 
     breed(
-      riotTokenId: BigNumberish,
-      bonusPerkTokenId: BigNumberish,
+      mysteryBoxTokenId: BigNumberish,
+      mysteryKeyTokenId: BigNumberish,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -261,18 +264,34 @@ export class BonusPerkBreeding extends BaseContract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
-      [string, BigNumber, BigNumber] & {
+      [string, BigNumber, BigNumber, BigNumber] & {
         owner: string;
-        riotTokenId: BigNumber;
+        mysteryBoxTokenId: BigNumber;
+        mysteryKeyTokenId: BigNumber;
         bonusPerkTokenId: BigNumber;
       }
     >;
 
     breedRequestsCount(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    mint(
+      tokenIds: BigNumberish[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     minter(overrides?: CallOverrides): Promise<[string]>;
 
-    nftMetadataRegistry(overrides?: CallOverrides): Promise<[string]>;
+    mysteryBox(overrides?: CallOverrides): Promise<[string]>;
+
+    mysteryKey(overrides?: CallOverrides): Promise<[string]>;
+
+    onERC721Received(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      arg3: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
@@ -285,8 +304,6 @@ export class BonusPerkBreeding extends BaseContract {
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
-
-    riot(overrides?: CallOverrides): Promise<[string]>;
 
     setBreedConfig(
       newBreedConfig: {
@@ -325,17 +342,11 @@ export class BonusPerkBreeding extends BaseContract {
     ): Promise<ContractTransaction>;
   };
 
-  LUCK(overrides?: CallOverrides): Promise<string>;
-
-  PROTECTION(overrides?: CallOverrides): Promise<string>;
-
-  STAMINA(overrides?: CallOverrides): Promise<string>;
-
   bonusPerk(overrides?: CallOverrides): Promise<string>;
 
   breed(
-    riotTokenId: BigNumberish,
-    bonusPerkTokenId: BigNumberish,
+    mysteryBoxTokenId: BigNumberish,
+    mysteryKeyTokenId: BigNumberish,
     overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -353,18 +364,34 @@ export class BonusPerkBreeding extends BaseContract {
     arg0: BigNumberish,
     overrides?: CallOverrides
   ): Promise<
-    [string, BigNumber, BigNumber] & {
+    [string, BigNumber, BigNumber, BigNumber] & {
       owner: string;
-      riotTokenId: BigNumber;
+      mysteryBoxTokenId: BigNumber;
+      mysteryKeyTokenId: BigNumber;
       bonusPerkTokenId: BigNumber;
     }
   >;
 
   breedRequestsCount(overrides?: CallOverrides): Promise<BigNumber>;
 
+  mint(
+    tokenIds: BigNumberish[],
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   minter(overrides?: CallOverrides): Promise<string>;
 
-  nftMetadataRegistry(overrides?: CallOverrides): Promise<string>;
+  mysteryBox(overrides?: CallOverrides): Promise<string>;
+
+  mysteryKey(overrides?: CallOverrides): Promise<string>;
+
+  onERC721Received(
+    arg0: string,
+    arg1: string,
+    arg2: BigNumberish,
+    arg3: BytesLike,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
@@ -377,8 +404,6 @@ export class BonusPerkBreeding extends BaseContract {
   renounceOwnership(
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
-
-  riot(overrides?: CallOverrides): Promise<string>;
 
   setBreedConfig(
     newBreedConfig: {
@@ -414,17 +439,11 @@ export class BonusPerkBreeding extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    LUCK(overrides?: CallOverrides): Promise<string>;
-
-    PROTECTION(overrides?: CallOverrides): Promise<string>;
-
-    STAMINA(overrides?: CallOverrides): Promise<string>;
-
     bonusPerk(overrides?: CallOverrides): Promise<string>;
 
     breed(
-      riotTokenId: BigNumberish,
-      bonusPerkTokenId: BigNumberish,
+      mysteryBoxTokenId: BigNumberish,
+      mysteryKeyTokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -442,18 +461,31 @@ export class BonusPerkBreeding extends BaseContract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
-      [string, BigNumber, BigNumber] & {
+      [string, BigNumber, BigNumber, BigNumber] & {
         owner: string;
-        riotTokenId: BigNumber;
+        mysteryBoxTokenId: BigNumber;
+        mysteryKeyTokenId: BigNumber;
         bonusPerkTokenId: BigNumber;
       }
     >;
 
     breedRequestsCount(overrides?: CallOverrides): Promise<BigNumber>;
 
+    mint(tokenIds: BigNumberish[], overrides?: CallOverrides): Promise<void>;
+
     minter(overrides?: CallOverrides): Promise<string>;
 
-    nftMetadataRegistry(overrides?: CallOverrides): Promise<string>;
+    mysteryBox(overrides?: CallOverrides): Promise<string>;
+
+    mysteryKey(overrides?: CallOverrides): Promise<string>;
+
+    onERC721Received(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      arg3: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<string>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
@@ -462,8 +494,6 @@ export class BonusPerkBreeding extends BaseContract {
     paused(overrides?: CallOverrides): Promise<boolean>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
-
-    riot(overrides?: CallOverrides): Promise<string>;
 
     setBreedConfig(
       newBreedConfig: {
@@ -496,20 +526,44 @@ export class BonusPerkBreeding extends BaseContract {
   filters: {
     "Breed(address,uint256,uint256)"(
       user?: null,
-      riotTokenId?: null,
-      bonusPerkTokenId?: null
+      mysteryBoxTokenId?: null,
+      mysteryKeyTokenId?: null
     ): TypedEventFilter<
       [string, BigNumber, BigNumber],
-      { user: string; riotTokenId: BigNumber; bonusPerkTokenId: BigNumber }
+      {
+        user: string;
+        mysteryBoxTokenId: BigNumber;
+        mysteryKeyTokenId: BigNumber;
+      }
     >;
 
     Breed(
       user?: null,
-      riotTokenId?: null,
-      bonusPerkTokenId?: null
+      mysteryBoxTokenId?: null,
+      mysteryKeyTokenId?: null
     ): TypedEventFilter<
       [string, BigNumber, BigNumber],
-      { user: string; riotTokenId: BigNumber; bonusPerkTokenId: BigNumber }
+      {
+        user: string;
+        mysteryBoxTokenId: BigNumber;
+        mysteryKeyTokenId: BigNumber;
+      }
+    >;
+
+    "Mint(address,uint256)"(
+      user?: null,
+      bonusPerkTokenId?: null
+    ): TypedEventFilter<
+      [string, BigNumber],
+      { user: string; bonusPerkTokenId: BigNumber }
+    >;
+
+    Mint(
+      user?: null,
+      bonusPerkTokenId?: null
+    ): TypedEventFilter<
+      [string, BigNumber],
+      { user: string; bonusPerkTokenId: BigNumber }
     >;
 
     "OwnershipTransferred(address,address)"(
@@ -558,17 +612,11 @@ export class BonusPerkBreeding extends BaseContract {
   };
 
   estimateGas: {
-    LUCK(overrides?: CallOverrides): Promise<BigNumber>;
-
-    PROTECTION(overrides?: CallOverrides): Promise<BigNumber>;
-
-    STAMINA(overrides?: CallOverrides): Promise<BigNumber>;
-
     bonusPerk(overrides?: CallOverrides): Promise<BigNumber>;
 
     breed(
-      riotTokenId: BigNumberish,
-      bonusPerkTokenId: BigNumberish,
+      mysteryBoxTokenId: BigNumberish,
+      mysteryKeyTokenId: BigNumberish,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -581,9 +629,24 @@ export class BonusPerkBreeding extends BaseContract {
 
     breedRequestsCount(overrides?: CallOverrides): Promise<BigNumber>;
 
+    mint(
+      tokenIds: BigNumberish[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     minter(overrides?: CallOverrides): Promise<BigNumber>;
 
-    nftMetadataRegistry(overrides?: CallOverrides): Promise<BigNumber>;
+    mysteryBox(overrides?: CallOverrides): Promise<BigNumber>;
+
+    mysteryKey(overrides?: CallOverrides): Promise<BigNumber>;
+
+    onERC721Received(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      arg3: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -596,8 +659,6 @@ export class BonusPerkBreeding extends BaseContract {
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
-
-    riot(overrides?: CallOverrides): Promise<BigNumber>;
 
     setBreedConfig(
       newBreedConfig: {
@@ -634,17 +695,11 @@ export class BonusPerkBreeding extends BaseContract {
   };
 
   populateTransaction: {
-    LUCK(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    PROTECTION(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    STAMINA(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     bonusPerk(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     breed(
-      riotTokenId: BigNumberish,
-      bonusPerkTokenId: BigNumberish,
+      mysteryBoxTokenId: BigNumberish,
+      mysteryKeyTokenId: BigNumberish,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -659,10 +714,23 @@ export class BonusPerkBreeding extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    mint(
+      tokenIds: BigNumberish[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     minter(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    nftMetadataRegistry(
-      overrides?: CallOverrides
+    mysteryBox(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    mysteryKey(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    onERC721Received(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      arg3: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -676,8 +744,6 @@ export class BonusPerkBreeding extends BaseContract {
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
-
-    riot(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     setBreedConfig(
       newBreedConfig: {

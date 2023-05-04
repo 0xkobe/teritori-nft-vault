@@ -12,7 +12,7 @@ import "./MysteryNft.sol";
 import "../lib/UniSafeERC20.sol";
 
 /// @dev Distribute Mystery Boxes / Mystery Keys
-contract LootDistributor is Ownable {
+contract MysteryMinter is Ownable {
     address public mysteryBox;
     address public mysteryKey;
 

@@ -193,6 +193,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.BonusPerkDistributor__factory>;
     getContractFactory(
+      name: "BonusPerkMinter",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.BonusPerkMinter__factory>;
+    getContractFactory(
       name: "BonusPerkNft",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.BonusPerkNft__factory>;
@@ -200,6 +204,10 @@ declare module "hardhat/types/runtime" {
       name: "LootDistributor",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.LootDistributor__factory>;
+    getContractFactory(
+      name: "MysteryMinter",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.MysteryMinter__factory>;
     getContractFactory(
       name: "MysteryNft",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -467,6 +475,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.BonusPerkDistributor>;
     getContractAt(
+      name: "BonusPerkMinter",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.BonusPerkMinter>;
+    getContractAt(
       name: "BonusPerkNft",
       address: string,
       signer?: ethers.Signer
@@ -476,6 +489,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.LootDistributor>;
+    getContractAt(
+      name: "MysteryMinter",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.MysteryMinter>;
     getContractAt(
       name: "MysteryNft",
       address: string,

@@ -119,6 +119,13 @@ contract HPHealing is Ownable, ERC721Holder {
             endTimestamp: endTimestamp
         });
 
+        NFTMetadataRegistry(nftMetadataRegistry).registerNftMegadata(
+            collection,
+            HP,
+            tokenId,
+            100 * BASE_POINT
+        );
+
         emit StartHealing(msg.sender, collection, tokenId, price, endTimestamp);
     }
 

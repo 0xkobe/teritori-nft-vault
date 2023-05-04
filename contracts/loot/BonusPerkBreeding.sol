@@ -25,7 +25,6 @@ contract BonusPerkBreeding is Ownable, Pausable, ReentrancyGuard {
     bytes32 public constant STAMINA = keccak256(abi.encode("Stamina"));
     bytes32 public constant LUCK = keccak256(abi.encode("Luck"));
     bytes32 public constant PROTECTION = keccak256(abi.encode("Protection"));
-    bytes32 public constant RARITY = keccak256(abi.encode("Rarity"));
 
     struct BreedInfo {
         address owner;
@@ -130,7 +129,6 @@ contract BonusPerkBreeding is Ownable, Pausable, ReentrancyGuard {
         _handleBonusPerk(STAMINA, riotTokenId, bonusPerkTokenId);
         _handleBonusPerk(PROTECTION, riotTokenId, bonusPerkTokenId);
         _handleBonusPerk(LUCK, riotTokenId, bonusPerkTokenId);
-        _handleBonusPerk(RARITY, riotTokenId, bonusPerkTokenId);
 
         // burn bonus perk
         BonusPerkNft(bonusPerk).burn(bonusPerkTokenId);
