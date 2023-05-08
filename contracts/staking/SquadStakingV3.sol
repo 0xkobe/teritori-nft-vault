@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 
-import "./NFTMetadataRegistry.sol";
+import "../registry/NFTMetadataRegistry.sol";
 
 /// @dev use metadata registry + multi squad staking
 contract SquadStakingV3 is Ownable, Pausable, ERC721Holder {

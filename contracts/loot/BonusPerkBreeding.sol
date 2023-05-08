@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 import "../lib/UniSafeERC20.sol";
-import "../staking/NFTMetadataRegistry.sol";
+import "../registry/NFTMetadataRegistry.sol";
 import "./BonusPerkNft.sol";
 
 contract BonusPerkBreeding is Ownable, Pausable, ReentrancyGuard {

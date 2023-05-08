@@ -101,6 +101,14 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Pausable__factory>;
     getContractFactory(
+      name: "ERC20",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC20__factory>;
+    getContractFactory(
+      name: "IERC20Metadata",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC20Metadata__factory>;
+    getContractFactory(
       name: "IERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20__factory>;
@@ -189,10 +197,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.BonusPerkBreeding__factory>;
     getContractFactory(
-      name: "BonusPerkDistributor",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.BonusPerkDistributor__factory>;
-    getContractFactory(
       name: "BonusPerkMinter",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.BonusPerkMinter__factory>;
@@ -200,10 +204,6 @@ declare module "hardhat/types/runtime" {
       name: "BonusPerkNft",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.BonusPerkNft__factory>;
-    getContractFactory(
-      name: "LootDistributor",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.LootDistributor__factory>;
     getContractFactory(
       name: "MysteryMinter",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -216,6 +216,14 @@ declare module "hardhat/types/runtime" {
       name: "NFTVault",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.NFTVault__factory>;
+    getContractFactory(
+      name: "HPHealing",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.HPHealing__factory>;
+    getContractFactory(
+      name: "NFTMetadataRegistry",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.NFTMetadataRegistry__factory>;
     getContractFactory(
       name: "HPHealing",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -244,6 +252,10 @@ declare module "hardhat/types/runtime" {
       name: "Staking",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Staking__factory>;
+    getContractFactory(
+      name: "TestERC20",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.TestERC20__factory>;
     getContractFactory(
       name: "TestERC721",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -360,6 +372,16 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Pausable>;
     getContractAt(
+      name: "ERC20",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC20>;
+    getContractAt(
+      name: "IERC20Metadata",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC20Metadata>;
+    getContractAt(
       name: "IERC20",
       address: string,
       signer?: ethers.Signer
@@ -470,11 +492,6 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.BonusPerkBreeding>;
     getContractAt(
-      name: "BonusPerkDistributor",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.BonusPerkDistributor>;
-    getContractAt(
       name: "BonusPerkMinter",
       address: string,
       signer?: ethers.Signer
@@ -484,11 +501,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.BonusPerkNft>;
-    getContractAt(
-      name: "LootDistributor",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.LootDistributor>;
     getContractAt(
       name: "MysteryMinter",
       address: string,
@@ -504,6 +516,16 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.NFTVault>;
+    getContractAt(
+      name: "HPHealing",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.HPHealing>;
+    getContractAt(
+      name: "NFTMetadataRegistry",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.NFTMetadataRegistry>;
     getContractAt(
       name: "HPHealing",
       address: string,
@@ -539,6 +561,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Staking>;
+    getContractAt(
+      name: "TestERC20",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.TestERC20>;
     getContractAt(
       name: "TestERC721",
       address: string,
