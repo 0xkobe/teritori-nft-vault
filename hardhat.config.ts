@@ -23,6 +23,10 @@ export default {
       url: `https://eth-mainnet.g.alchemy.com/v2/${process.env.RPC_NODE_KEY}`,
       accounts: [process.env.PRIVATE_KEY],
     },
+    polygon: {
+      url: `https://polygon-mainnet.g.alchemy.com/v2/${process.env.RPC_NODE_KEY}`,
+      accounts: [process.env.PRIVATE_KEY],
+    },
     goerli: {
       url: `https://eth-goerli.g.alchemy.com/v2/${process.env.RPC_NODE_KEY}`,
       accounts: [process.env.PRIVATE_KEY],

@@ -1,16 +1,16 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { LootDistributor, MysteryNft } from "../types";
+import { MysteryMinter, MysteryNft } from "../types";
 
-describe.only("LootDistributor Test", () => {
+describe("MysteryMinter Test", () => {
     let user1: SignerWithAddress
     let user2: SignerWithAddress
     let user3: SignerWithAddress
     let user4: SignerWithAddress
     let mysteryBox: MysteryNft;
     let mysteryKey: MysteryNft;
-    let distributor: LootDistributor;
+    let distributor: MysteryMinter;
 
     beforeEach(async () => {
         [user1, user2, user3, user4] = await ethers.getSigners();
@@ -22,8 +22,8 @@ describe.only("LootDistributor Test", () => {
         mysteryKey = <MysteryNft>await MysteryNft.deploy("MysteryKey", "MysteryKey");
         await mysteryKey.deployed();
 
-        const LootDistributor = await ethers.getContractFactory("LootDistributor");
-        distributor = <LootDistributor>await LootDistributor.deploy(mysteryBox.address, mysteryKey.address);
+        const MysteryMinter = await ethers.getContractFactory("MysteryMinter");
+        distributor = <MysteryMinter>await MysteryMinter.deploy(mysteryBox.address, mysteryKey.address);
 
 
         await mysteryBox.setMinter(distributor.address);

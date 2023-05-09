@@ -12,12 +12,7 @@ import "../lib/UniSafeERC20.sol";
 import "./MysteryNft.sol";
 import "./BonusPerkNft.sol";
 
-contract BonusPerkMinter is
-    Ownable,
-    Pausable,
-    ReentrancyGuard,
-    ERC721Holder
-{
+contract BonusPerkMinter is Ownable, Pausable, ReentrancyGuard, ERC721Holder {
     using UniSafeERC20 for IERC20;
 
     event WithdrawFund(address token, uint256 amount);
@@ -60,6 +55,7 @@ contract BonusPerkMinter is
         mysteryKey = _mysteryKey;
         bonusPerk = _bonusPerk;
         breedConfig = _breedConfig;
+        minter = msg.sender;
     }
 
     function pause() external onlyOwner whenNotPaused {
@@ -131,7 +127,18 @@ contract BonusPerkMinter is
                 MysteryNft(mysteryKey).ownerOf(mysteryKeyTokenId) == msg.sender,
             "NOT_OWNER"
         );
+        // burn mystery box/key
+        MysteryNft(mysteryBox).safeTransferFrom(
+            msg.sender,
+            address(this),
+            mysteryBoxTokenId
+        );
         MysteryNft(mysteryBox).burn(mysteryBoxTokenId);
+        MysteryNft(mysteryKey).safeTransferFrom(
+            msg.sender,
+            address(this),
+            mysteryKeyTokenId
+        );
         MysteryNft(mysteryKey).burn(mysteryKeyTokenId);
 
         // save breed info

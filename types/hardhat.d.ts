@@ -225,14 +225,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.NFTMetadataRegistry__factory>;
     getContractFactory(
-      name: "HPHealing",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.HPHealing__factory>;
-    getContractFactory(
-      name: "NFTMetadataRegistry",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.NFTMetadataRegistry__factory>;
-    getContractFactory(
       name: "SquadStaking",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.SquadStaking__factory>;
@@ -516,16 +508,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.NFTVault>;
-    getContractAt(
-      name: "HPHealing",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.HPHealing>;
-    getContractAt(
-      name: "NFTMetadataRegistry",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.NFTMetadataRegistry>;
     getContractAt(
       name: "HPHealing",
       address: string,
