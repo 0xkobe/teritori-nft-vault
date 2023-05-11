@@ -5,12 +5,13 @@ pragma abicoder v2;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 
 import "../lib/UniSafeERC20.sol";
 import "../registry/NFTMetadataRegistry.sol";
 import "./BonusPerkNft.sol";
 
-contract BonusPerkBreeding is Ownable, Pausable, ReentrancyGuard {
+contract BonusPerkBreeding is Ownable, Pausable, ReentrancyGuard, ERC721Holder {
     using UniSafeERC20 for IERC20;
 
     event WithdrawFund(address token, uint256 amount);
@@ -51,6 +52,7 @@ contract BonusPerkBreeding is Ownable, Pausable, ReentrancyGuard {
         bonusPerk = _bonusPerk;
         nftMetadataRegistry = _nftMetadataRegistry;
         breedConfig = _breedConfig;
+        minter = msg.sender;
     }
 
     function pause() external onlyOwner whenNotPaused {
@@ -123,14 +125,16 @@ contract BonusPerkBreeding is Ownable, Pausable, ReentrancyGuard {
         );
 
         // update riot metadata based on the bonus perk
-        BonusPerkNft(riot).burn(riotTokenId);
-
-        // Check Stamina
         _handleBonusPerk(STAMINA, riotTokenId, bonusPerkTokenId);
         _handleBonusPerk(PROTECTION, riotTokenId, bonusPerkTokenId);
         _handleBonusPerk(LUCK, riotTokenId, bonusPerkTokenId);
 
         // burn bonus perk
+        BonusPerkNft(bonusPerk).safeTransferFrom(
+            msg.sender,
+            address(this),
+            bonusPerkTokenId
+        );
         BonusPerkNft(bonusPerk).burn(bonusPerkTokenId);
 
         // save breed info

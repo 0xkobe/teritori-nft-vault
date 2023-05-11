@@ -32,6 +32,7 @@ interface BonusPerkBreedingInterface extends ethers.utils.Interface {
     "breedRequestsCount()": FunctionFragment;
     "minter()": FunctionFragment;
     "nftMetadataRegistry()": FunctionFragment;
+    "onERC721Received(address,address,uint256,bytes)": FunctionFragment;
     "owner()": FunctionFragment;
     "pause()": FunctionFragment;
     "paused()": FunctionFragment;
@@ -73,6 +74,10 @@ interface BonusPerkBreedingInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "nftMetadataRegistry",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "onERC721Received",
+    values: [string, string, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(functionFragment: "pause", values?: undefined): string;
@@ -124,6 +129,10 @@ interface BonusPerkBreedingInterface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "minter", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "nftMetadataRegistry",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "onERC721Received",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
@@ -274,6 +283,14 @@ export class BonusPerkBreeding extends BaseContract {
 
     nftMetadataRegistry(overrides?: CallOverrides): Promise<[string]>;
 
+    onERC721Received(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      arg3: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     owner(overrides?: CallOverrides): Promise<[string]>;
 
     pause(
@@ -366,6 +383,14 @@ export class BonusPerkBreeding extends BaseContract {
 
   nftMetadataRegistry(overrides?: CallOverrides): Promise<string>;
 
+  onERC721Received(
+    arg0: string,
+    arg1: string,
+    arg2: BigNumberish,
+    arg3: BytesLike,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   owner(overrides?: CallOverrides): Promise<string>;
 
   pause(
@@ -454,6 +479,14 @@ export class BonusPerkBreeding extends BaseContract {
     minter(overrides?: CallOverrides): Promise<string>;
 
     nftMetadataRegistry(overrides?: CallOverrides): Promise<string>;
+
+    onERC721Received(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      arg3: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<string>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
@@ -585,6 +618,14 @@ export class BonusPerkBreeding extends BaseContract {
 
     nftMetadataRegistry(overrides?: CallOverrides): Promise<BigNumber>;
 
+    onERC721Received(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      arg3: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     pause(
@@ -663,6 +704,14 @@ export class BonusPerkBreeding extends BaseContract {
 
     nftMetadataRegistry(
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    onERC721Received(
+      arg0: string,
+      arg1: string,
+      arg2: BigNumberish,
+      arg3: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
