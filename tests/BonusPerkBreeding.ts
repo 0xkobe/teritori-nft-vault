@@ -186,6 +186,11 @@ describe("BonusPerkBreeding", () => {
         await bonusPerkBreeding.startBreed();
         await nft.connect(user).approve(bonusPerkBreeding.address, "1");
         await bonusPerk.connect(user).approve(bonusPerkBreeding.address, "1");
+
+        await expect(bonusPerkBreeding.connect(minter).breed("1", "1", {
+            value: ethers.utils.parseEther("0.1")
+        })).to.revertedWith('NOT_OWNER');
+
         await bonusPerkBreeding.connect(user).breed("1", "1", {
             value: ethers.utils.parseEther("0.1")
         });

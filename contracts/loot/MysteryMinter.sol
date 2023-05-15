@@ -3,10 +3,6 @@ pragma solidity ^0.8.4;
 pragma abicoder v2;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 import "./MysteryNft.sol";
 import "../lib/UniSafeERC20.sol";

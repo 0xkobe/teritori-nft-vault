@@ -1,6 +1,5 @@
 
 import { ethers } from "hardhat"
-import config from './config.json';
 
 async function Deploy() {
   const [deployer] = await ethers.getSigners();
@@ -25,24 +24,6 @@ async function Deploy() {
   const bonusPerk = await BonusPerkNft.deploy("Bonus Perk", "bPerk");
   await bonusPerk.deployed();
   console.log("BonusPerk deployed at ", bonusPerk.address);
-
-  const BonusPerkMinter = await ethers.getContractFactory("BonusPerkMinter");
-  const bonusPerkMinter = await BonusPerkMinter.deploy(mysteryBox.address, mysteryKey.address, bonusPerk.address, {
-    startTime: 0,
-    priceAmount: config.bonusPerkMinter.breedPrice,
-    currency: config.bonusPerkMinter.breedToken,
-  });
-  await bonusPerkMinter.deployed();
-  console.log("BonusPerkMinter deployed at ", bonusPerkMinter.address);
-
-  const BonusPerkBreeding = await ethers.getContractFactory("BonusPerkBreeding");
-  const bonusPerkBreeding = await BonusPerkBreeding.deploy(config.riot, bonusPerk.address, config.metadataRegistry, {
-    startTime: 0,
-    priceAmount: config.bonusPerkBreeding.breedPrice,
-    currency: config.bonusPerkBreeding.breedToken,
-  });
-  await bonusPerkBreeding.deployed();
-  console.log("BonusPerkBreeding deployed at ", bonusPerkBreeding.address);
 }
 
 Deploy();

@@ -73,6 +73,11 @@ describe("MysteryMinter Test", () => {
         expect(await mysteryKey.ownerOf(1)).to.equal(user3.address);
         await distributor.connect(user4).claimMysteryKey();
         expect(await mysteryKey.ownerOf(2)).to.equal(user4.address);
+
+        await expect(distributor.connect(user1).claimMysteryBox()).to.reverted;
+        await expect(distributor.connect(user2).claimMysteryBox()).to.reverted;
+        await expect(distributor.connect(user3).claimMysteryBox()).to.reverted;
+        await expect(distributor.connect(user4).claimMysteryBox()).to.reverted;
     })
 
     it("tokenURI", async () => {

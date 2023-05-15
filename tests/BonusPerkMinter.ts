@@ -94,6 +94,11 @@ describe("BonusPerkMinter", () => {
         await bonusPerkMinter.startBreed();
         await mysteryBox.connect(user).approve(bonusPerkMinter.address, "1");
         await mysteryKey.connect(user).approve(bonusPerkMinter.address, "2");
+
+        await expect(bonusPerkMinter.connect(minter).breed("1", "2", {
+            value: ethers.utils.parseEther("0.1")
+        })).to.revertedWith('NOT_OWNER');
+
         await bonusPerkMinter.connect(user).breed("1", "2", {
             value: ethers.utils.parseEther("0.1")
         });
@@ -103,5 +108,8 @@ describe("BonusPerkMinter", () => {
         await bonusPerkMinter.mint(["1"]);
 
         expect(await bonusPerk.ownerOf("1")).to.equal(user.address);
+
+        await expect(bonusPerkMinter.connect(user).mint(["1"])).to.revertedWith('UNAUTHORIZED');
+        await expect(bonusPerkMinter.mint(["1"])).to.revertedWith('ALL_BREED_PROCESSED');
     })
 });

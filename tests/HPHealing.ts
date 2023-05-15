@@ -207,9 +207,18 @@ describe("HPHealing Test", () => {
 
         await nft.connect(user).setApprovalForAll(hpHealing.address, true);
         await hpHealing.connect(user).heal(nft.address, "1", { value: "538634880000000000" });
+
+        // can't withdraw before duration
+        await expect(hpHealing.connect(minter).withdraw(nft.address, "1")).to.revertedWith('unauthorized');
+        await expect(hpHealing.connect(user).withdraw(nft.address, "1")).to.revertedWith('in healing');
+
         await network.provider.send("evm_increaseTime", [90000]);
         await hpHealing.connect(user).withdraw(nft.address, "1");
+
         expect(await registry.metadata(nft.address, hpKey, "1")).to.equal("100000000000000000000");
+
+        // can't heal with 100% hp
+        await expect(hpHealing.connect(user).heal(nft.address, "1", { value: "538634880000000000" })).to.revertedWith('full hp');
 
         // try stake again
         await staking.connect(user).stake([
