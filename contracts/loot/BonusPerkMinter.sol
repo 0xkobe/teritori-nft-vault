@@ -150,21 +150,21 @@ contract BonusPerkMinter is Ownable, Pausable, ReentrancyGuard, ERC721Holder {
     function mint(uint256[] memory tokenIds) external nonReentrant {
         require(msg.sender == minter, "UNAUTHORIZED");
 
-        uint256 currentSupply = BonusPerkNft(bonusPerk).totalSupply();
+        uint256 _currentSupply = currentSupply();
         require(
-            currentSupply + tokenIds.length <= breedList.length,
+            _currentSupply + tokenIds.length <= breedList.length,
             "ALL_BREED_PROCESSED"
         );
 
         for (uint256 i = 0; i < tokenIds.length; ++i) {
-            breedList[currentSupply].bonusPerkTokenId = tokenIds[i];
+            breedList[_currentSupply].bonusPerkTokenId = tokenIds[i];
             BonusPerkNft(bonusPerk).mint(
-                breedList[currentSupply].owner,
+                breedList[_currentSupply].owner,
                 tokenIds[i]
             );
-            emit Mint(breedList[currentSupply].owner, tokenIds[i]);
+            emit Mint(breedList[_currentSupply].owner, tokenIds[i]);
 
-            currentSupply++;
+            _currentSupply++;
         }
     }
 
@@ -176,5 +176,9 @@ contract BonusPerkMinter is Ownable, Pausable, ReentrancyGuard, ERC721Holder {
 
     function breedRequestsCount() external view returns (uint256) {
         return breedList.length;
+    }
+
+    function currentSupply() public view returns (uint256) {
+        return BonusPerkNft(bonusPerk).totalSupply();
     }
 }

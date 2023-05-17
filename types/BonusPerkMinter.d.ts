@@ -27,6 +27,7 @@ interface BonusPerkMinterInterface extends ethers.utils.Interface {
     "breedConfig()": FunctionFragment;
     "breedList(uint256)": FunctionFragment;
     "breedRequestsCount()": FunctionFragment;
+    "currentSupply()": FunctionFragment;
     "mint(uint256[])": FunctionFragment;
     "minter()": FunctionFragment;
     "mysteryBox()": FunctionFragment;
@@ -60,6 +61,10 @@ interface BonusPerkMinterInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "breedRequestsCount",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "currentSupply",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -120,6 +125,10 @@ interface BonusPerkMinterInterface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "breedList", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "breedRequestsCount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "currentSupply",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
@@ -274,6 +283,8 @@ export class BonusPerkMinter extends BaseContract {
 
     breedRequestsCount(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    currentSupply(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     mint(
       tokenIds: BigNumberish[],
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -374,6 +385,8 @@ export class BonusPerkMinter extends BaseContract {
 
   breedRequestsCount(overrides?: CallOverrides): Promise<BigNumber>;
 
+  currentSupply(overrides?: CallOverrides): Promise<BigNumber>;
+
   mint(
     tokenIds: BigNumberish[],
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -470,6 +483,8 @@ export class BonusPerkMinter extends BaseContract {
     >;
 
     breedRequestsCount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    currentSupply(overrides?: CallOverrides): Promise<BigNumber>;
 
     mint(tokenIds: BigNumberish[], overrides?: CallOverrides): Promise<void>;
 
@@ -629,6 +644,8 @@ export class BonusPerkMinter extends BaseContract {
 
     breedRequestsCount(overrides?: CallOverrides): Promise<BigNumber>;
 
+    currentSupply(overrides?: CallOverrides): Promise<BigNumber>;
+
     mint(
       tokenIds: BigNumberish[],
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -713,6 +730,8 @@ export class BonusPerkMinter extends BaseContract {
     breedRequestsCount(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    currentSupply(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     mint(
       tokenIds: BigNumberish[],

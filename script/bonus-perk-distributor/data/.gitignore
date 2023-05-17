@@ -2,8 +2,4 @@
 /tokens.json
 /minted.json
 /state.json
-/collection.json
-/collection.png
-/collection-banner.*
-/collection-image.*
-/metadata
+/config.json

@@ -1,9 +1,8 @@
 import tokens from './data/tokens.json'
-import collectionInfo from "./data/collection.json";
 import fs from 'fs'
 import path from "path"
-import { metadataDir, dataDir, loadState } from "./lib";
-import { Breeding } from '../../types';
+import { dataDir, loadState } from "./lib";
+import { BonusPerkMinter } from '../../types';
 import { ethers } from 'hardhat';
 
 const mintedFile = path.join(dataDir, "minted.json")
@@ -16,17 +15,13 @@ const loadMintedTokens = (): any[] => {
 }
 
 async function getRandomItems(count: number) {
-  const result: any[] = []
+  const result = []
   const mintedTokens = loadMintedTokens();
   let remainings = tokens.filter(item => mintedTokens.findIndex(token => token.toString() == item.toString()) == -1);
   while (result.length < count) {
     const index = Math.floor(Math.random() * remainings.length);
     const i = remainings[index];
-    const tokenMetadata = JSON.parse(fs.readFileSync(path.join(metadataDir, `${i}.json`), { encoding: "utf-8" }))
-    result.push({
-      token_id: i.toString(),
-      ...tokenMetadata
-    })
+    result.push(i.toString())
     remainings = remainings.filter((a) => a != i)
   }
   return result
@@ -38,12 +33,12 @@ async function addToMinted(item: any) {
   fs.writeFileSync(mintedFile, JSON.stringify(mintedTokens, undefined, 2))
 }
 
-async function tryMint(breeding: Breeding) {
+async function tryMint(bonusPerkMinter: BonusPerkMinter) {
   console.log("Checking new mint request...", new Date());
 
-  const currentSupply = (await breeding.childCollectionConfig()).currentSupply;
+  const currentSupply = await bonusPerkMinter.currentSupply();
   console.log("currentSupply = ", currentSupply.toString());
-  const breedRequestsCount = await breeding.breedRequestsCount();
+  const breedRequestsCount = await bonusPerkMinter.breedRequestsCount();
   console.log("breedRequestsCount = ", breedRequestsCount.toString());
 
   if (breedRequestsCount == currentSupply) {
@@ -57,33 +52,15 @@ async function tryMint(breeding: Breeding) {
 
     const items = await getRandomItems(count)
 
-    console.log("Will try mint", items.map(item => item.token_id).join(', '))
+    console.log("Will try mint", items.join(', '))
 
     try {
-      console.log(items.map(item => ({
-        tokenId: item.token_id,
-        royaltyPercentage: collectionInfo.royaltyPercentage,
-        royaltyReceiver: collectionInfo.royaltyPaymentAddress,
-        tokenUri: item.tokenURI || "",
-        // extension: {
-        //   name: item.name,
-        //   description: item.description,
-        //   image: item.image,
-        //   external_url: item.external_url,
-        //   attributes: item.attributes,
-        // }
-      })))
-      const tx = await (await breeding.mint(
-        items.map(item => ({
-          tokenId: item.token_id,
-          royaltyPercentage: collectionInfo.royaltyPercentage,
-          royaltyReceiver: collectionInfo.royaltyPaymentAddress,
-          tokenUri: item.tokenURI || "",
-        }))
+      const tx = await (await bonusPerkMinter.mint(
+        items
       )).wait();
 
       for (let j = 0; j < items.length; j++) {
-        await addToMinted(items[j].token_id);
+        await addToMinted(items[j]);
       }
       console.log("Minted token in", tx.transactionHash)
     } catch (e) {
@@ -93,22 +70,22 @@ async function tryMint(breeding: Breeding) {
   }
 }
 
-async function start(breeding: Breeding) {
-  await tryMint(breeding);
+async function start(bonusPerkMinter: BonusPerkMinter) {
+  await tryMint(bonusPerkMinter);
 
-  setTimeout(() => start(breeding), 10000);
+  setTimeout(() => start(bonusPerkMinter), 10000);
 }
 
 async function main() {
   const state = loadState()
-  if (!state.breedingContract || !state.nftContract) {
+  if (!state.bonusPerkMinter) {
     console.error("Not instantiated")
     return
   }
 
-  const breeding = <Breeding>await ethers.getContractAt('Breeding', state.breedingContract);
+  const bonusPerkMinter = <BonusPerkMinter>await ethers.getContractAt('BonusPerkMinter', state.bonusPerkMinter);
 
-  await start(breeding);
+  await start(bonusPerkMinter);
 }
 
 main();
